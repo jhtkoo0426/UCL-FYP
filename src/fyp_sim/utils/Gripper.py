@@ -140,4 +140,12 @@ class shadowHand(gripper):
             iteration += 1
             if iteration > 50000:
                 break
-            
+
+
+class arg85(gripper):
+    
+    def __init__(self, robot):
+        gripper.__init__(self, robot)
+    
+    def openGripper(self):
+        pass

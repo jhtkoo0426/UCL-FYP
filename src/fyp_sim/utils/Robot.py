@@ -6,7 +6,7 @@ import pybullet as p
 import dqrobotics 
 from dqrobotics import robot_modeling
 from dqrobotics import DQ
-from Gripper import RG6, threeFingers, yumi, shadowHand
+from Gripper import RG6, threeFingers, yumi, shadowHand, arg85
 import math
 from math import pi
 import os
@@ -59,7 +59,12 @@ class Robot:
             self.DH = np.load("Robots/yumi_description/DH/yumi_dh.npy")
             self.serialManipulator = robot_modeling.DQ_SerialManipulator(self.DH, 'standard')
             self.robot_model = p.loadURDF("Robots/yumi_description/urdf/yumi.urdf", self.start_pos, self.start_orientation, useFixedBase=1)
-
+        # My code
+        elif self.arm == "Panda":
+            self.DH = np.load("Robots/UR/DH/ur_dh.npy")
+            self.serialManipulator = robot_modeling.DQ_SerialManipulator(self.DH, 'standard')
+            if self.gripperName == "arg85":
+                self.robot_model = p.loadURDF("Robots/panda/panda_arm_hand_realsense.urdf", self.start_pos, self.start_orientation, useFixedBase=1)
         else:
             print("[ERROR]: No robot available by that name, edit parameter file")
             quit
@@ -84,6 +89,9 @@ class Robot:
             self.gripper = yumi(self)
         elif self.gripperName == "shadowHand":
             self.gripper = shadowHand(self)
+        # Added my code
+        elif self.gripperName == "arg85":
+            self.gripper = arg85(self)
 
         #Constants
         self.K = params["K"]
