@@ -2,8 +2,8 @@
 - robot:
     #Choose robot (Kuka, ur10, Yumi )
     arm: Kuka
-    #Choose gripper (threeFingers, RG6, yumi, shadowHand)
-    gripper: threeFingers
+    #Choose gripper (threeFingers, RG6, yumi, shadowHand, arg85)
+    gripper: arg85
     robot_start_pos: [0, 0, 0]
     robot_start_orientation_euler: [0, 0, 0]
     K: 0.5

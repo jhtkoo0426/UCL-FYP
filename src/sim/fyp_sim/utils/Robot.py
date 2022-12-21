@@ -44,6 +44,8 @@ class Robot:
                 self.robot_model = p.loadURDF("Robots/UR/ur10/ur10_rg6.urdf", self.start_pos, self.start_orientation, useFixedBase=1)
             elif self.gripperName == "shadowHand":
                 self.robot_model = p.loadURDF("Robots/UR/ur10/ur10_sh.urdf", self.start_pos, self.start_orientation, useFixedBase=1) 
+            if self.gripperName == "arg85":
+                self.robot_model = p.loadURDF("Robots/panda/panda_arm_hand_realsense.urdf", self.start_pos, self.start_orientation, useFixedBase=1)
 
         elif self.arm == "Kuka":
             self.DH = np.load("Robots/KUKA/DH/kuka_dh.npy")
@@ -54,6 +56,8 @@ class Robot:
                 self.robot_model = p.loadURDF("Robots/KUKA/kuka_RG6.urdf", self.start_pos, self.start_orientation, useFixedBase=1)
             elif self.gripperName == "shadowHand":
                 self.robot_model = p.loadURDF("Robots/KUKA/kuka_sh.urdf", self.start_pos, self.start_orientation, useFixedBase=1)
+            if self.gripperName == "arg85":
+                self.robot_model = p.loadURDF("Robots/panda/panda_arm_hand_realsense.urdf", self.start_pos, self.start_orientation, useFixedBase=1)
 
         elif self.arm == "Yumi":
             self.DH = np.load("Robots/yumi_description/DH/yumi_dh.npy")
