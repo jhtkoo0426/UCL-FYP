@@ -197,12 +197,12 @@
   <link name="panda_leftfinger">
     <visual>
       <geometry>
-        <mesh filename="package://../common/config/meshes/finger.dae"/>
+        <mesh filename="franka_ros/franka_description/meshes/visual/finger.dae"/>
       </geometry>
     </visual>
     <collision>
       <geometry>
-        <mesh filename="package://../common/config/meshes/finger.dae"/>
+        <mesh filename="franka_ros/franka_description/meshes/visual/finger.dae"/>
       </geometry>
     </collision>
   </link>
@@ -210,13 +210,13 @@
     <visual>
       <origin rpy="0 0 3.14159265359" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://../common/config/meshes/finger.dae"/>
+        <mesh filename="franka_ros/franka_description/meshes/visual/finger.dae"/>
       </geometry>
     </visual>
     <collision>
       <origin rpy="0 0 3.14159265359" xyz="0 0 0"/>
       <geometry>
-        <mesh filename="package://../common/config/meshes/finger.dae"/>
+        <mesh filename="franka_ros/franka_description/meshes/visual/finger.dae"/>
       </geometry>
     </collision>
   </link>
@@ -329,26 +329,6 @@
   <material name="grey">
     <color rgba="0.8 0.8 0.8 1"/>
   </material>
-
-  <link name="table">
-    <visual>
-      <geometry>
-        <mesh filename="package://../common/config/meshes/table/visual/table.dae"/>
-      </geometry>
-      <material name="grey"/>
-    </visual>
-    <collision>
-      <geometry>
-        <mesh filename="package://../common/config/meshes/table/collision/table.obj"/>
-      </geometry>
-    </collision>
-  </link>
-
-  <joint name="table_joint" type="fixed">
-    <parent link="world"/>
-    <child link="table"/>
-    <origin xyz="0.0 0.0 -0.39" rpy="0.0 0.0 0.0"/>
-  </joint>
 
   <joint name="panda_ee_link_joint" type="fixed">
     <origin rpy="0.0 0.0 -0.785" xyz="0.0 0.0 0.15"/>
