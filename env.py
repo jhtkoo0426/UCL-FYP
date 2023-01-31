@@ -49,33 +49,28 @@ class ClutteredPushGrasp:
         self.yawId = p.addUserDebugParameter("yaw", -np.pi/2, np.pi/2, np.pi/2)
         self.gripper_opening_length_control = p.addUserDebugParameter("gripper_opening_length", 0, 0.085, 0.04)
 
-        # call the function to read the arg85 yaml file
+        # Read the parameters.yaml file to load robot parameters
         self.robot.load_digit_parm()
-        # add the digit sensor to the arg85 hand
 
+        # Mount DIGIT tactile sensors to hand
         self.digits = tacto.Sensor(**self.robot.tacto_info, background = self.robot.bg)
         p.resetDebugVisualizerCamera(**self.robot.camera_info)
         self.digits.add_camera(self.robot.id, self.robot.link_ID)
-        
 
         
-        # added point cloud button and initial button values
+        # Point cloud button and initial button values
         self.initButtonVals()
         self.pointCloudButton = p.addUserDebugParameter("Get point cloud", 1, 0, 1)
 
-        # added digit button to save the frame to a matrix...?
+        # DIGIT button to save the tactile readings as numpy array
         self.DigitTempSaveButton = p.addUserDebugParameter("Save digit frame temp", 1, 0, 1)
-
         self.DigitSaveButton = p.addUserDebugParameter("Save digit frame local", 1, 0, 1)
 
-        # Get current joint coordinates
+        # Button to get current joint coordinates and 6d pose of end effector
         self.jointObsButton = p.addUserDebugParameter("Get joint coordinates", 1, 0, 1)
-
-        # Get current end effector 6d pose
         self.fetch6dButton = p.addUserDebugParameter("Get 6d pose", 1, 0 ,1)
 
-        # LOAD the mug (or other objects later into the envrionment)
-
+        # Load the target object defined in the parameters.yaml file (or other objects later into the envrionment)
         self.container = Thing(robot.object_info["object_name"], robot.object_info["object_position"], robot.object_info["global_scaling"])
 
         # Load the mug to the tacto digit sensor

@@ -17,8 +17,9 @@ object_control_panel:
     position_low: [-0.3, -0.3, 0]
     position_high: [0.3, 0.3, 0.3]
 
-# neccesary parameters of the mug, the global scaling is used to shrink the size of the mug
-mug:
+# Neccesary parameters of the target object;
+# The global scaling is used to shrink the size of the object
+target_object:
   object_name: Mug
   object_position: [0, -0.2, 0.5]
   global_scaling : 0.5

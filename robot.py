@@ -39,8 +39,7 @@ class RobotBase(object):
         self.base_pos = pos
         self.base_ori = p.getQuaternionFromEuler(ori)
 
-
-        # load the background of the digit sensor
+        # Load the background of the digit sensor
         self.bg = cv2.imread("bg_digit_240_320.jpg")
         self.digit_RGB_img = []
         self.digit_depth_img = []
@@ -52,17 +51,18 @@ class RobotBase(object):
         self.__post_load__()
         print(self.joints)
 
-    # read the parameters from the yaml
+    # Read and load parameters from the parameters.yaml file 
     def load_digit_parm(self):
-        with open("arg85.yaml", 'r') as f:
+        with open("parameters.yaml", 'r') as f:
             file_data = yaml.load(f, Loader=yaml.FullLoader)
 
         self.tacto_info = file_data['tacto']
         self.camera_info = file_data['pybullet_camera']
         self.panel_info = file_data["object_control_panel"]
         self.link_ID = file_data["digit_link_id_arg85"]
-        # here used a mug for object simulation
-        self.object_info = file_data["mug"]
+        
+        # Identify the defined object from the parameters.yaml file
+        self.object_info = file_data["target_object"]
 
 
     def step_simulation(self):
