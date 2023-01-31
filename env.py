@@ -68,6 +68,12 @@ class ClutteredPushGrasp:
 
         self.DigitSaveButton = p.addUserDebugParameter("Save digit frame local", 1, 0, 1)
 
+        # Get current joint coordinates
+        self.jointObsButton = p.addUserDebugParameter("Get joint coordinates", 1, 0, 1)
+
+        # Get current end effector 6d pose
+        self.fetch6dButton = p.addUserDebugParameter("Get 6d pose", 1, 0 ,1)
+
         # LOAD the mug (or other objects later into the envrionment)
 
         self.container = Thing(robot.object_info["object_name"], robot.object_info["object_position"], robot.object_info["global_scaling"])
@@ -124,6 +130,8 @@ class ClutteredPushGrasp:
         self.pointCloudButtonVal = 2.0
         self.DigitTempSaveButtonVal = 2.0
         self.DigitSaveButtonVal = 2.0
+        self.jointObsButtonVal = 2.0
+        self.fetch6dButtonVal = 2.0
 
     def readPointCloudButton(self):
         if p.readUserDebugParameter(self.pointCloudButton) >= self.pointCloudButtonVal:
@@ -168,6 +176,16 @@ class ClutteredPushGrasp:
 
         self.DigitSaveButtonVal = p.readUserDebugParameter(self.DigitSaveButton) + 1.0
 
+    def readJointObsButton(self, sixd_pose):
+        if p.readUserDebugParameter(self.jointObsButton) >= self.DigitSaveButtonVal:
+            print(f"6D Pose: {sixd_pose}")
+        self.jointObsButtonVal = p.readUserDebugParameter(self.jointObsButton) + 1.0
+    
+    def readFetch6dButton(self, action):
+        if p.readUserDebugParameter(self.fetch6dButton) >= self.fetch6dButtonVal:
+            print(f"Action: {action}")
+        self.fetch6dButtonVal = p.readUserDebugParameter(self.fetch6dButton) + 1.0
+
     # def getPandO(self):
     #     linkPos = 13    # This corresponds to the link id of the digit sensor, "joint_digit_1.0_tip', mounted to the left finger
     #     com_p, com_o, _, _, _, _ = p.getLinkState(self.robot, linkPos, computeForwardKinematics=True)
@@ -194,8 +212,13 @@ class ClutteredPushGrasp:
         self.robot.move_ee(action[:-1], control_method)
         self.robot.move_gripper(action[-1])
 
+        # in the step simulation, get the joint orientation
+        sixd = self.robot.get_joint_obs()
+
         # in the step simulation, read the point cloud
         self.readPointCloudButton()
+        self.readJointObsButton(sixd)
+        self.readFetch6dButton(action[:-1])
         # in the step simulation, update the renderer of tacto sensor
 
 

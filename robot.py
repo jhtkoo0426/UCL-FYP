@@ -165,7 +165,8 @@ class RobotBase(object):
         positions = []
         velocities = []
         for joint_id in self.controllable_joints:
-            pos, vel, _, _ = p.getJointState(self.id, joint_id)
+            joint_states = p.getJointState(self.id, joint_id)
+            pos, vel = joint_states[0], joint_states[1]
             positions.append(pos)
             velocities.append(vel)
         ee_pos = p.getLinkState(self.id, self.eef_id)[0]
