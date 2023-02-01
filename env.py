@@ -5,6 +5,7 @@ import numpy as np
 import pybullet as p
 import pybullet_data
 import tacto
+import cv2
 
 from utilities import Models, Camera
 from tqdm import tqdm
@@ -23,26 +24,22 @@ class ClutteredPushGrasp:
     def __init__(self, robot, models: Models, camera=None, vis=False) -> None:
         self.robot = robot
         self.vis = vis
+        
         if self.vis:
             self.p_bar = tqdm(ncols=0, disable=False)
         self.camera = camera
 
-        # define environment
+        # Define Pybullet simulation environment
         self.physicsClient = p.connect(p.GUI if self.vis else p.DIRECT)
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
-        p.setGravity(0, 0, -10)
+        p.setGravity(0, 0, -9.8)
         self.planeID = p.loadURDF("plane.urdf")
 
         self.robot.load()
         self.robot.step_simulation = self.step_simulation
 
-        self.xin = p.addUserDebugParameter("x", -0.224, 0.224, 0)
-        self.yin = p.addUserDebugParameter("y", -0.224, 0.224, 0)
-        self.zin = p.addUserDebugParameter("z", 0, 1., 0.5)
-        self.rollId = p.addUserDebugParameter("roll", -3.14, 3.14, 0)
-        self.pitchId = p.addUserDebugParameter("pitch", -3.14, 3.14, np.pi/2)
-        self.yawId = p.addUserDebugParameter("yaw", -np.pi/2, np.pi/2, np.pi/2)
-        self.gripper_opening_length_control = p.addUserDebugParameter("gripper_opening_length", 0, 0.085, 0.04)
+        # Reset debug parameters
+        self.resetUserDebugParameters()
 
         # Read the parameters.yaml file to load robot parameters
         self.robot.load_digit_parm()
@@ -51,22 +48,6 @@ class ClutteredPushGrasp:
         self.digits = tacto.Sensor(**self.robot.tacto_info, background = self.robot.bg)
         p.resetDebugVisualizerCamera(**self.robot.camera_info)
         self.digits.add_camera(self.robot.id, self.robot.link_ID)
-
-        
-        # Point cloud button and initial button values
-        self.initButtonVals()
-        self.pointCloudButton = p.addUserDebugParameter("Get point cloud", 1, 0, 1)
-
-        # DIGIT button to save the tactile readings as numpy array
-        self.DigitTempSaveButton = p.addUserDebugParameter("Save digit frame temp", 1, 0, 1)
-        self.DigitSaveButton = p.addUserDebugParameter("Save digit frame local", 1, 0, 1)
-
-        # Button to get current joint coordinates and 6d pose of end effector
-        self.jointObsButton = p.addUserDebugParameter("Get joint coordinates", 1, 0, 1)
-        self.fetch6dButton = p.addUserDebugParameter("Get 6d pose", 1, 0 ,1)
-
-        # Button for data collection
-        self.dataCollectionButton = p.addUserDebugParameter("Collect sensory data...", 1, 0, 1)
 
         # Load the target object defined in the parameters.yaml file (or other objects later into the envrionment)
         self.container = Thing(self.robot.object_info["object_name"], self.robot.object_info["object_position"], self.robot.object_info["global_scaling"])
@@ -107,6 +88,9 @@ class ClutteredPushGrasp:
         self.jointObsButtonVal = 2.0
         self.fetch6dButtonVal = 2.0
         self.dataCollectionButtonVal = 2.0
+        self.openGripperButtonVal = 2.0
+        self.closeGripperButtonVal = 2.0
+        self.resetSimulationButtonVal = 2.0
 
     def readPointCloudButton(self):
         if p.readUserDebugParameter(self.pointCloudButton) >= self.pointCloudButtonVal:
@@ -143,6 +127,16 @@ class ClutteredPushGrasp:
             np.save(digit_data_path_depth,np.asarray(self.robot.digit_depth_img))
 
         self.DigitSaveButtonVal = p.readUserDebugParameter(self.DigitSaveButton) + 1.0
+    
+    def readOpenGripperButton(self):
+        if p.readUserDebugParameter(self.openGripperButton) >= self.openGripperButtonVal:
+            self.robot.open_gripper()
+        self.openGripperButtonVal = p.readUserDebugParameter(self.openGripperButton) + 1.0
+    
+    def readCloseGripperButton(self):
+        if p.readUserDebugParameter(self.closeGripperButton) >= self.closeGripperButtonVal:
+            self.robot.close_gripper()
+        self.closeGripperButtonVal = p.readUserDebugParameter(self.closeGripperButton) + 1.0
 
     def readJointObsButton(self, sixd_pose):
         if p.readUserDebugParameter(self.jointObsButton) >= self.DigitSaveButtonVal:
@@ -154,18 +148,22 @@ class ClutteredPushGrasp:
             print(f"Action: {action}")
         self.fetch6dButtonVal = p.readUserDebugParameter(self.fetch6dButton) + 1.0
     
+    def readResetSimulationButton(self):
+        if p.readUserDebugParameter(self.resetSimulationButton) >= self.resetSimulationButtonVal:
+            self.reset_simulation()
+        self.resetSimulationButtonVal = p.readUserDebugParameter(self.resetSimulationButton) + 1.0
+    
     # Run data collection code via button onclick
     def readDataCollectionButton(self):
         print("Data Collection Button read...")
-        position = np.asarray([0.0, 0.0, 0.1631578952074051, 0.0, 1.570796251296997, 1.5707963705062866])
-
+        position = np.asarray([-0.01, 0.0, 0.1631578952074051, 0.0, 1.570796251296997, 1.5707963705062866])
         random_poses_count = 200
 
-        # Nx6 numpy array (6d poses)
+        # N trials x 6d pose
         random_poses = np.zeros(shape=(random_poses_count, 6))
 
-        # [Flattened actile data 160 * 240 + Grasp result (1)] + N trials
-        generated_training_dataset = np.zeros(shape=(230401, random_poses_count))
+        # N trials x [Flattened actile data 240x320x3 + Grasp result (1)]
+        generated_training_dataset = np.zeros(shape=(random_poses_count, 230401))
 
         #  Add a bit of height to poses. Prevents the robot from colliding with the object when moving to it
         z_padding = abs(0.5)
@@ -193,25 +191,32 @@ class ClutteredPushGrasp:
 
                 # Move arm to pose
                 self.robot.move_ee_data_col(sixd_pose, 'end', velocity_scale)
-                for _ in range(500):  # Wait for a few steps
+                for _ in range(350):  # Wait for a few steps
                     self.step_simulation()
 
                 # Open gripper
                 self.robot.open_gripper()
+                for _ in range(50):
+                    self.step_simulation()
 
                 # Lower the arm by z=2
                 lower_sixd_pose = random_poses[i].copy()
                 lower_sixd_pose[2] = lower_sixd_pose[2] - z_padding
                 self.robot.move_ee_data_col(lower_sixd_pose, 'end', velocity_scale)
-                for _ in range(500):  # Wait for a few steps
+                for _ in range(350):  # Wait for a few steps
                     self.step_simulation()
 
                 # Perform grasp (close gripper)
                 self.robot.close_gripper()
+                for _ in range(50):
+                    self.step_simulation()
 
                 # Record tactile data
-                print(np.asarray(self.depth).shape, np.asarray(self.color).shape)
-                tactile_data = np.array(self.color).flatten()
+                color = np.concatenate(self.color, axis=1)                                                  # 1. Concatenate colors horizontally (axis=1)
+                depth = np.concatenate([self.digits._depth_to_color(d) for d in self.depth], axis=1)        # 2. Convert depth to color
+                color_n_depth = np.concatenate([color, depth], axis=0)                                      # 3. Concatenate the resulting 2 images vertically (axis=0)
+                tactile_data = np.array(color_n_depth).flatten()                                            # 4. Flatten image to put into dataset
+                print(f"Flattened image shape: {tactile_data.shape}")
 
                 # Lift object for 5s
                 upper_sixd_pose = random_poses[i].copy()
@@ -220,7 +225,7 @@ class ClutteredPushGrasp:
 
                 # Record object position to determine if it moved after a while
                 grasped_object_position = self.container.getPos()
-                for _ in range(1500):  # Wait for a few steps
+                for _ in range(1000):  # Wait for a few steps
                     self.step_simulation()
 
                 # Record success/failure
@@ -229,11 +234,12 @@ class ClutteredPushGrasp:
                 grasp_outcome = None
                 if grasped_object_position == final_object_position and final_object_position != self.container.getInitPos:
                     print('SUCCESSFUL GRASP')
-                    grasp_outcome = 1
+                    grasp_outcome = np.ones(shape=(1,))
                 else:
                     print('UNSUCCESSFUL GRASP')
-                    grasp_outcome = 0
-                print(len(tactile_data))
+                    grasp_outcome = np.zeros(shape=(1,))
+                print(generated_training_dataset.shape)
+                print(generated_training_dataset[i].shape)
                 generated_training_dataset[i] = np.concatenate([tactile_data, grasp_outcome])
 
                 # Reset simulation (or reset object position)
@@ -243,6 +249,7 @@ class ClutteredPushGrasp:
                     self.step_simulation()
 
         self.dataCollectionButtonVal = p.readUserDebugParameter(self.dataCollectionButton) + 1.0
+    
 
     # def getPandO(self):
     #     linkPos = 13    # This corresponds to the link id of the digit sensor, "joint_digit_1.0_tip', mounted to the left finger
@@ -275,9 +282,13 @@ class ClutteredPushGrasp:
 
         # in the step simulation, read the point cloud
         self.readPointCloudButton()
+
+        self.readResetSimulationButton()
         self.readJointObsButton(sixd)
         self.readFetch6dButton(action[:-1])
         self.readDataCollectionButton()
+        self.readOpenGripperButton()
+        self.readCloseGripperButton()
         # in the step simulation, update the renderer of tacto sensor
 
         for _ in range(120):  # Wait for a few steps
@@ -316,8 +327,47 @@ class ClutteredPushGrasp:
         # self.reset_box()
         return self.get_observation()
     
+    def resetUserDebugParameters(self):
+        # Re-initialize sliders
+        self.xin = p.addUserDebugParameter("x", -0.224, 0.224, 0)
+        self.yin = p.addUserDebugParameter("y", -0.224, 0.224, 0)
+        self.zin = p.addUserDebugParameter("z", 0, 1., 0.5)
+        self.rollId = p.addUserDebugParameter("roll", -3.14, 3.14, 0)
+        self.pitchId = p.addUserDebugParameter("pitch", -3.14, 3.14, np.pi/2)
+        self.yawId = p.addUserDebugParameter("yaw", -np.pi/2, np.pi/2, np.pi/2)
+        self.gripper_opening_length_control = p.addUserDebugParameter("gripper_opening_length", 0, 0.085, 0.04)
+
+        # Re-initialize buttons
+        # Simulation buttons
+        self.resetSimulationButton = p.addUserDebugParameter("Reset simulation", 1, 0, 1)
+        
+        # Point cloud button and initial button values
+        self.initButtonVals()
+        self.pointCloudButton = p.addUserDebugParameter("Get point cloud", 1, 0, 1)
+
+        # DIGIT button to save the tactile readings as numpy array
+        self.DigitTempSaveButton = p.addUserDebugParameter("Save digit frame temp", 1, 0, 1)
+        self.DigitSaveButton = p.addUserDebugParameter("Save digit frame local", 1, 0, 1)
+
+        # Button to get current joint coordinates and 6d pose of end effector
+        self.jointObsButton = p.addUserDebugParameter("Get joint coordinates", 1, 0, 1)
+        self.fetch6dButton = p.addUserDebugParameter("Get 6d pose", 1, 0 ,1)
+
+        # Button for data collection
+        self.dataCollectionButton = p.addUserDebugParameter("Collect sensory data", 1, 0, 1)
+
+        # Gripper control
+        self.openGripperButton = p.addUserDebugParameter("Open gripper", 1, 0, 1)
+        self.closeGripperButton = p.addUserDebugParameter("Close gripper", 1, 0, 1)
+
     # Reset the whole simulation
     def reset_simulation(self):
+        # Remove sliders and buttons
+        p.removeAllUserParameters()
+
+        # Re-initialize sliders and buttons
+        self.resetUserDebugParameters()
+
         self.robot.reset()
         self.container.resetObject()
 
