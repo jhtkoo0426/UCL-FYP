@@ -1,9 +1,14 @@
+"""
+Class for defining & initializing object meshes in Pybullet simulations.
+"""
+
+
 import pybullet as p
 import os
 import pybullet_data
 
 
-class Thing:     # class for spwaning the objects 
+class Thing:     
 
 # # neccesary parameters of the mug, the global scaling is used to shrink the size of the mug
 # mug:
@@ -17,7 +22,7 @@ class Thing:     # class for spwaning the objects
         self.name = name
         self.initPos = position
         self.objectScale = globalScaling    # also defined in the arg85.yaml file, for shrinking the size of the mug
-        self.initOrientation=p.getQuaternionFromEuler([0,0,0])
+        self.initOrientation = p.getQuaternionFromEuler([0,0,0])
 
         """
         for better organization, should move the urdf path to the arg85 yaml file as well...
@@ -27,9 +32,10 @@ class Thing:     # class for spwaning the objects
         print(f"Created a {name}")
 
         if name=="Mug":
-            self.id = p.loadURDF(self.urdf_path, self.initPos, self.initOrientation, useFixedBase=True, globalScaling = self.objectScale)
+            id = p.loadURDF(self.urdf_path, self.initPos, self.initOrientation, useFixedBase=False, globalScaling = self.objectScale)
             print(f'Load {name}')
-            print(f"Set ID to {self.id}")  
+            print(f"Set ID to {id}")
+            self.setID(id)
 
 
         # elif name=="Bottle":
@@ -63,27 +69,27 @@ class Thing:     # class for spwaning the objects
 
     def getPos(self):
         bpao=p.getBasePositionAndOrientation(self.ID)
-        #print(bpao)
         return bpao[0]
+
     def setHeight(self,height):
         self.height=height
 
     def getHeight(self):
         return self.height
+
     def setWidth(self,width):
         self.width=width
 
     def getWidth(self):
         return self.width
+
     def setInitOrientation(self, quat):
         self.initOrientation=quat
+    
+    def resetObject(self):
+        pos = (0, 0, 0)
+        orn = p.getQuaternionFromEuler([0,0,0])
+        p.resetBasePositionAndOrientation(self.ID, pos, orn)
+
     def getInitOrientation(self):
         return self.initOrientation 
-        
-       
-
-        
-
-
-
-
