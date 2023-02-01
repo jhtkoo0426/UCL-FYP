@@ -40,7 +40,7 @@ class RobotBase(object):
         self.base_ori = p.getQuaternionFromEuler(ori)
 
         # Load the background of the digit sensor
-        self.bg = cv2.imread("bg_digit_240_320.jpg")
+        self.bg = cv2.imread("./src/bg_digit_240_320.jpg")
         self.digit_RGB_img = []
         self.digit_depth_img = []
         self.sensor_pos = []        # compute the camera matrix...
@@ -54,7 +54,7 @@ class RobotBase(object):
 
     # Read and load parameters from the parameters.yaml file 
     def load_digit_parm(self):
-        with open("parameters.yaml", 'r') as f:
+        with open("./src/parameters.yaml", 'r') as f:
             file_data = yaml.load(f, Loader=yaml.FullLoader)
 
         self.tacto_info = file_data['tacto']
@@ -198,7 +198,7 @@ class Panda(RobotBase):
         self.eef_id = 11
         self.arm_num_dofs = 7
         self.arm_rest_poses = [0.98, 0.458, 0.31, -2.24, -0.30, 2.66, 2.32]
-        self.id = p.loadURDF('./urdf/panda.urdf', self.base_pos, self.base_ori,
+        self.id = p.loadURDF('./src/urdf/panda.urdf', self.base_pos, self.base_ori,
                              useFixedBase=True, flags=p.URDF_ENABLE_CACHED_GRAPHICS_SHAPES)
         self.gripper_range = [0, 0.04]
         # create a constraint to keep the fingers centered
@@ -224,7 +224,7 @@ class UR5Robotiq85(RobotBase):
         self.arm_num_dofs = 6
         self.arm_rest_poses = [-1.5690622952052096, -1.5446774605904932, 1.343946009733127, -1.3708613585093699,
                                -1.5707970583733368, 0.0009377758247187636]
-        self.id = p.loadURDF('./urdf/ur5_robotiq_85_digit.urdf', self.base_pos, self.base_ori,
+        self.id = p.loadURDF('./src/urdf/ur5_robotiq_85_digit.urdf', self.base_pos, self.base_ori,
                              useFixedBase=True, flags=p.URDF_ENABLE_CACHED_GRAPHICS_SHAPES)
         self.gripper_range = [0, 0.085]
     
@@ -265,7 +265,7 @@ class UR5Robotiq140(UR5Robotiq85):
         self.arm_num_dofs = 6
         self.arm_rest_poses = [-1.5690622952052096, -1.5446774605904932, 1.343946009733127, -1.3708613585093699,
                                -1.5707970583733368, 0.0009377758247187636]
-        self.id = p.loadURDF('./urdf/ur5_robotiq_140.urdf', self.base_pos, self.base_ori,
+        self.id = p.loadURDF('./src/urdf/ur5_robotiq_140.urdf', self.base_pos, self.base_ori,
                              useFixedBase=True, flags=p.URDF_ENABLE_CACHED_GRAPHICS_SHAPES)
         self.gripper_range = [0, 0.085]
         # TODO: It's weird to use the same range and the same formula to calculate open_angle as Robotiq85.

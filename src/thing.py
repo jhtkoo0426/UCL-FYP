@@ -27,7 +27,7 @@ class Thing:
         """
         for better organization, should move the urdf path to the arg85 yaml file as well...
         """
-        self.urdf_path = "urdf/objects/mug/mug.urdf"
+        self.urdf_path = "./src/urdf/objects/mug/mug.urdf"
 
         print(f"Created a {name}")
 

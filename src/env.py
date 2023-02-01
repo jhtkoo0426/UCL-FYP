@@ -24,13 +24,15 @@ class ClutteredPushGrasp:
     def __init__(self, robot, models: Models, camera=None, vis=False) -> None:
         self.robot = robot
         self.vis = vis
-        
+
         if self.vis:
             self.p_bar = tqdm(ncols=0, disable=False)
         self.camera = camera
 
         # Define Pybullet simulation environment
+        # p.GUI for a simulation w/ GUI, p.DIRECT for a headless simulation
         self.physicsClient = p.connect(p.GUI if self.vis else p.DIRECT)
+
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
         p.setGravity(0, 0, -9.8)
         self.planeID = p.loadURDF("plane.urdf")
@@ -53,10 +55,7 @@ class ClutteredPushGrasp:
         self.container = Thing(self.robot.object_info["object_name"], self.robot.object_info["object_position"], self.robot.object_info["global_scaling"])
 
         # Load the mug to the tacto digit sensor
-        # self.digits.add_object(self.container.urdf_path, self.container.id, self.container.objectScale)
-
-        # added the get point cloud class... maybe to make it inherit the properties of the class?
-        # self.PC = getPointCloud(target = robot.object_info["object_position"])
+        self.digits.add_object(self.container.urdf_path, self.container.ID, self.container.objectScale)
 
     def step_simulation(self):
         """
@@ -109,7 +108,7 @@ class ClutteredPushGrasp:
         if p.readUserDebugParameter(self.DigitSaveButton) >= self.DigitSaveButtonVal:
             print("saving the frame to local folder")
             curr_dir = os.getcwd()
-            Digit_folder = "Digit_data/mug"
+            Digit_folder = "./src/Digit_data/mug"
             if not os.path.exists(Digit_folder):
                 os.mkdir(os.path.join(curr_dir,Digit_folder))
                 print("creating folder",Digit_folder)
@@ -155,9 +154,9 @@ class ClutteredPushGrasp:
     
     # Run data collection code via button onclick
     def readDataCollectionButton(self):
-        print("Data Collection Button read...")
-        position = np.asarray([-0.01, 0.0, 0.1631578952074051, 0.0, 1.570796251296997, 1.5707963705062866])
-        random_poses_count = 200
+        z = 0.3210526406764984
+        position = np.asarray([0.0, 0.0, 0.1725230525032501, 0.0, 1.570796251296997, 1.5707963705062866])
+        random_poses_count = 1
 
         # N trials x 6d pose
         random_poses = np.zeros(shape=(random_poses_count, 6))
@@ -166,10 +165,10 @@ class ClutteredPushGrasp:
         generated_training_dataset = np.zeros(shape=(random_poses_count, 230401))
 
         #  Add a bit of height to poses. Prevents the robot from colliding with the object when moving to it
-        z_padding = abs(0.5)
+        z_padding = abs(0.2)
 
         # Set robot movement speed
-        velocity_scale = 0.3
+        velocity_scale = 0.15
 
         if p.readUserDebugParameter(self.dataCollectionButton) >= self.dataCollectionButtonVal:
             # Generate random poses using Gaussian noise
@@ -216,55 +215,50 @@ class ClutteredPushGrasp:
                 depth = np.concatenate([self.digits._depth_to_color(d) for d in self.depth], axis=1)        # 2. Convert depth to color
                 color_n_depth = np.concatenate([color, depth], axis=0)                                      # 3. Concatenate the resulting 2 images vertically (axis=0)
                 tactile_data = np.array(color_n_depth).flatten()                                            # 4. Flatten image to put into dataset
-                print(f"Flattened image shape: {tactile_data.shape}")
 
                 # Lift object for 5s
                 upper_sixd_pose = random_poses[i].copy()
                 upper_sixd_pose[2] = upper_sixd_pose[2] + z_padding
                 self.robot.move_ee_data_col(upper_sixd_pose, 'end', velocity_scale)
 
-                # Record object position to determine if it moved after a while
-                grasped_object_position = self.container.getPos()
+                # Record object z position to determine if it moved after a while
+                grasped_object_z_pos = self.container.getPos()[2]
                 for _ in range(1000):  # Wait for a few steps
                     self.step_simulation()
 
                 # Record success/failure
-                final_object_position = self.container.getPos()
+                final_object_z_pos = self.container.getPos()[2]
 
                 grasp_outcome = None
-                if grasped_object_position == final_object_position and final_object_position != self.container.getInitPos:
+
+                # Determine if the grabbed object stays in the same z position AND the z position is not 0 (as defined in container.getInitPos())
+                delta_z = final_object_z_pos - grasped_object_z_pos
+                print(f"z diff: {delta_z}")
+                if delta_z > z_padding and final_object_z_pos > 0:
                     print('SUCCESSFUL GRASP')
                     grasp_outcome = np.ones(shape=(1,))
                 else:
                     print('UNSUCCESSFUL GRASP')
                     grasp_outcome = np.zeros(shape=(1,))
-                print(generated_training_dataset.shape)
-                print(generated_training_dataset[i].shape)
+
                 generated_training_dataset[i] = np.concatenate([tactile_data, grasp_outcome])
 
-                # Reset simulation (or reset object position)
-                self.reset_simulation()
+                # Reset robot and arm only
+                self.robot.reset()
+                self.container.resetObject()
 
                 for _ in range(100):
                     self.step_simulation()
+            
+            # Save data as np.ndarray
+            curr_dir = os.getcwd()
+            baseline_dir = "./src/baseline_model"
+            training_ds_filename = "training_ds.npy"
+            training_ds_path = os.path.join(curr_dir, baseline_dir, training_ds_filename)
+            np.save(training_ds_path, generated_training_dataset)
+            print("Training data saved to ")
 
         self.dataCollectionButtonVal = p.readUserDebugParameter(self.dataCollectionButton) + 1.0
-    
-
-    # def getPandO(self):
-    #     linkPos = 13    # This corresponds to the link id of the digit sensor, "joint_digit_1.0_tip', mounted to the left finger
-    #     com_p, com_o, _, _, _, _ = p.getLinkState(self.robot, linkPos, computeForwardKinematics=True)
-        
-    #     com_o_Eul=p.getEulerFromQuaternion(com_o)
-    #     #print(com_o_Eul)
-    #     normtemp=np.linalg.norm(com_o_Eul)
-        
-    #     #quickfix 
-    #     com_p1= com_p[0]-(0.2/normtemp)*com_o_Eul[0]
-    #     com_p2= com_p[1]-(0.2/normtemp)*com_o_Eul[1]
-    #     com_p3= com_p[2]-(0.2/normtemp)*com_o_Eul[2]
-    #     com_p=(com_p1,com_p2,com_p3)
-    #     return com_p
 
     def step(self, action, control_method='joint'):
         """
@@ -324,7 +318,6 @@ class ClutteredPushGrasp:
 
     def reset(self):
         self.robot.reset()
-        # self.reset_box()
         return self.get_observation()
     
     def resetUserDebugParameters(self):
