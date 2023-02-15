@@ -9,16 +9,16 @@
       <collision>
           <origin xyz="0 0 0" rpy="0 0 0" />
           <geometry>
-              <mesh filename="mug.stl" scale="0.5 0.5 0.5"/>
+              <mesh filename="mug.obj" />
           </geometry>
       </collision>
       <visual>
           <origin xyz="0 0 0" rpy="0 0 0" />
           <geometry>
-              <mesh filename="mug.stl" scale="0.5 0.5 0.5"/>
+              <mesh filename="mug.stl" />
           </geometry>
-          <material name="red">
-              <color rgba="1 0 0 1"/>
+          <material name="TransparentGray">
+              <color rgba="0.5 0.5 0.5 0.6"/>
           </material>
       </visual>
       <inertial>

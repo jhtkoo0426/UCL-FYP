@@ -21,8 +21,8 @@ object_control_panel:
 # The global scaling is used to shrink the size of the object
 target_object:
   object_name: Mug
-  object_position: [0, 0, 0]
-  global_scaling : 0.5
+  object_position: [0, 0, 0.25]
+  global_scaling : 1.0
 
 simulation:
   camera_pos : [0.5, 1, 0.7]

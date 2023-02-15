@@ -14,11 +14,13 @@ from thing import Thing
 from robot import RobotBase
 
 
+import matplotlib.pyplot as plt
+
 
 
 class ClutteredPushGrasp:
     # Global constants
-    SIMULATION_STEP_DELAY = 1 / 10000.
+    SIMULATION_STEP_DELAY = 1 / 20000.
 
 
     def __init__(self, robot, models: Models, camera=None, vis=False) -> None:
@@ -153,26 +155,48 @@ class ClutteredPushGrasp:
         self.resetSimulationButtonVal = p.readUserDebugParameter(self.resetSimulationButton) + 1.0
     
     # Auxiliary function for readDataCollectionButton to generate random poses
-    def generateGaussianNoisePoses(self, random_poses, target_poses_count, base_6d_pose, z_padding):
+    def generateGaussianNoisePoses(self, target_poses_count, base_6d_poses, z_padding):
         """
         Generates random end effector poses following a Gaussian distribution.
 
-        @param random_poses: (2D numpy array) empty array to store the generated end effector poses
         @param target_poses_count: (int) indicating the number of poses to generate
-        @param base_6d_pose: (1D numpy array) representing the base end effector pose to apply gaussian noise to
+        @param base_6d_poses: (1D numpy array) representing the base end effector pose to apply gaussian noise to
         @param z_padding: (float) slight padding to prevent the robot from colliding with the object when moving
                           to it via inverse kinematics
         
         @returns random_poses: filled array of generated end effector poses
         """
 
-        for i in range(target_poses_count):
+        random_poses = []
+
+        for _ in range(target_poses_count):
             # Add noise to 6d pose (x,y,z,r,p,y)
-            gaussian_noise = np.random.normal(0, 0.005, 6)
-            noisy_pose = base_6d_pose + gaussian_noise
-            noisy_pose[2] += z_padding
-            random_poses[i] = noisy_pose
-        return random_poses
+            # Block noise
+            # x_noise = np.random.normal(0, 0.005, 1).item()
+            # y_noise = np.random.normal(0, 0.005, 1).item()
+            # z_noise = np.random.normal(0, 0.01, 1).item() + z_padding
+            # or_noise = 0
+            # op_noise = np.random.normal(0, 0.1, 1).item()
+            # oy_noise = np.random.normal(0, 0.1, 1).item()
+
+            # Mug noise
+            x_noise = np.random.normal(0, 0.005, 1).item()
+            y_noise = np.random.normal(0, 0.005, 1).item()
+            z_noise = np.random.normal(0, 0.005, 1).item() + z_padding
+            or_noise = 0
+            op_noise = np.random.normal(0, 0.05, 1).item()
+            oy_noise = np.random.normal(0, 0.05, 1).item()
+            
+            # Apply the Gaussian noise for each base pose
+            for base_6d_pose in base_6d_poses:
+                noisy_pose = np.array([x_noise, y_noise, z_noise, or_noise, op_noise, oy_noise])
+                noisy_pose = base_6d_pose + noisy_pose
+                random_poses.append(noisy_pose)
+            
+            if len(random_poses) == target_poses_count:
+                break
+        
+        return np.array(random_poses)
     
     # Auxiliary function as sanity check for collecting tactile readings
     def tactileSanityCheck(self, depth, color):
@@ -208,11 +232,17 @@ class ClutteredPushGrasp:
         model.
         """
         
-        position = np.asarray([0.0, 0.0, 0.1725230525032501, 0.0, 1.570796251296997, 1.5707963705062866])
-        random_poses_count = 3000
+        # Block positions
+        # positions = np.array([[0.0, 0.0, 0.1725230525032501, 0.0, 1.570796251296997, 1.5707963705062866],
+        #                       [0.0, -0.05187368392944336, 0.1984210538864136, 0.0, 1.3221051692962646, 1.5707963705062866],
+        #                       [-0.007073685526847839, 0.028294742107391357, 0.16842105984687805, 0.0, 1.7187368869781494, 1.5707963705062866]])
+        # Mug positions
+        positions = np.array([[-0.009431570768356323, -0.016505271196365356, 0.17368420958518982, 0.0, 1.4212634563446045, 1.5707963705062866],
+                              [-0.0047158002853393555, 0.0, 0.17368420958518982, 0.0, 1.570796251296997, 1.5707963705062866],
+                              [0.0, 0.021221041679382324, 0.16842105984687805, 0.0, 1.7517893314361572, 1.5707963705062866]])
+        random_poses_count = 500
 
         # Separate data arrays for tactile and visual data
-        random_poses = np.zeros(shape=(random_poses_count, 6))                  # N trials x 6d pose
         valid_random_poses = np.empty((0, 6))
         depth_dataset = np.empty((0, 2, 160, 120))       # N trials x [Tactile data (depth) 160x120]
         color_dataset = np.empty((0, 2, 160, 120, 3))    # N trials x [Tactile data (color) 160x120x3]
@@ -227,36 +257,48 @@ class ClutteredPushGrasp:
 
         if p.readUserDebugParameter(self.dataCollectionButton) >= self.dataCollectionButtonVal:
             # Generate random poses using Gaussian noise
-            random_poses = self.generateGaussianNoisePoses(random_poses, random_poses_count, position, Z_PADDING)
+            random_poses = self.generateGaussianNoisePoses(random_poses_count, positions, Z_PADDING)
             print(f"Generated random poses of shape {random_poses.shape}")
 
             # Execute generated grasps
             for i in range(len(random_poses)):
-                print(f"Random pose {str(i+1)}")
                 sixd_pose = tuple(random_poses[i])
+                print(f"Random pose {str(i+1)}: {sixd_pose}")
 
                 # 1. Move arm to pose and prepare gripper
                 self.robot.move_ee_data_col(sixd_pose, 'end', VELOCITY_SCALE)
                 self.robot.open_gripper()
-                self.fixed_step_sim(100)
+                self.fixed_step_sim(500)
 
                 # 2. Lower the arm by z=2
                 lower_sixd_pose = random_poses[i].copy()
                 lower_sixd_pose[2] = lower_sixd_pose[2] - Z_PADDING
                 self.robot.move_ee_data_col(lower_sixd_pose, 'end', VELOCITY_SCALE)
-                self.fixed_step_sim(200)
+                self.fixed_step_sim(500)
 
                 # 3. Close gripper to perform grasp
                 self.robot.close_gripper()
-                self.fixed_step_sim(200)
+                self.fixed_step_sim(500)
                 
                 # 4. Update the DIGIT camera to collect color and depth of DIGIT sensor
                 self.digit_step()
-                self.fixed_step_sim(100)
+                self.fixed_step_sim(500)
 
                 # 5. Record tactile data
                 color = np.asarray(self.color)      # (2, 160, 120, 3)
                 depth = np.asarray(self.depth)      # (2, 160, 120)
+
+                # fig = plt.figure(figsize=(5,2))
+                # fig.add_subplot(1,4,1)
+                # plt.imshow(depth[0], cmap='gray')
+                # fig.add_subplot(1,4,2)
+                # plt.imshow(color[0])
+                # fig.add_subplot(1,4,3)
+                # plt.imshow(depth[1], cmap='gray')
+                # fig.add_subplot(1,4,4)
+                # plt.imshow(color[1])
+                # plt.savefig('test.png')
+
                 # color = np.concatenate(self.color, axis=1)                                                  # 1. Concatenate colors horizontally (axis=1)
                 # depth = np.concatenate([self.digits._depth_to_color(d) for d in self.depth], axis=1)        # 2. Convert depth to color
                 # color_n_depth = np.concatenate([color, depth], axis=0)                                      # 3. Concatenate the resulting 2 images vertically (axis=0)
@@ -270,7 +312,7 @@ class ClutteredPushGrasp:
 
                 # Record object z position to determine if it moved after a while
                 grasped_object_z_pos = self.container.getPos()[2]
-                self.fixed_step_sim(1000)
+                self.fixed_step_sim(1500)
 
                 # Record success/failure
                 final_object_z_pos = self.container.getPos()[2]
@@ -302,9 +344,7 @@ class ClutteredPushGrasp:
                 # 7. Reset robot and arm only
                 self.robot.reset()
                 self.container.resetObject()
-
-                for _ in range(100):
-                    self.step_simulation()
+                self.fixed_step_sim(500)
             
             # Save generated data to .npy files
             CURR_DIR = os.getcwd()
