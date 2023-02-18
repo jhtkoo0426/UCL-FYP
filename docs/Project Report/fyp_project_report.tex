@@ -1,0 +1,297 @@
+\documentclass[a4paper]{report}
+\usepackage{setspace}
+%\usepackage{subfigure}
+
+\pagestyle{plain}
+\usepackage{amssymb,graphicx,color}
+\usepackage{amsfonts}
+\usepackage{latexsym}
+\usepackage{amsmath}
+\usepackage[a4paper, margin = 3cm, bottom = 2.5cm]{geometry}
+
+\usepackage{changepage}
+
+\newtheorem{theorem}{THEOREM}
+\newtheorem{lemma}[theorem]{LEMMA}
+\newtheorem{corollary}[theorem]{COROLLARY}
+\newtheorem{proposition}[theorem]{PROPOSITION}
+\newtheorem{remark}[theorem]{REMARK}
+\newtheorem{definition}[theorem]{DEFINITION}
+\newtheorem{fact}[theorem]{FACT}
+
+\newtheorem{problem}[theorem]{PROBLEM}
+\newtheorem{exercise}[theorem]{EXERCISE}
+\def \set#1{\{#1\} }
+
+\newenvironment{proof}{
+PROOF:
+\begin{quotation}}{
+$\Box$ \end{quotation}}
+
+
+
+\newcommand{\nats}{\mbox{\( \mathbb N \)}}
+\newcommand{\rat}{\mbox{\(\mathbb Q\)}}
+\newcommand{\rats}{\mbox{\(\mathbb Q\)}}
+\newcommand{\reals}{\mbox{\(\mathbb R\)}}
+\newcommand{\ints}{\mbox{\(\mathbb Z\)}}
+
+
+% Helper packages - delete these before submission
+\usepackage{xcolor}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\title{{\vspace{-14em} \includegraphics[scale=0.4]{ucl_logo.png}}\\
+\vspace{2cm}
+\begin{adjustwidth}{1cm}{1cm}
+    \centering
+    \Huge Robust Robotic Grasping Utilising Touch Sensing
+\end{adjustwidth}}
+\\
+\date{Submission date: \today}
+\author{Koo Ho Tin Justin\thanks{
+{\bf Disclaimer:}
+This report is submitted as part requirement for the BSc degree in Computer Science at UCL. It is
+substantially the result of my own work except where explicitly indicated in the text.
+\emph{Either:} The report may be freely copied and distributed provided the source is explicitly acknowledged
+\newline  %% \\ messes it up
+\emph{Or:}\newline
+The report will be distributed to the internal and external examiners, but thereafter may not be copied or distributed except with permission from the author.}
+\\ \\
+BSc Computer Science\\ \\
+Supervisors: Prof. Marc Deisenroth, Dr. Yasemin Bekiroglu}
+
+
+
+\begin{document}
+ 
+\onehalfspacing
+\maketitle
+
+
+%--------------------------------------------------------------------------------------------
+% Abstract
+%---------------------------------------------------------------------------------------------
+\begin{abstract}
+Robotic grasping and object manipulation have been studied for decades. The success of a robotic grasping task is often dependent on the robustness of the system, which refers to the ability of the robot to perform a grasping task consistently and accurately despite changes or disturbances in the environment and object. Thus, achieving robust grasping is a significant challenge, which if mastered, greatly benefits the autonomy and reliability of robotic manipulation.\\
+
+This project includes a survey of research methods for multiple regrasping frameworks to robotic grasping using various combinations of sensory (vision and tactile) data. These frameworks mainly adapt either a learning-based approach to formulate a regrasping policy, or tactile exploration to maximise grasp quality and improve object shape representation.\\
+
+This project will focus on building a robust robotic system that can learn to pick up an object with simple geometry using a two-finger and a three-finger hand. \color{red}[Add final approach once solution is complete]
+\end{abstract}
+
+
+%---------------------------------------------------------------------------------------------
+% Abcknowledgements
+%---------------------------------------------------------------------------------------------
+\renewcommand\abstractname{Acknowledgments}
+\begin{abstract}
+    
+\end{abstract}
+
+
+%---------------------------------------------------------------------------------------------
+% Contents
+%---------------------------------------------------------------------------------------------
+\tableofcontents
+\setcounter{page}{1}
+
+
+%---------------------------------------------------------------------------------------------
+% Chapter 1: Introduction
+%---------------------------------------------------------------------------------------------
+\chapter{Introduction}
+\label{chap:1}
+
+\section{Project Outline}
+\label{sec:1.1}
+Many different approaches have been proposed for robotic grasping, with varying assumptions regarding the available information about the scene and the type of objects in question (known, unknown, familiar). These approaches range from designing simplifying hand models, to completely end-to-end systems inferring grasp parameters from raw data using generative models. However, there are still problems in the field in terms of, for example, dealing with uncertainties in sensing and actuation, scalability and adding constraints in terms of task.\\
+
+[Add final approach once solution is complete]
+
+
+\section{Project Aims and Objectives}
+\label{sec:1.2}
+
+\subsection{Aims}
+\label{sec:1.2.1}
+The aim of this project is to develop a robust robotic system that can learn to pick up an object with simple geometry using a two-finger and a three-finger hand. The project will take a learning-based approach to grasping through, for example, Bayesian optimization \cite{nogueria, frazier}. The learning-based approach should be compared with a baseline approach from the related literature (e.g. \cite{nogueria, danielczuk, breyer}) for evaluation. 
+
+\subsection{Objectives}
+\label{sec:1.2.2}
+The project aim is divided into several objectives that are expected to be completed throughout the academic year. 
+\begin{enumerate}
+    \item Set up a simulation environment, e.g. PyBullet or NVIDIA Isaac. 
+    \item Collect sensory data (e.g. visual and force/torque readings) via the simulator.
+    \item Apply basic simulation functionalities: position control and vision sensing.
+    \item Implement and test baseline (e.g. \cite{breyer}, and a basic approach such as executing predefined grasps per object model given object pose).
+    \item Build the learning framework:
+    \begin{enumerate}
+        \item Learning grasps based on Bayesian Optimization, from a chosen scene representations such as signed distance function 
+        \item Picking with two fingers given object model (primitive shapes such as box, sphere, cylinder) and pose, all learned by trial and error
+    \end{enumerate}
+\end{enumerate}
+
+\subsection{Additional Objectives}
+These are additional objectives depending on the progress of the project:
+\begin{enumerate}
+    \item Quickly adapt to new object shapes based on prior trials with other shapes.
+    \item Add simple touch feedback in simulation (e.g. \cite{bekiroglu}).
+    \item Include task constraints: e.g. moving a cup or keeping the cup upright.
+\end{enumerate}
+
+
+\section{Project Approach}
+\label{sec:1.3}
+To successfully complete the project, a simple timeline consisting of several phases was suggested. Any technologies and tools required for the project will also be stated and justified in the corresponding sections.
+
+\subsection{Experimenting with Tactile Sensors}
+\label{sec:1.3.1}
+This project is concerned with the employment of DIGIT tactile sensors. A tactile sensor is mounted onto each finger in the 2-finger gripper of the real robot setup. These tactile sensors are responsible for providing tactile readings and feedback as depth and RGB color images.\\
+
+To get accustomed to these tactile sensors early on, I visited the Statistical Machine Learning Group lab to experiment and set up a simple data collection pipeline for future development of the actual learning framework. I also visualised a dataset of 200 examples of tactile readings that I collected during my visit, which is included in Figure 1 below.
+\begin{figure}
+    \centering
+    \includegraphics{}
+    \caption{DIGIT tactile readings of 200 examples}
+    \label{fig:digit\_readings}
+\end{figure}
+
+\subsection{Developing a Pybullet simulation for the real robot setup}
+A Pybullet simulation that supports inverse kinematics and simple gripping was developed for the baseline approach 
+
+\begin{itemize}
+    \item developing a baseline classifier for good and bad grasps
+    \item developing a simple Gaussian process generative model that infers good hand poses for potential grasps
+    \item developing the final project approach
+\end{itemize}
+
+
+%---------------------------------------------------------------------------------------------
+% Section 2: Literature Review
+% Focuses on important terms used throughout the report & academic papers read in-depth
+%---------------------------------------------------------------------------------------------
+\chapter{Background and Literature Review}
+\label{chap:2}
+
+\section{Robotic Regrasping}
+\label{sec:2.1}
+Robotic grasping requires precise coordination between the visual perception of the surrounding environment, efficient grasp planning and robustness in terms of the type of objects to grasp. 
+
+
+\section{Academic Papers Reviewed in Depth}
+\label{}
+\subsection{More Than a Feeling: Learning to Grasp and Regrasp using Vision and Touch (Calandra et al)\cite{calandra}}
+\label{}
+
+
+\subsection{Generalizing Regrasping with Supervised Policy Learning (Hausman et al)\cite{hausman}}
+\label{}
+
+
+\subsection{Simultaneous Tactile Exploration and Grasp Refinement for Unknown Objects (Farias et al)\cite{farias}}
+\label{}
+
+\section{Conclusion on Literature Review}
+
+
+
+%---------------------------------------------------------------------------------------------
+% Section 3: Designing a Baseline Model and Deciding on Feature Representation of Tactile and Visual Data
+%---------------------------------------------------------------------------------------------
+\chapter{Baseline and Feature Representation Analysis}
+\label{chap:3}
+Mention the following:
+- What common feature representations are there
+- Results from your own testing
+    - Collected tactile sensor readings (as tactile data) and end effector poses (as visual data)
+    - Data was processed in 3 ways: raw, PCA with 3 main components, Convnet
+    - Each type of processed data was then run with different feature combinations: tactile, vision \& tactile+vision
+    - Display results
+- Select the most promising representation and use it for actual generative model in Sec 4.
+
+
+%---------------------------------------------------------------------------------------------
+% Section 4: Actual Model
+%---------------------------------------------------------------------------------------------
+\chapter{Actual Model}
+\label{chap:4}
+
+
+
+%---------------------------------------------------------------------------------------------
+% Section 5: Future Work
+%---------------------------------------------------------------------------------------------
+\chapter{Future Work}
+\label{chap:5}
+Since Pybullet is no longer being maintained, consider to move to mujico
+
+
+
+%---------------------------------------------------------------------------------------------
+% Appendix section
+%---------------------------------------------------------------------------------------------
+\appendix
+
+
+\begin{thebibliography}{9}
+\bibitem{haarnoja}
+    Haarnoja, T., Zhou, A., Abbeel, P. & Levine, S..
+    \textit{Soft Actor-CriticL Off-Policy Maximum Entroy Deep Reinforcement Learning with a Stochastic Actor, \href{https://arxiv.org/abs/1801.01290}{https://arxiv.org/abs/1801.01290}},
+    ICML,
+    2018roboti
+
+\bibitem{nogueria}
+    Nogueria et al,
+    \textit{Unscented Bayesian Optimization for Safe Robot Grasping},
+    IROS,
+    2016
+
+\bibitem{danielczuk}
+    Danielczuk et al,
+    \textit{Exploratory Grasping: Asymptotically Optimal Algorithms for Grasping Challenging Polyhedral Objects},
+    2020
+
+\bibitem{bekiroglu}
+    Bekiroglu et al,
+    \textit{Assessing Grasp Stability from Haptic Data},
+    IEEE TRO,
+    2011
+
+\bibitem{frazier}
+    Frazier,
+    \textit{A Tutorial on Bayesian Optimization},
+    2018
+
+\bibitem{breyer}
+    Breyer,
+    \textit{\href{https://github.com/ethz-asl/vgn}{https://github.com/ethz-asl/vgn}}
+    CORL,
+    2020
+
+\bibitem{calandra}
+    Calandra et al,
+    \textit{More Than a Feeling: Learning to Grasp and Regrasp using Vision and Touch},
+    2018
+
+\bibitem{hausman}
+    Hausman et al,
+    \textit{Generalizing Regrasping with Supervised Policy Learning},
+    2017
+
+\bibitem{farias}
+    Farias et al,
+    \textit{Simultaneous Tactile Exploration and Grasp Refinement for Unknown Objects},
+    2021
+
+\bibitem{digit}
+    \href{https://digit.ml/}{DIGIT tactile sensors, 2020 @ Facebook}
+\end{thebibliography}
+
+\chapter{Other appendices, e.g., code listing}
+Put your appendix sections here
+
+\end{document}
