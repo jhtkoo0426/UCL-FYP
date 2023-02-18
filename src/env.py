@@ -179,13 +179,13 @@ class ClutteredPushGrasp:
             # op_noise = np.random.normal(0, 0.1, 1).item()
             # oy_noise = np.random.normal(0, 0.1, 1).item()
 
-            # Mug noise
-            x_noise = np.random.normal(0, 0.005, 1).item()
-            y_noise = np.random.normal(0, 0.005, 1).item()
-            z_noise = np.random.normal(0, 0.005, 1).item() + z_padding
+            # Bottle noise
+            x_noise = np.random.normal(0, 0.01, 1).item()
+            y_noise = np.random.normal(0, 0.01, 1).item()
+            z_noise = np.random.normal(0, 0.1, 1).item() + z_padding
             or_noise = 0
-            op_noise = np.random.normal(0, 0.05, 1).item()
-            oy_noise = np.random.normal(0, 0.05, 1).item()
+            op_noise = np.random.normal(0, 0.07, 1).item()
+            oy_noise = np.random.normal(0, 0.07, 1).item()
             
             # Apply the Gaussian noise for each base pose
             for base_6d_pose in base_6d_poses:
@@ -236,11 +236,11 @@ class ClutteredPushGrasp:
         # positions = np.array([[0.0, 0.0, 0.1725230525032501, 0.0, 1.570796251296997, 1.5707963705062866],
         #                       [0.0, -0.05187368392944336, 0.1984210538864136, 0.0, 1.3221051692962646, 1.5707963705062866],
         #                       [-0.007073685526847839, 0.028294742107391357, 0.16842105984687805, 0.0, 1.7187368869781494, 1.5707963705062866]])
-        # Mug positions
-        positions = np.array([[-0.009431570768356323, -0.016505271196365356, 0.17368420958518982, 0.0, 1.4212634563446045, 1.5707963705062866],
-                              [-0.0047158002853393555, 0.0, 0.17368420958518982, 0.0, 1.570796251296997, 1.5707963705062866],
-                              [0.0, 0.021221041679382324, 0.16842105984687805, 0.0, 1.7517893314361572, 1.5707963705062866]])
-        random_poses_count = 500
+        # Bottle positions
+        positions = np.array([[0.1296842396259308, 0.014147371053695679, 0.13684210181236267, 0.09915781021118164, 1.520420789718628, 0.5952490568161011],
+                              [0.10374736785888672, -0.01886315643787384, 0.1315789520740509, 0.0, 1.553473711013794, 0.8928736448287964],
+                              [0.16033685207366943, 0.06602105498313904, 0.057894736528396606, 0.0, 1.570796251296997, 0.5952490568161011]])
+        random_poses_count = 400
 
         # Separate data arrays for tactile and visual data
         valid_random_poses = np.empty((0, 6))
