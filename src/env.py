@@ -139,14 +139,14 @@ class ClutteredPushGrasp:
             self.robot.close_gripper()
         self.closeGripperButtonVal = p.readUserDebugParameter(self.closeGripperButton) + 1.0
 
-    def readJointObsButton(self, sixd_pose):
+    def readJointObsButton(self, angles):
         if p.readUserDebugParameter(self.jointObsButton) >= self.DigitSaveButtonVal:
-            print(f"6D Pose: {sixd_pose}")
+            print(f"Joint angles (length={len(angles)}): {angles}")
         self.jointObsButtonVal = p.readUserDebugParameter(self.jointObsButton) + 1.0
     
     def readFetch6dButton(self, action):
         if p.readUserDebugParameter(self.fetch6dButton) >= self.fetch6dButtonVal:
-            print(f"Action: {action}")
+            print(f"End effector 6D pose: {action}")
         self.fetch6dButtonVal = p.readUserDebugParameter(self.fetch6dButton) + 1.0
     
     def readResetSimulationButton(self):
@@ -445,7 +445,7 @@ class ClutteredPushGrasp:
         self.rollId = p.addUserDebugParameter("roll", -3.14, 3.14, 0)
         self.pitchId = p.addUserDebugParameter("pitch", -3.14, 3.14, np.pi/2)
         self.yawId = p.addUserDebugParameter("yaw", -np.pi/2, np.pi/2, np.pi/2)
-        self.gripper_opening_length_control = p.addUserDebugParameter("gripper_opening_length", 0, 0.085, 0.04)
+        self.gripper_opening_length_control = p.addUserDebugParameter("Gripper opening length", 0, 0.04, 0.04)
 
         # Re-initialize buttons
         # Simulation buttons
@@ -461,7 +461,7 @@ class ClutteredPushGrasp:
 
         # Button to get current joint coordinates and 6d pose of end effector
         self.jointObsButton = p.addUserDebugParameter("Get joint coordinates", 1, 0, 1)
-        self.fetch6dButton = p.addUserDebugParameter("Get 6d pose", 1, 0 ,1)
+        self.fetch6dButton = p.addUserDebugParameter("Get end effector pose", 1, 0 ,1)
 
         # Button for data collection
         self.dataCollectionButton = p.addUserDebugParameter("Collect sensory data", 1, 0, 1)

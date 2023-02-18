@@ -334,5 +334,49 @@
     <child link="panda_grasptarget"/>
     <origin rpy="0 0 0" xyz="0 0 0.105"/>
   </joint>
-  
+     <link name="digit_1.0_tip">
+    <visual>
+      <geometry>
+        <mesh filename="package://../meshes/digit.STL"/>
+      </geometry>
+      <material name="white">
+        <color rgba=".9 .9 .9 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://../meshes/digit.STL"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+    </collision>
+  </link>
+  <joint name="joint_digit_1.0_tip" type="fixed">
+    <parent link="panda_rightfinger"/>
+    <child link="digit_1.0_tip"/>
+    <origin rpy="0 0 1.57" xyz="0 -0.01 0.03"/>
+    <!--0.0267000000000005-->
+  </joint>
+    <link name="digit_2.0_tip">
+    <visual>
+      <geometry>
+        <mesh filename="package://../meshes/digit.STL"/>
+      </geometry>
+      <material name="white">
+        <color rgba=".9 .9 .9 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://../meshes/digit.STL"/>
+      </geometry>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+    </collision>
+  </link>
+  <joint name="joint_digit_2.0_tip" type="fixed">
+    <parent link="panda_leftfinger"/>
+    <child link="digit_2.0_tip"/>
+    <origin rpy="0 0 -1.57" xyz="0 0.01 0.03"/>
+    <!--0.0267000000000005-->
+  </joint>
+
 </robot>
