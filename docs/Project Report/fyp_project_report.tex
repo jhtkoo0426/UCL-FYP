@@ -178,13 +178,14 @@ To get familiar with the sensors before implementing our proposed learning frame
 \subsection{Developing a Pybullet Simulation for the Real Robot Setup}
 Pybullet \cite{pybullet} is a physics engine and simulator designed to be used in robotics, machine learning and computer graphics. It is a Python wrapper for the Bullet Physics Library, which is an open-source physics engine that can simulate rigid body dynamics, soft body dynamics, and fluids.\\
 
-I developed a Pybullet simulation alongside Jeffery Wei, a Master's project student with the Statistical Machine Learning Group as of writing this report.
+I developed a Pybullet simulation alongside Jeffery Wei, a Master's project student with the Statistical Machine Learning Group as of writing this report. The simulation supports basic robot control and object manipulation, inverse kinematics and a tactile data collection pipeline.
 
-\begin{itemize}
-    \item developing a baseline classifier for good and bad grasps
-    \item developing a simple Gaussian process generative model that infers good hand poses for potential grasps
-    \item developing the final project approach
-\end{itemize}
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.2]{docs/Project Report/Media/pybullet_sim.png}
+    \caption{Screenshot of Pybullet Simulation for the Project}
+    \label{fig:pb_sim_eg}
+\end{figure}
 
 
 %----------------------------------------------------------------------------------
