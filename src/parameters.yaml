@@ -1,5 +1,5 @@
 # id of the links that are digits
-digit_link_id: [10, 12]
+digit_link_id: [13, 19]
 
 pybullet_camera:
   cameraDistance: 0.4

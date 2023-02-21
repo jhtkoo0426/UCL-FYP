@@ -197,7 +197,7 @@ class Panda(RobotBase):
         # see https://github.com/bulletphysics/bullet3/blob/master/examples/pybullet/gym/pybullet_robots/panda/panda_sim_grasp.py
         self.eef_id = 11
         self.arm_num_dofs = 7
-        self.arm_rest_poses = [0.98, 0.458, 0.31, -2.24, -0.30, 2.66, 2.32, 0.2, 0.02] 
+        self.arm_rest_poses = [0.98, 0.458, 0.31, -2.24, -0.30, 2.66, 2.32] 
         self.id = p.loadURDF('./src/urdf/panda.urdf', self.base_pos, self.base_ori,
                              useFixedBase=True, flags=p.URDF_ENABLE_CACHED_GRAPHICS_SHAPES)
         self.gripper_range = [0, 0.04]
@@ -205,7 +205,7 @@ class Panda(RobotBase):
         c = p.createConstraint(self.id,
                                9,
                                self.id,
-                               11,
+                               10,
                                jointType=p.JOINT_GEAR,
                                jointAxis=[1, 0, 0],
                                parentFramePosition=[0, 0, 0],
