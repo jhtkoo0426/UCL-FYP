@@ -50,7 +50,7 @@ def run_simulation():
     # digits.add_object(env.container.urdf_path, env.container.id, env.container.objectScale)
 
     while True:
-        obs, reward, done, info = env.step(env.read_debug_parameter(), 'end')
+        obs = env.step(env.read_debug_parameter(), 'end')
         env.digit_step()
         color, depth = digits.render()
         digits.updateGUI(color, depth)

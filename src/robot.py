@@ -159,7 +159,7 @@ class RobotBase(object):
             p.setJointMotorControl2(self.id, joint_id, p.POSITION_CONTROL, joint_poses[i],
                                     force=self.joints[joint_id].maxForce, maxVelocity=self.joints[joint_id].maxVelocity)
 
-    def move_ee_data_col(self, action, control_method, velocity_scale=1):
+    def manipulate_ee(self, action, control_method, velocity_scale=1):
         assert control_method in ('joint', 'end')
         if control_method == 'end':
             x, y, z, roll, pitch, yaw = action

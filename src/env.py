@@ -5,15 +5,11 @@ import numpy as np
 import pybullet as p
 import pybullet_data
 import tacto
-import cv2
 
 from utilities import Models, Camera
 from tqdm import tqdm
 from pointCloud import getPointCloud
 from thing import Thing
-from robot import RobotBase
-
-
 import matplotlib.pyplot as plt
 
 
@@ -34,21 +30,19 @@ class ClutteredPushGrasp:
         # Define Pybullet simulation environment
         # p.GUI for a simulation w/ GUI, p.DIRECT for a headless simulation
         self.physicsClient = p.connect(p.GUI if self.vis else p.DIRECT)
-
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
         p.setGravity(0, 0, -9.8)
         self.planeID = p.loadURDF("plane.urdf")
 
+        # Import the robot
         self.robot.load()
         self.robot.step_simulation = self.step_simulation
 
-        # Reset debug parameters
+        # Prepare parameters
         self.resetUserDebugParameters()
+        self.robot.load_digit_parm()        # Read the parameters.yaml file to load robot parameters
 
-        # Read the parameters.yaml file to load robot parameters
-        self.robot.load_digit_parm()
-
-        # Mount DIGIT tactile sensors to hand
+        # Mount DIGIT tactile sensors and cameras
         self.digits = tacto.Sensor(**self.robot.tacto_info, background = self.robot.bg)
         p.resetDebugVisualizerCamera(**self.robot.camera_info)
         self.digits.add_camera(self.robot.id, self.robot.link_ID)
@@ -56,18 +50,22 @@ class ClutteredPushGrasp:
         # Load the target object defined in the parameters.yaml file (or other objects later into the envrionment)
         self.container = Thing(self.robot.object_info["object_name"], self.robot.object_info["object_position"], self.robot.object_info["global_scaling"])
 
-        # Load the mug to the tacto digit sensor
+        # Load the specified object to the DIGIT tactile sensors
         self.digits.add_object(self.container.urdf_path, self.container.ID, self.container.objectScale)
 
+    # Hooks to pybullet.stepSimulation()
     def step_simulation(self):
-        """
-        Hook p.stepSimulation()
-        """
         p.stepSimulation()
         if self.vis:
             time.sleep(self.SIMULATION_STEP_DELAY)
             self.p_bar.update(1)
 
+    # Auxiliary function for step_simulation with predetermined step size
+    def fixed_step_sim(self, step_size):
+        for _ in range(step_size):
+            self.step_simulation()
+    
+    # Read the values of the sliders in the simulation GUI
     def read_debug_parameter(self):
         # read the value of task parameter
         x = p.readUserDebugParameter(self.xin)
@@ -80,19 +78,20 @@ class ClutteredPushGrasp:
 
         return x, y, z, roll, pitch, yaw, gripper_opening_length
 
-
+    # Initialize simulation GUI button values
     def initButtonVals(self):
-        # set the button value for point cloud
         self.pointCloudButtonVal = 2.0
         self.DigitTempSaveButtonVal = 2.0
         self.DigitSaveButtonVal = 2.0
         self.jointObsButtonVal = 2.0
         self.fetch6dButtonVal = 2.0
         self.dataCollectionButtonVal = 2.0
+        self.generativeModelButtonVal = 2.0
         self.openGripperButtonVal = 2.0
         self.closeGripperButtonVal = 2.0
         self.resetSimulationButtonVal = 2.0
 
+    # Functions to read values of buttons and carry out corresponding actions
     def readPointCloudButton(self):
         if p.readUserDebugParameter(self.pointCloudButton) >= self.pointCloudButtonVal:
             pcl = getPointCloud(target = self.robot.object_info["object_position"])
@@ -149,12 +148,17 @@ class ClutteredPushGrasp:
             print(f"End effector 6D pose: {action}")
         self.fetch6dButtonVal = p.readUserDebugParameter(self.fetch6dButton) + 1.0
     
+    def readGenerativeModelButton(self):
+        if p.readUserDebugParameter(self.generativeModelButton) >= self.generativeModelButtonVal:
+            print("Btn works")
+        self.generativeModelButtonVal = p.readUserDebugParameter(self.generativeModelButton) + 1.0
+    
     def readResetSimulationButton(self):
         if p.readUserDebugParameter(self.resetSimulationButton) >= self.resetSimulationButtonVal:
             self.reset_simulation()
         self.resetSimulationButtonVal = p.readUserDebugParameter(self.resetSimulationButton) + 1.0
     
-    # Auxiliary function for readDataCollectionButton to generate random poses
+    # Generate random poses by applying Gaussian noise to a base pose(s)
     def generateGaussianNoisePoses(self, target_poses_count, base_6d_poses, z_padding):
         """
         Generates random end effector poses following a Gaussian distribution.
@@ -169,7 +173,7 @@ class ClutteredPushGrasp:
 
         random_poses = []
 
-        for _ in range(target_poses_count):
+        while len(random_poses) < target_poses_count:
             # Add noise to 6d pose (x,y,z,r,p,y)
             # Block noise
             # x_noise = np.random.normal(0, 0.005, 1).item()
@@ -192,9 +196,6 @@ class ClutteredPushGrasp:
                 noisy_pose = np.array([x_noise, y_noise, z_noise, or_noise, op_noise, oy_noise])
                 noisy_pose = base_6d_pose + noisy_pose
                 random_poses.append(noisy_pose)
-            
-            if len(random_poses) == target_poses_count:
-                break
         
         return np.array(random_poses)
     
@@ -215,22 +216,17 @@ class ClutteredPushGrasp:
             return None, None
         return depth, color
     
-    # Auxiliary function for step_simulation with predetermined step size
-    def fixed_step_sim(self, step_size):
-        for _ in range(step_size):
-            self.step_simulation()
-    
-    # Auxiliary function to execute a grasp given an end effector pose
+    # Helper function to execute a grasp given an end effector pose
     def execute_pose(self, grasp_pose, velocity_scale, z_padding):
         # 1. Move arm to pose and prepare gripper
-        self.robot.move_ee_data_col(grasp_pose, 'end', velocity_scale)
+        self.robot.manipulate_ee(grasp_pose, 'end', velocity_scale)
         self.robot.open_gripper()
         self.fixed_step_sim(500)
 
         # 2. Lower the arm by z=2
         lower_sixd_pose = grasp_pose.copy()
         lower_sixd_pose[2] = lower_sixd_pose[2] - z_padding
-        self.robot.move_ee_data_col(lower_sixd_pose, 'end', velocity_scale)
+        self.robot.manipulate_ee(lower_sixd_pose, 'end', velocity_scale)
         self.fixed_step_sim(500)
 
         # 3. Close gripper to perform grasp
@@ -265,7 +261,7 @@ class ClutteredPushGrasp:
         # 6. Lift object for 5s to determine successful vs unsuccessful grasp
         upper_sixd_pose = grasp_pose.copy()
         upper_sixd_pose[2] += z_padding
-        self.robot.move_ee_data_col(upper_sixd_pose, 'end', velocity_scale)
+        self.robot.manipulate_ee(upper_sixd_pose, 'end', velocity_scale)
 
         # Record object z position to determine if it moved after a while
         grasped_object_z_pos = self.container.getPos()[2]
@@ -322,19 +318,16 @@ class ClutteredPushGrasp:
             # Execute generated grasps
             for i in range(len(random_poses)):
                 sixd_pose = np.array(random_poses[i])
-                print(f"Random pose {str(i+1)}: {sixd_pose}")
+                # print(f"Random pose {str(i+1)}: {sixd_pose}")
 
                 # Execute grasp to get tactile readings and outcome
                 color, depth, grasp_outcome = self.execute_pose(sixd_pose, VELOCITY_SCALE, Z_PADDING)
 
                 if grasp_outcome[0] == 1:
                     successes += 1
-                    print("SUCCESS")
                 else:
                     fails += 1
-                    print("FAIL")
                 print(f"Successes: {successes} | Fails: {fails}")
-                
 
                 # Sanity check to make sure the data is valid
                 depth, color = self.tactileSanityCheck(depth, color)
@@ -385,6 +378,12 @@ class ClutteredPushGrasp:
 
         self.dataCollectionButtonVal = p.readUserDebugParameter(self.dataCollectionButton) + 1.0
 
+    # Simple generative model approach
+    def readGenerativeModelButton(self):
+        if p.readUserDebugParameter(self.generativeModelButton) >= self.generativeModelButtonVal:
+            print("Executing generative model...")        
+        self.generativeModelButtonVal = p.readUserDebugParameter(self.generativeModelButton) + 1.0
+
     def step(self, action, control_method='joint'):
         """
         action: (x, y, z, roll, pitch, yaw, gripper_opening_length) for End Effector Position Control
@@ -392,7 +391,6 @@ class ClutteredPushGrasp:
         control_method:  'end' for end effector position control
                          'joint' for joint position control
         """
-        assert control_method in ('joint', 'end')
         self.robot.move_ee(action[:-1], control_method)
         self.robot.move_gripper(action[-1])
 
@@ -401,30 +399,22 @@ class ClutteredPushGrasp:
 
         # in the step simulation, read the point cloud
         self.readPointCloudButton()
-
         self.readResetSimulationButton()
         self.readJointObsButton(sixd)
         self.readFetch6dButton(action[:-1])
         self.readDataCollectionButton()
+        self.readGenerativeModelButton()
         self.readOpenGripperButton()
         self.readCloseGripperButton()
-        # in the step simulation, update the renderer of tacto sensor
 
-        for _ in range(120):  # Wait for a few steps
-            self.step_simulation()
-
-        reward, done, info = None, None, None
-        return self.get_observation(), reward, done, info
+        self.fixed_step_sim(step_size=120)
+        return self.get_observation()
 
     def digit_step(self):
         self.color, self.depth = self.digits.render()
         self.digits.updateGUI(self.color, self.depth)
-
-        # check whether the frame should be saved to a list
-        self.readDigitTempSaveButton()
-
-        # check whether the list of renderer frame should be saved locally
-        self.readDigitSaveButton()
+        self.readDigitTempSaveButton()      # Check whether the frame should be saved to a list
+        self.readDigitSaveButton()          # Check whether the list of renderer frame should be saved locally
         
 
     def update_reward(self):
@@ -471,8 +461,9 @@ class ClutteredPushGrasp:
         self.jointObsButton = p.addUserDebugParameter("Get joint coordinates", 1, 0, 1)
         self.fetch6dButton = p.addUserDebugParameter("Get end effector pose", 1, 0 ,1)
 
-        # Button for data collection
+        # Button for data collection and training approaches
         self.dataCollectionButton = p.addUserDebugParameter("Collect sensory data", 1, 0, 1)
+        self.generativeModelButton = p.addUserDebugParameter("Execute generative model", 1, 0, 1)
 
         # Gripper control
         self.openGripperButton = p.addUserDebugParameter("Open gripper", 1, 0, 1)
