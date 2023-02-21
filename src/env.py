@@ -219,6 +219,65 @@ class ClutteredPushGrasp:
     def fixed_step_sim(self, step_size):
         for _ in range(step_size):
             self.step_simulation()
+    
+    # Auxiliary function to execute a grasp given an end effector pose
+    def execute_pose(self, grasp_pose, velocity_scale, z_padding):
+        # 1. Move arm to pose and prepare gripper
+        self.robot.move_ee_data_col(grasp_pose, 'end', velocity_scale)
+        self.robot.open_gripper()
+        self.fixed_step_sim(500)
+
+        # 2. Lower the arm by z=2
+        lower_sixd_pose = grasp_pose.copy()
+        lower_sixd_pose[2] = lower_sixd_pose[2] - z_padding
+        self.robot.move_ee_data_col(lower_sixd_pose, 'end', velocity_scale)
+        self.fixed_step_sim(500)
+
+        # 3. Close gripper to perform grasp
+        self.robot.close_gripper()
+        self.fixed_step_sim(500)
+        
+        # 4. Update the DIGIT camera to collect color and depth of DIGIT sensor
+        self.digit_step()
+        self.fixed_step_sim(500)
+
+        # 5. Record tactile data
+        color = np.asarray(self.color)      # (2, 160, 120, 3)
+        depth = np.asarray(self.depth)      # (2, 160, 120)
+
+        # fig = plt.figure(figsize=(5,2))
+        # fig.add_subplot(1,4,1)
+        # plt.imshow(depth[0], cmap='gray')
+        # fig.add_subplot(1,4,2)
+        # plt.imshow(color[0])
+        # fig.add_subplot(1,4,3)
+        # plt.imshow(depth[1], cmap='gray')
+        # fig.add_subplot(1,4,4)
+        # plt.imshow(color[1])
+        # plt.savefig('test.png')
+
+        # color = np.concatenate(self.color, axis=1)                                                  # 1. Concatenate colors horizontally (axis=1)
+        # depth = np.concatenate([self.digits._depth_to_color(d) for d in self.depth], axis=1)        # 2. Convert depth to color
+        # color_n_depth = np.concatenate([color, depth], axis=0)                                      # 3. Concatenate the resulting 2 images vertically (axis=0)
+        # # tactile_data = np.array(color_n_depth).flatten()                                            # 4. Flatten image to put into dataset
+        # tactile_data = np.array(color_n_depth)
+
+        # 6. Lift object for 5s to determine successful vs unsuccessful grasp
+        upper_sixd_pose = grasp_pose.copy()
+        upper_sixd_pose[2] += z_padding
+        self.robot.move_ee_data_col(upper_sixd_pose, 'end', velocity_scale)
+
+        # Record object z position to determine if it moved after a while
+        grasped_object_z_pos = self.container.getPos()[2]
+        self.fixed_step_sim(1500)
+
+        # Record success/failure
+        final_object_z_pos = self.container.getPos()[2]
+
+        # Determine if the grabbed object stays in the same z position AND the z position is not 0 (as defined in container.getInitPos())
+        delta_z = final_object_z_pos - grasped_object_z_pos
+        grasp_outcome = np.ones(shape=(1,)) if delta_z > z_padding and final_object_z_pos > 0 else np.zeros(shape=(1,))
+        return color, depth, grasp_outcome
 
     # Run data collection code via button onclick
     def readDataCollectionButton(self):
@@ -250,7 +309,7 @@ class ClutteredPushGrasp:
 
         # Parameters of robot setup (can be changed)
         Z_PADDING = abs(0.2)        # Prevents the robot from colliding with the object when moving to it
-        VELOCITY_SCALE = 0.15       # Scales the robot movement speed\
+        VELOCITY_SCALE = 0.15       # Scales the robot movement speed
 
         successes = 0
         fails = 0
@@ -262,71 +321,20 @@ class ClutteredPushGrasp:
 
             # Execute generated grasps
             for i in range(len(random_poses)):
-                sixd_pose = tuple(random_poses[i])
+                sixd_pose = np.array(random_poses[i])
                 print(f"Random pose {str(i+1)}: {sixd_pose}")
 
-                # 1. Move arm to pose and prepare gripper
-                self.robot.move_ee_data_col(sixd_pose, 'end', VELOCITY_SCALE)
-                self.robot.open_gripper()
-                self.fixed_step_sim(500)
+                # Execute grasp to get tactile readings and outcome
+                color, depth, grasp_outcome = self.execute_pose(sixd_pose, VELOCITY_SCALE, Z_PADDING)
 
-                # 2. Lower the arm by z=2
-                lower_sixd_pose = random_poses[i].copy()
-                lower_sixd_pose[2] = lower_sixd_pose[2] - Z_PADDING
-                self.robot.move_ee_data_col(lower_sixd_pose, 'end', VELOCITY_SCALE)
-                self.fixed_step_sim(500)
-
-                # 3. Close gripper to perform grasp
-                self.robot.close_gripper()
-                self.fixed_step_sim(500)
-                
-                # 4. Update the DIGIT camera to collect color and depth of DIGIT sensor
-                self.digit_step()
-                self.fixed_step_sim(500)
-
-                # 5. Record tactile data
-                color = np.asarray(self.color)      # (2, 160, 120, 3)
-                depth = np.asarray(self.depth)      # (2, 160, 120)
-
-                # fig = plt.figure(figsize=(5,2))
-                # fig.add_subplot(1,4,1)
-                # plt.imshow(depth[0], cmap='gray')
-                # fig.add_subplot(1,4,2)
-                # plt.imshow(color[0])
-                # fig.add_subplot(1,4,3)
-                # plt.imshow(depth[1], cmap='gray')
-                # fig.add_subplot(1,4,4)
-                # plt.imshow(color[1])
-                # plt.savefig('test.png')
-
-                # color = np.concatenate(self.color, axis=1)                                                  # 1. Concatenate colors horizontally (axis=1)
-                # depth = np.concatenate([self.digits._depth_to_color(d) for d in self.depth], axis=1)        # 2. Convert depth to color
-                # color_n_depth = np.concatenate([color, depth], axis=0)                                      # 3. Concatenate the resulting 2 images vertically (axis=0)
-                # # tactile_data = np.array(color_n_depth).flatten()                                            # 4. Flatten image to put into dataset
-                # tactile_data = np.array(color_n_depth)
-
-                # 6. Lift object for 5s to determine successful vs unsuccessful grasp
-                upper_sixd_pose = random_poses[i].copy()
-                upper_sixd_pose[2] += Z_PADDING
-                self.robot.move_ee_data_col(upper_sixd_pose, 'end', VELOCITY_SCALE)
-
-                # Record object z position to determine if it moved after a while
-                grasped_object_z_pos = self.container.getPos()[2]
-                self.fixed_step_sim(1500)
-
-                # Record success/failure
-                final_object_z_pos = self.container.getPos()[2]
-
-                # Determine if the grabbed object stays in the same z position AND the z position is not 0 (as defined in container.getInitPos())
-                delta_z = final_object_z_pos - grasped_object_z_pos
-                if delta_z > Z_PADDING and final_object_z_pos > 0:
+                if grasp_outcome[0] == 1:
                     successes += 1
                     print("SUCCESS")
                 else:
                     fails += 1
                     print("FAIL")
                 print(f"Successes: {successes} | Fails: {fails}")
-                grasp_outcome = np.ones(shape=(1,)) if delta_z > Z_PADDING and final_object_z_pos > 0 else np.zeros(shape=(1,))
+                
 
                 # Sanity check to make sure the data is valid
                 depth, color = self.tactileSanityCheck(depth, color)
