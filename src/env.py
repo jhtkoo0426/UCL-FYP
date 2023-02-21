@@ -173,30 +173,29 @@ class ClutteredPushGrasp:
 
         random_poses = []
 
-        while len(random_poses) < target_poses_count:
+        while len(random_poses) < target_poses_count // len(base_6d_poses):
             # Add noise to 6d pose (x,y,z,r,p,y)
             # Block noise
-            # x_noise = np.random.normal(0, 0.005, 1).item()
-            # y_noise = np.random.normal(0, 0.005, 1).item()
-            # z_noise = np.random.normal(0, 0.01, 1).item() + z_padding
-            # or_noise = 0
-            # op_noise = np.random.normal(0, 0.1, 1).item()
-            # oy_noise = np.random.normal(0, 0.1, 1).item()
+            x_noise = 0
+            y_noise = np.random.normal(0, 0.01, 1).item()
+            z_noise = np.random.normal(0, 0.01, 1).item() + z_padding
+            or_noise = 0
+            op_noise = 0
+            oy_noise = 0
 
             # Bottle noise
-            x_noise = np.random.normal(0, 0.01, 1).item()
-            y_noise = np.random.normal(0, 0.01, 1).item()
-            z_noise = np.random.normal(0, 0.1, 1).item() + z_padding
-            or_noise = 0
-            op_noise = np.random.normal(0, 0.07, 1).item()
-            oy_noise = np.random.normal(0, 0.07, 1).item()
+            # x_noise = np.random.normal(0, 0.01, 1).item()
+            # y_noise = np.random.normal(0, 0.01, 1).item()
+            # z_noise = np.random.normal(0, 0.1, 1).item() + z_padding
+            # or_noise = 0
+            # op_noise = np.random.normal(0, 0.07, 1).item()
+            # oy_noise = np.random.normal(0, 0.07, 1).item()
             
             # Apply the Gaussian noise for each base pose
             for base_6d_pose in base_6d_poses:
                 noisy_pose = np.array([x_noise, y_noise, z_noise, or_noise, op_noise, oy_noise])
                 noisy_pose = base_6d_pose + noisy_pose
                 random_poses.append(noisy_pose)
-        
         return np.array(random_poses)
     
     # Auxiliary function as sanity check for collecting tactile readings
@@ -208,8 +207,6 @@ class ClutteredPushGrasp:
         @param depth: (np.array) a pair of depth tactile readings from the tactile sensor; Shape: (2, 160, 120)
         @param color: (np.array) a pair of color tactile readings from the tactile sensor; Shape: (2, 160 , 120, 3)
         """
-
-        print(len(np.unique(depth[0], return_counts=True)[0]) == 1, len(np.unique(depth[1], return_counts=True)[0]) == 1, len(np.unique(color[0], return_counts=True)[0]) == 1, len(np.unique(color[1], return_counts=True)[0]) == 1)
 
         if len(np.unique(depth[0], return_counts=True)[0]) == 1 or len(np.unique(depth[1], return_counts=True)[0]) == 1 or len(np.unique(color[0], return_counts=True)[0]) == 1 or len(np.unique(color[1], return_counts=True)[0]) == 1:
             print("Found invalid depth and color readings. Skipping this set of readings...")
@@ -241,38 +238,21 @@ class ClutteredPushGrasp:
         color = np.asarray(self.color)      # (2, 160, 120, 3)
         depth = np.asarray(self.depth)      # (2, 160, 120)
 
-        # fig = plt.figure(figsize=(5,2))
-        # fig.add_subplot(1,4,1)
-        # plt.imshow(depth[0], cmap='gray')
-        # fig.add_subplot(1,4,2)
-        # plt.imshow(color[0])
-        # fig.add_subplot(1,4,3)
-        # plt.imshow(depth[1], cmap='gray')
-        # fig.add_subplot(1,4,4)
-        # plt.imshow(color[1])
-        # plt.savefig('test.png')
-
-        # color = np.concatenate(self.color, axis=1)                                                  # 1. Concatenate colors horizontally (axis=1)
-        # depth = np.concatenate([self.digits._depth_to_color(d) for d in self.depth], axis=1)        # 2. Convert depth to color
-        # color_n_depth = np.concatenate([color, depth], axis=0)                                      # 3. Concatenate the resulting 2 images vertically (axis=0)
-        # # tactile_data = np.array(color_n_depth).flatten()                                            # 4. Flatten image to put into dataset
-        # tactile_data = np.array(color_n_depth)
-
         # 6. Lift object for 5s to determine successful vs unsuccessful grasp
         upper_sixd_pose = grasp_pose.copy()
         upper_sixd_pose[2] += z_padding
         self.robot.manipulate_ee(upper_sixd_pose, 'end', velocity_scale)
 
-        # Record object z position to determine if it moved after a while
+        # 7. Record object z position to determine if it moved after a while
         grasped_object_z_pos = self.container.getPos()[2]
         self.fixed_step_sim(1500)
 
-        # Record success/failure
+        # 8. Record success/failure
         final_object_z_pos = self.container.getPos()[2]
 
-        # Determine if the grabbed object stays in the same z position AND the z position is not 0 (as defined in container.getInitPos())
+        # 9. Determine if the grabbed object stays in the same z position AND the z position is not 0 (as defined in container.getInitPos())
         delta_z = final_object_z_pos - grasped_object_z_pos
-        grasp_outcome = np.ones(shape=(1,)) if delta_z > z_padding and final_object_z_pos > 0 else np.zeros(shape=(1,))
+        grasp_outcome = True if delta_z > z_padding and final_object_z_pos > 0 else False
         return color, depth, grasp_outcome
 
     # Run data collection code via button onclick
@@ -288,13 +268,11 @@ class ClutteredPushGrasp:
         """
         
         # Block positions
-        # positions = np.array([[0.0, 0.0, 0.1725230525032501, 0.0, 1.570796251296997, 1.5707963705062866],
-        #                       [0.0, -0.05187368392944336, 0.1984210538864136, 0.0, 1.3221051692962646, 1.5707963705062866],
-        #                       [-0.007073685526847839, 0.028294742107391357, 0.16842105984687805, 0.0, 1.7187368869781494, 1.5707963705062866]])
+        positions = np.array([[0.0, 0.0, 0.18, 0.0, 1.570796251296997, 1.5707963705062866]])
         # Bottle positions
-        positions = np.array([[0.1296842396259308, 0.014147371053695679, 0.13684210181236267, 0.09915781021118164, 1.520420789718628, 0.5952490568161011],
-                              [0.10374736785888672, -0.01886315643787384, 0.1315789520740509, 0.0, 1.553473711013794, 0.8928736448287964],
-                              [0.16033685207366943, 0.06602105498313904, 0.057894736528396606, 0.0, 1.570796251296997, 0.5952490568161011]])
+        # positions = np.array([[0.1296842396259308, 0.014147371053695679, 0.13684210181236267, 0.09915781021118164, 1.520420789718628, 0.5952490568161011],
+        #                       [0.10374736785888672, -0.01886315643787384, 0.1315789520740509, 0.0, 1.553473711013794, 0.8928736448287964],
+        #                       [0.16033685207366943, 0.06602105498313904, 0.057894736528396606, 0.0, 1.570796251296997, 0.5952490568161011]])
         random_poses_count = 400
 
         # Separate data arrays for tactile and visual data
@@ -318,16 +296,10 @@ class ClutteredPushGrasp:
             # Execute generated grasps
             for i in range(len(random_poses)):
                 sixd_pose = np.array(random_poses[i])
-                # print(f"Random pose {str(i+1)}: {sixd_pose}")
+                print(f"Random pose {str(i+1)}: {sixd_pose}")
 
                 # Execute grasp to get tactile readings and outcome
                 color, depth, grasp_outcome = self.execute_pose(sixd_pose, VELOCITY_SCALE, Z_PADDING)
-
-                if grasp_outcome[0] == 1:
-                    successes += 1
-                else:
-                    fails += 1
-                print(f"Successes: {successes} | Fails: {fails}")
 
                 # Sanity check to make sure the data is valid
                 depth, color = self.tactileSanityCheck(depth, color)
@@ -339,7 +311,14 @@ class ClutteredPushGrasp:
                     valid_random_poses = np.append(valid_random_poses, [random_poses[i]], axis=0)
                     depth_dataset = np.append(depth_dataset, [depth], axis=0)
                     color_dataset = np.append(color_dataset, [color], axis=0)
-                    grasp_outcomes = np.append(grasp_outcomes, grasp_outcome, axis=0)
+
+                    if grasp_outcome:
+                        successes += 1
+                        grasp_outcomes = np.append(grasp_outcomes, np.ones(shape=(1,)), axis=0)
+                    else:
+                        fails += 1
+                        grasp_outcomes = np.append(grasp_outcomes, np.zeros(shape=(1,)), axis=0)
+                    print(f"Successes: {successes} | Fails: {fails}")
                     print(f"Saved data from pose {str(i)} to dataset.")
 
                 # 7. Reset robot and arm only
