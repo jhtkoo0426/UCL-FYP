@@ -150,7 +150,7 @@ class RobotBase(object):
             orn = p.getQuaternionFromEuler((roll, pitch, yaw))
             joint_poses = p.calculateInverseKinematics(self.id, self.eef_id, pos, orn,
                                                        self.arm_lower_limits, self.arm_upper_limits, self.arm_joint_ranges, self.arm_rest_poses,
-                                                       maxNumIterations=20)
+                                                       maxNumIterations=100)
         elif control_method == 'joint':
             assert len(action) == self.arm_num_dofs
             joint_poses = action
@@ -167,7 +167,7 @@ class RobotBase(object):
             orn = p.getQuaternionFromEuler((roll, pitch, yaw))
             joint_poses = p.calculateInverseKinematics(self.id, self.eef_id, pos, orn,
                                                        self.arm_lower_limits, self.arm_upper_limits, self.arm_joint_ranges, self.arm_rest_poses,
-                                                       maxNumIterations=20)
+                                                       maxNumIterations=100)
         elif control_method == 'joint':
             assert len(action) == self.arm_num_dofs
             joint_poses = action
