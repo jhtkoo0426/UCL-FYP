@@ -255,6 +255,15 @@ class ClutteredPushGrasp:
         grasp_outcome = True if delta_z > z_padding and final_object_z_pos > 0 else False
         return color, depth, grasp_outcome
 
+    def save_dataset(self, dataset_filename, dataset):
+        CURR_DIR = os.getcwd()
+        TARGET_DIR = "./src/baseline_model"
+
+        dataset_path = os.path.join(CURR_DIR, TARGET_DIR, dataset_filename)
+        np.save(dataset_path, dataset)
+        print(f"Dataset saved to {dataset_path}")
+
+
     # Run data collection code via button onclick
     def readDataCollectionButton(self):
         """
@@ -267,33 +276,30 @@ class ClutteredPushGrasp:
         model.
         """
         
-        # Block positions
+        # Base hand poses for different objects will vary as a result of manual trials on these objects.
+        # Block base hand poses
         positions = np.array([[0.0, 0.0, 0.18, 0.0, 1.570796251296997, 1.5707963705062866]])
-        # Bottle positions
+
+        # Bottle base hand poses
         # positions = np.array([[0.1296842396259308, 0.014147371053695679, 0.13684210181236267, 0.09915781021118164, 1.520420789718628, 0.5952490568161011],
         #                       [0.10374736785888672, -0.01886315643787384, 0.1315789520740509, 0.0, 1.553473711013794, 0.8928736448287964],
         #                       [0.16033685207366943, 0.06602105498313904, 0.057894736528396606, 0.0, 1.570796251296997, 0.5952490568161011]])
         random_poses_count = 400
 
         # Separate data arrays for tactile and visual data
-        valid_random_poses = np.empty((0, 6))
-        depth_dataset = np.empty((0, 2, 160, 120))       # N trials x [Tactile data (depth) 160x120]
-        color_dataset = np.empty((0, 2, 160, 120, 3))    # N trials x [Tactile data (color) 160x120x3]
-        grasp_outcomes = np.empty((0))                   # N trials
+        valid_random_poses = np.empty((0, 6))               # N trials x 6d pose
+        depth_dataset = np.empty((0, 2, 160, 120))          # N trials x [Tactile data (depth) 160x120]
+        color_dataset = np.empty((0, 2, 160, 120, 3))       # N trials x [Tactile data (color) 160x120x3]
+        grasp_outcomes = np.empty((0))                      # N trials
 
         # Parameters of robot setup (can be changed)
         Z_PADDING = abs(0.2)        # Prevents the robot from colliding with the object when moving to it
-        VELOCITY_SCALE = 0.15       # Scales the robot movement speed
-
-        successes = 0
-        fails = 0
+        VELOCITY_SCALE = 0.15       # Scale up/down the robot movement speed
 
         if p.readUserDebugParameter(self.dataCollectionButton) >= self.dataCollectionButtonVal:
-            # Generate random poses using Gaussian noise
             random_poses = self.generateGaussianNoisePoses(random_poses_count, positions, Z_PADDING)
-            print(f"Generated random poses of shape {random_poses.shape}")
 
-            # Execute generated grasps
+            # Execute all generated grasps
             for i in range(len(random_poses)):
                 sixd_pose = np.array(random_poses[i])
                 print(f"Random pose {str(i+1)}: {sixd_pose}")
@@ -301,59 +307,31 @@ class ClutteredPushGrasp:
                 # Execute grasp to get tactile readings and outcome
                 color, depth, grasp_outcome = self.execute_pose(sixd_pose, VELOCITY_SCALE, Z_PADDING)
 
-                # Sanity check to make sure the data is valid
+                # Make sure the recorded tactile data is valid
                 depth, color = self.tactileSanityCheck(depth, color)
 
+                # Only record the grasp data if the tactile data is valid
                 if depth is None or color is None:
                     print(f"Not saving pose {str(i)} data to dataset.")
                 else:
-                    # Save to dataset
+                    # Save recorded data to corresponding datasets
                     valid_random_poses = np.append(valid_random_poses, [random_poses[i]], axis=0)
                     depth_dataset = np.append(depth_dataset, [depth], axis=0)
                     color_dataset = np.append(color_dataset, [color], axis=0)
-
-                    if grasp_outcome:
-                        successes += 1
-                        grasp_outcomes = np.append(grasp_outcomes, np.ones(shape=(1,)), axis=0)
-                    else:
-                        fails += 1
-                        grasp_outcomes = np.append(grasp_outcomes, np.zeros(shape=(1,)), axis=0)
-                    print(f"Successes: {successes} | Fails: {fails}")
-                    print(f"Saved data from pose {str(i)} to dataset.")
+                    grasp_outcomes = np.append(grasp_outcomes, np.ones(shape=(1,)) if grasp_outcome else np.zeros(shape=(1,)), axis=0)
+                    
+                    print(f"Successes: {(grasp_outcomes == 1).sum()} | Fails: {(grasp_outcomes == 0).sum()}")
 
                 # 7. Reset robot and arm only
                 self.robot.reset()
                 self.container.resetObject()
                 self.fixed_step_sim(500)
             
-            # Save generated data to .npy files
-            CURR_DIR = os.getcwd()
-            BASELINE_DIR = "./src/baseline_model"
-
-            # Save depth data to npy file
-            depth_ds_filename = "depth_ds.npy"
-            depth_ds_path = os.path.join(CURR_DIR, BASELINE_DIR, depth_ds_filename)
-            np.save(depth_ds_path, depth_dataset)
-            print(f"Training data saved to {depth_ds_path}")
-
-            # Save color data to npy file
-            color_ds_filename = "color_ds.npy"
-            color_ds_path = os.path.join(CURR_DIR, BASELINE_DIR, color_ds_filename)
-            np.save(color_ds_path, color_dataset)
-            print(f"Training data saved to {color_ds_path}")
-
-            # Save end effector poses to npy file
-            poses_ds_filename = "poses_ds.npy"
-            poses_ds_path = os.path.join(CURR_DIR, BASELINE_DIR, poses_ds_filename)
-            np.save(poses_ds_path, valid_random_poses)
-            print(f"End effector poses saved to {poses_ds_path}")
-
-            # Save grasp outcome to npy file
-            grasp_ds_filename = "grasp_outcomes.npy"
-            grasp_ds_path = os.path.join(CURR_DIR, BASELINE_DIR, grasp_ds_filename)
-            np.save(grasp_ds_path, grasp_outcomes)
-            print(f"Grasp outcomes saved to {grasp_ds_path}")
-
+            # Save collected data into .npy files for future loading
+            self.save_dataset("depth_ds.npy", depth_dataset)
+            self.save_dataset("color_ds.npy", color_dataset)
+            self.save_dataset("poses_ds.npy", valid_random_poses)
+            self.save_dataset("grasp_outcomes.npy", grasp_outcomes)
 
         self.dataCollectionButtonVal = p.readUserDebugParameter(self.dataCollectionButton) + 1.0
 
