@@ -220,7 +220,7 @@ class ClutteredPushGrasp:
             
             # Apply the Gaussian noise for each base pose
             for base_6d_pose in base_6d_poses:
-                noisy_pose = np.array([sixd_noise])
+                noisy_pose = np.array(sixd_noise)
                 noisy_pose = base_6d_pose + noisy_pose
                 random_poses.append(noisy_pose)
         return np.array(random_poses)
