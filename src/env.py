@@ -91,7 +91,7 @@ class ClutteredPushGrasp:
         self.closeGripperButtonVal = 2.0
         self.resetSimulationButtonVal = 2.0
 
-    # Functions to read values of buttons and carry out corresponding actions
+    # READ USER DEBUG PARAMETERS (BUTTONS IN GUI) AND EXECUTE CORRRESPONDING ACTIONS
     def readPointCloudButton(self):
         if p.readUserDebugParameter(self.pointCloudButton) >= self.pointCloudButtonVal:
             pcl = getPointCloud(target = self.robot.object_info["object_position"])
@@ -158,6 +158,38 @@ class ClutteredPushGrasp:
             self.reset_simulation()
         self.resetSimulationButtonVal = p.readUserDebugParameter(self.resetSimulationButton) + 1.0
     
+    def readDataCollectionButton(self):
+        """
+        This function executes a data collection loop by generating N gaussian-distributed end effector poses,
+        then collecting the corresponding DIGIT tactile sensor readings on each finger of the gripper (as the 
+        tactile data) as well as the end effector poses (as the visual data).
+
+        The collected data is then used for stability classification in which the project aims to find the
+        best representation of this data. This serves as the basis for further work on learning a generative
+        model.
+        """
+        
+        # Base hand poses for different objects will vary as a result of manual trials on these objects.
+        # Block base hand poses
+        positions = np.array([[0.0, 0.0, 0.18, 0.0, 1.570796251296997, 1.5707963705062866]])
+
+        # Bottle base hand poses
+        # positions = np.array([[0.1296842396259308, 0.014147371053695679, 0.13684210181236267, 0.09915781021118164, 1.520420789718628, 0.5952490568161011],
+        #                       [0.10374736785888672, -0.01886315643787384, 0.1315789520740509, 0.0, 1.553473711013794, 0.8928736448287964],
+        #                       [0.16033685207366943, 0.06602105498313904, 0.057894736528396606, 0.0, 1.570796251296997, 0.5952490568161011]])
+        random_poses_count = 2500
+
+        if p.readUserDebugParameter(self.dataCollectionButton) >= self.dataCollectionButtonVal:
+            self.collect_data(positions, random_poses_count)
+        self.dataCollectionButtonVal = p.readUserDebugParameter(self.dataCollectionButton) + 1.0
+
+    def readGenerativeModelButton(self):
+        if p.readUserDebugParameter(self.generativeModelButton) >= self.generativeModelButtonVal:
+            self.learning_framework()
+        self.generativeModelButtonVal = p.readUserDebugParameter(self.generativeModelButton) + 1.0
+
+    
+    # HELPER FUNCTIONS FOR DATA COLLECTION PIPELINE
     # Generate random poses by applying Gaussian noise to a base pose(s)
     def generateGaussianNoisePoses(self, target_poses_count, base_6d_poses, z_padding):
         """
@@ -176,29 +208,23 @@ class ClutteredPushGrasp:
         while len(random_poses) < target_poses_count // len(base_6d_poses):
             # Add noise to 6d pose (x,y,z,r,p,y)
             # Block noise
-            x_noise = 0
-            y_noise = np.random.normal(0, 0.01, 1).item()
-            z_noise = np.random.normal(0, 0.01, 1).item() + z_padding
-            or_noise = 0
-            op_noise = 0
-            oy_noise = 0
+            # sixd_noise = [0, np.random.normal(0,0.01,1).item(), np.random.normal(0,0.01,1).item()+z_padding]
 
             # Bottle noise
-            # x_noise = np.random.normal(0, 0.01, 1).item()
-            # y_noise = np.random.normal(0, 0.01, 1).item()
-            # z_noise = np.random.normal(0, 0.1, 1).item() + z_padding
-            # or_noise = 0
-            # op_noise = np.random.normal(0, 0.07, 1).item()
-            # oy_noise = np.random.normal(0, 0.07, 1).item()
+            # sixd_noise = [np.random.normal(0, 0.01, 1).item(), np.random.normal(0, 0.01, 1).item(), np.random.normal(0, 0.01, 1).item()+z_padding,
+            #               0, np.random.normal(0, 0.05, 1).item(), np.random.normal(0, 0.05, 1).item()]
+
+            # Mug noise
+            sixd_noise = [np.random.normal(0, 0.005, 1).item(), np.random.normal(0, 0.005, 1).item(), np.random.normal(0, 0.01, 1).item()+z_padding,
+                          0, np.random.normal(0, 0.01, 1).item(), np.random.normal(0, 0.01, 1).item()]
             
             # Apply the Gaussian noise for each base pose
             for base_6d_pose in base_6d_poses:
-                noisy_pose = np.array([x_noise, y_noise, z_noise, or_noise, op_noise, oy_noise])
+                noisy_pose = np.array(sixd_noise)
                 noisy_pose = base_6d_pose + noisy_pose
                 random_poses.append(noisy_pose)
         return np.array(random_poses)
     
-    # Auxiliary function as sanity check for collecting tactile readings
     def tactileSanityCheck(self, depth, color):
         """
         Checks if the collected tactile data actually represent any grasps. Discards the data if the sensor
@@ -213,8 +239,11 @@ class ClutteredPushGrasp:
             return None, None
         return depth, color
     
-    # Helper function to execute a grasp given an end effector pose
     def execute_pose(self, grasp_pose, velocity_scale, z_padding):
+        """
+        Executes a grasp given a specific hand pose
+        """
+
         # 1. Move arm to pose and prepare gripper
         self.robot.manipulate_ee(grasp_pose, 'end', velocity_scale)
         self.robot.open_gripper()
@@ -255,17 +284,7 @@ class ClutteredPushGrasp:
         grasp_outcome = True if delta_z > z_padding and final_object_z_pos > 0 else False
         return color, depth, grasp_outcome
 
-    def save_dataset(self, dataset_filename, dataset):
-        CURR_DIR = os.getcwd()
-        TARGET_DIR = "./src/baseline_model"
-
-        dataset_path = os.path.join(CURR_DIR, TARGET_DIR, dataset_filename)
-        np.save(dataset_path, dataset)
-        print(f"Dataset saved to {dataset_path}")
-
-
-    # Run data collection code via button onclick
-    def readDataCollectionButton(self):
+    def collect_data(self, positions, random_poses_count):
         """
         This function executes a data collection loop by generating N gaussian-distributed end effector poses,
         then collecting the corresponding DIGIT tactile sensor readings on each finger of the gripper (as the 
@@ -275,16 +294,6 @@ class ClutteredPushGrasp:
         best representation of this data. This serves as the basis for further work on learning a generative
         model.
         """
-        
-        # Base hand poses for different objects will vary as a result of manual trials on these objects.
-        # Block base hand poses
-        positions = np.array([[0.0, 0.0, 0.18, 0.0, 1.570796251296997, 1.5707963705062866]])
-
-        # Bottle base hand poses
-        # positions = np.array([[0.1296842396259308, 0.014147371053695679, 0.13684210181236267, 0.09915781021118164, 1.520420789718628, 0.5952490568161011],
-        #                       [0.10374736785888672, -0.01886315643787384, 0.1315789520740509, 0.0, 1.553473711013794, 0.8928736448287964],
-        #                       [0.16033685207366943, 0.06602105498313904, 0.057894736528396606, 0.0, 1.570796251296997, 0.5952490568161011]])
-        random_poses_count = 400
 
         # Separate data arrays for tactile and visual data
         valid_random_poses = np.empty((0, 6))               # N trials x 6d pose
@@ -296,51 +305,99 @@ class ClutteredPushGrasp:
         Z_PADDING = abs(0.2)        # Prevents the robot from colliding with the object when moving to it
         VELOCITY_SCALE = 0.15       # Scale up/down the robot movement speed
 
-        if p.readUserDebugParameter(self.dataCollectionButton) >= self.dataCollectionButtonVal:
-            random_poses = self.generateGaussianNoisePoses(random_poses_count, positions, Z_PADDING)
+        random_poses = self.generateGaussianNoisePoses(random_poses_count, positions, Z_PADDING)
 
-            # Execute all generated grasps
-            for i in range(len(random_poses)):
-                sixd_pose = np.array(random_poses[i])
-                print(f"Random pose {str(i+1)}: {sixd_pose}")
+        # Execute all generated grasps
+        for i in range(len(random_poses)):
+            sixd_pose = np.array(random_poses[i])
+            print(f"Random pose {str(i+1)}: {sixd_pose}")
 
-                # Execute grasp to get tactile readings and outcome
-                color, depth, grasp_outcome = self.execute_pose(sixd_pose, VELOCITY_SCALE, Z_PADDING)
+            # Execute grasp to get tactile readings and outcome
+            color, depth, grasp_outcome = self.execute_pose(sixd_pose, VELOCITY_SCALE, Z_PADDING)
 
-                # Make sure the recorded tactile data is valid
-                depth, color = self.tactileSanityCheck(depth, color)
+            # Make sure the recorded tactile data is valid
+            depth, color = self.tactileSanityCheck(depth, color)
 
-                # Only record the grasp data if the tactile data is valid
-                if depth is None or color is None:
-                    print(f"Not saving pose {str(i)} data to dataset.")
-                else:
-                    # Save recorded data to corresponding datasets
-                    valid_random_poses = np.append(valid_random_poses, [random_poses[i]], axis=0)
-                    depth_dataset = np.append(depth_dataset, [depth], axis=0)
-                    color_dataset = np.append(color_dataset, [color], axis=0)
-                    grasp_outcomes = np.append(grasp_outcomes, np.ones(shape=(1,)) if grasp_outcome else np.zeros(shape=(1,)), axis=0)
-                    
-                    print(f"Successes: {(grasp_outcomes == 1).sum()} | Fails: {(grasp_outcomes == 0).sum()}")
+            # Only record the grasp data if the tactile data is valid
+            if depth is None or color is None:
+                print(f"Not saving pose {str(i)} data to dataset.")
+            else:
+                # Save recorded data to corresponding datasets
+                valid_random_poses = np.append(valid_random_poses, [random_poses[i]], axis=0)
+                depth_dataset = np.append(depth_dataset, [depth], axis=0)
+                color_dataset = np.append(color_dataset, [color], axis=0)
+                grasp_outcomes = np.append(grasp_outcomes, np.ones(shape=(1,)) if grasp_outcome else np.zeros(shape=(1,)), axis=0)
+                
+                print(f"Successes: {(grasp_outcomes == 1).sum()} | Fails: {(grasp_outcomes == 0).sum()}")
 
-                # 7. Reset robot and arm only
-                self.robot.reset()
-                self.container.resetObject()
-                self.fixed_step_sim(500)
-            
-            # Save collected data into .npy files for future loading
-            self.save_dataset("depth_ds.npy", depth_dataset)
-            self.save_dataset("color_ds.npy", color_dataset)
-            self.save_dataset("poses_ds.npy", valid_random_poses)
-            self.save_dataset("grasp_outcomes.npy", grasp_outcomes)
+            # 7. Reset robot and arm only
+            self.robot.reset()
+            self.container.resetObject()
+            self.fixed_step_sim(500)
+        
+        # Save collected data into .npy files for future loading
+        self.save_dataset("depth_ds.npy", depth_dataset)
+        self.save_dataset("color_ds.npy", color_dataset)
+        self.save_dataset("poses_ds.npy", valid_random_poses)
+        self.save_dataset("grasp_outcomes.npy", grasp_outcomes)
 
-        self.dataCollectionButtonVal = p.readUserDebugParameter(self.dataCollectionButton) + 1.0
+    def save_dataset(self, dataset_filename, dataset):
+        CURR_DIR = os.getcwd()
+        TARGET_DIR = "./src/baseline_model"
 
-    # Simple generative model approach
-    def readGenerativeModelButton(self):
-        if p.readUserDebugParameter(self.generativeModelButton) >= self.generativeModelButtonVal:
-            print("Executing generative model...")        
-        self.generativeModelButtonVal = p.readUserDebugParameter(self.generativeModelButton) + 1.0
+        dataset_path = os.path.join(CURR_DIR, TARGET_DIR, dataset_filename)
+        np.save(dataset_path, dataset)
+        print(f"Dataset saved to {dataset_path}")
 
+
+    # HELPER FUNCTIONS FOR GENERATIVE MODEL
+    def getRigidBodyDimensions(self, body_id):
+        aabb_min, aabb_max = p.getAABB(body_id)
+        width = aabb_max[0] - aabb_min[0]
+        height = aabb_max[1] - aabb_min[1]
+        depth = aabb_max[2] - aabb_min[2]
+        return (width, height, depth)
+    
+    # Fetch the radius of a rigid body if it is p.GEOM_SPHERE or p.GEOM_CAPSULE
+    def getRigidBodyRadius(self, body_id):
+        obj_shape = p.getCollisionShapeData(body_id, -1)
+        radius = None
+
+        if obj_shape[0][1] == p.GEOM_SPHERE:
+            radius = obj_shape[0][3][0]
+        return radius if not None else None
+
+    # Fetch the convexity of a rigid body
+    # The 'convex' field contains a value between 0 and 1 that represents the convexity
+    # of the shape, where 0 => perfectly convex and 1 => highly non-convex shape
+    def getRigidBodyConvexity(self, body_id):
+        # obj_shape = p.getCollisionShapeData(body_id, -1)
+        # print(f"Object shape: {obj_shape}")
+        # return obj_shape[0][2]['convex']
+        return None
+
+    # Calculate the curvature of a rigid body using the principal curvature estimation algorithm
+    # This function only works for meshes that include a .obj file.
+    def getRigidBodyCurvature(self, body_id):
+        mesh_data = p.getMeshData(body_id)
+        print(f"Object mesh data: {mesh_data}")
+        
+        # Convert the mesh data to a numpy array
+        vertices, indices = np.array(mesh_data[0]), np.array(mesh_data[1])
+        print(f"The object has {vertices} vertices.")
+        return None
+
+    def learning_framework(self):
+        obj_dims = self.getRigidBodyDimensions(self.container.ID)
+        obj_radius = self.getRigidBodyRadius(self.container.ID)
+        obj_convexity = self.getRigidBodyConvexity(self.container.ID)
+        obj_curvature = self.getRigidBodyCurvature(self.container.ID)
+        width, height, depth = obj_dims
+        
+        print(f"Width: {width} | Height: {height} | Depth: {depth} | Radius: {obj_radius} | Convexity: {obj_convexity}")    
+
+
+    # CORE FUNCTIONS FOR RUNNING THE SIMULATION
     def step(self, action, control_method='joint'):
         """
         action: (x, y, z, roll, pitch, yaw, gripper_opening_length) for End Effector Position Control
@@ -373,7 +430,6 @@ class ClutteredPushGrasp:
         self.readDigitTempSaveButton()      # Check whether the frame should be saved to a list
         self.readDigitSaveButton()          # Check whether the list of renderer frame should be saved locally
         
-
     def update_reward(self):
         pass
 
@@ -392,6 +448,7 @@ class ClutteredPushGrasp:
         self.robot.reset()
         return self.get_observation()
     
+    # Reset user-defined parameters (GUI slider values)
     def resetUserDebugParameters(self):
         # Re-initialize sliders
         self.xin = p.addUserDebugParameter("x", -0.224, 0.224, 0)
@@ -400,10 +457,9 @@ class ClutteredPushGrasp:
         self.rollId = p.addUserDebugParameter("roll", -3.14, 3.14, 0)
         self.pitchId = p.addUserDebugParameter("pitch", -3.14, 3.14, np.pi/2)
         self.yawId = p.addUserDebugParameter("yaw", -np.pi/2, np.pi/2, np.pi/2)
-        self.gripper_opening_length_control = p.addUserDebugParameter("Gripper opening length", 0, 0.04, 0.04)
+        self.gripper_opening_length_control = p.addUserDebugParameter("Gripper opening length", 0, self.robot.gripper_range[1], self.robot.gripper_range[1])
 
-        # Re-initialize buttons
-        # Simulation buttons
+        # Re-initialize simulation buttons
         self.resetSimulationButton = p.addUserDebugParameter("Reset simulation", 1, 0, 1)
         
         # Point cloud button and initial button values
