@@ -182,7 +182,7 @@ class ClutteredPushGrasp:
         @param color: (np.array) a pair of color tactile readings from the tactile sensor; Shape: (2, 160 , 120, 3)
         """
 
-        if len(np.unique(depth[0], return_counts=True)[0]) == 1 or len(np.unique(depth[1], return_counts=True)[0]) == 1 or len(np.unique(color[0], return_counts=True)[0]) == 1 or len(np.unique(color[1], return_counts=True)[0]) == 1:
+        if np.mean(depth[0]) < 1e-5 and np.mean(depth[1]) < 1e-5 and np.mean(color[0]) < 1e-5 and np.mean(color[1]) < 1e-5 and len(np.unique(depth[0], return_counts=True)[0]) == 1 or len(np.unique(depth[1], return_counts=True)[0]) == 1 or len(np.unique(color[0], return_counts=True)[0]) == 1 or len(np.unique(color[1], return_counts=True)[0]) == 1:
             print("Found invalid depth and color readings. Skipping this set of readings...")
             return None, None
         return depth, color
@@ -281,10 +281,10 @@ class ClutteredPushGrasp:
                     depth_dataset = np.append(depth_dataset, [depth], axis=0)
                     color_dataset = np.append(color_dataset, [color], axis=0)
 
-                    if grasp_outcome:
+                    if grasp_outcome and (grasp_outcomes == 1).sum() < no_of_grasps:
                         grasp_outcomes = np.append(grasp_outcomes, np.ones(shape=(1,)), axis=0)
                         success += 1
-                    else:
+                    elif grasp_outcome is False and (grasp_outcomes == 0).sum() < no_of_grasps:
                         grasp_outcomes = np.append(grasp_outcomes, np.zeros(shape=(1,)), axis=0)
                         failure += 1
                     print(f"Successes: {success} | Failures: {failure}")
