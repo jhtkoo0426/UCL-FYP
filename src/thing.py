@@ -18,9 +18,13 @@ class Thing:
         """
         for better organization, should move the urdf path to the arg85 yaml file as well...
         """
-        # self.urdf_path = "./src/urdf/objects/mug/mug.urdf"
-        self.urdf_path = "./src/urdf/objects/block.urdf"
-        # self.urdf_path = "./src/urdf/objects/bleach_cleanser/model.urdf"
+
+        if name == "mug":
+            self.urdf_path = "./src/urdf/objects/mug/mug.urdf"
+        elif name == "bottle":
+            self.urdf_path = "./src/urdf/objects/bleach_cleanser/model.urdf"
+        else:
+            self.urdf_path = "./src/urdf/objects/block.urdf"
 
         id = p.loadURDF(self.urdf_path, self.initPos, self.initOrientation, useFixedBase=False, globalScaling=self.objectScale)
         self.setID(id)
