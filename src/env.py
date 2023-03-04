@@ -282,10 +282,10 @@ class ClutteredPushGrasp:
                     color_dataset = np.append(color_dataset, [color], axis=0)
 
                     if grasp_outcome:
-                        np.append(grasp_outcomes, np.ones(shape=(1,)), axis=0)
+                        grasp_outcomes = np.append(grasp_outcomes, np.ones(shape=(1,)), axis=0)
                         success += 1
                     else:
-                        np.append(grasp_outcomes, np.zeros(shape=(1,)), axis=0)
+                        grasp_outcomes = np.append(grasp_outcomes, np.zeros(shape=(1,)), axis=0)
                         failure += 1
                     print(f"Successes: {success} | Failures: {failure}")
 
