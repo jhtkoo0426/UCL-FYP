@@ -263,7 +263,7 @@ class ClutteredPushGrasp:
 
         no_of_grasps = 200      # We need this number of success and failure grasps before stopping
 
-        while success < no_of_grasps and failure < no_of_grasps:
+        while success < no_of_grasps or failure < no_of_grasps:
             random_poses = self.generateGaussianNoisePoses(Z_PADDING)
 
             for random_pose in random_poses:
