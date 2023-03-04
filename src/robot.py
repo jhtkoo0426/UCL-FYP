@@ -61,6 +61,8 @@ class RobotBase(object):
         self.camera_info = file_data['pybullet_camera']
         self.panel_info = file_data["object_control_panel"]
         self.link_ID = file_data["digit_link_id"]
+        
+        # Identify the defined object from the parameters.yaml file
         self.object_info = file_data["target_object"]
 
 

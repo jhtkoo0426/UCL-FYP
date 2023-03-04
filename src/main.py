@@ -38,6 +38,14 @@ def run_simulation():
     cam1_pos, cam1_orient = env.digits.cameras["cam1"].get_pose()
     print("camera position of digit is", cam1_pos, cam1_orient)
 
+    # mug_start_pos = [0, -0.2, 0.5]
+    # mug_start_orientation_euler = [0, 0, 0]
+    # mug_start_orientation = p.getQuaternionFromEuler(mug_start_orientation_euler)
+
+    # mug = px.Body("urdf/objects/mug/mug.urdf",use_fixed_base=True, global_scaling = 0.5)
+    # # print("mug px file is",mug)
+    # mug.set_base_pose(mug_start_pos, mug_start_orientation)
+
     # digits.add_body(env.container) 
     # digits.add_object(env.container.urdf_path, env.container.id, env.container.objectScale)
 
