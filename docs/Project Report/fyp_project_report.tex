@@ -89,11 +89,11 @@ Supervisors: Prof. Marc Deisenroth, Dr. Yasemin Bekiroglu}
 % Abstract
 %----------------------------------------------------------------------------------
 \begin{abstract}
-Robotic grasping is a fundamental problem in robotics that aims to develop intelligent machines that are capable of manipulating objects in an environment. The success of a robotic grasping task is often dependent on the robustness of the system, which refers to the ability of the robot to perform a grasping task consistently and accurately despite changes or disturbances in the environment and object. Thus, achieving robust grasping is a significant challenge, which if mastered, greatly benefits the autonomy and reliability of robotic manipulation.\\
+Robotic grasping is a fundamental subdomain of robotics that involves the manipulation of objects using a gripper or end effector. Many different approaches have been proposed for robotic grasping, with various assumptions regarding the available information about the scene (robot setup, environment) and the type of objects in question (known, unknown, familiar). These approaches range from designing simplifying hand models, to completely end-to-end systems inferring grasp parameters from raw data using generative models.\\
 
-Many different approaches have been proposed for robotic grasping, with varying assumptions regarding the available information about the scene (robot setup, environment) and the type of objects in question (known, unknown, familiar). These approaches range from designing simplifying hand models, to completely end-to-end systems inferring grasp parameters from raw data using generative models. However, there are still problems in the field in terms of, for example, dealing with uncertainties in sensing and actuation, scalability and adding constraints in terms of task.\\
+However, the majority of these approaches do not address robustness in grasping, which refers to the ability of a robot to perform a grasping task consistently and accurately despite changes in the object.\\
 
-In this project, we present a robust learning framework that attempts to perform inferred grasp configurations from hand poses, using simple geometry on a two-finger hand. The project addresses two core complications for the framework: a) balancing the trade-off between data representation and data dimensionality; and b) a correction policy which aims to gradually synthesise good grasps.
+This project addresses several fundamental problems for achieving better robustness in grasping tasks. These include, for example, dealing with uncertainties in sensing and actuation, scalability and adding constraints in terms of task. In this project, we present a robust learning framework that attempts to perform inferred grasp configurations from hand poses, using simple geometry on a two-finger hand. The project addresses two core complications for the framework: a) balancing the trade-off between data representation and data dimensionality; and b) a correction policy which aims to gradually synthesise good grasps.
 \end{abstract}
 
 
@@ -190,21 +190,14 @@ Chapter 6 summarises the results and performances of the project, as well as mak
 
 \section{Robotic Grasping}
 \label{sec:2.1}
+Robotic grasping refers to the ability of a robot to pick up and manipulate objects using its mechanical grippers or other end effectors. It requires precise coordination between the visual perception of the environment and efficient grasp planning, as well as robustness in terms of the object type, which is the main focus of this project.\\
 
-{\color{red}rewrite this section}\\
-
-Robotic grasping refers to the ability of a robot to pick up and manipulate objects using its mechanical grippers or other end-effectors. It is a fundamental capability for many industrial and service robotic applications, including assembly, packaging, material handling, and warehouse automation.\\
-
-Robotic grasping involves several challenges, such as object recognition, pose estimation, and grasp planning. To grasp an object, a robot needs to detect the object's location, orientation, and size accurately, estimate the best grasp point and orientation, and then execute the grasp with sufficient force and control to ensure a secure hold. The grasping process can be performed using various types of end-effectors, including grippers, suction cups, or specialized tools designed for specific tasks. In this project, we will use a pair of DIGIT tactile sensors mounted to the gripper to collect sensory readings.\\
-
-Several approaches to robotic grasping have been developed over the years, including analytical methods, machine learning, and hybrid techniques that combine both approaches. These methods use various sensors, such as cameras, tactile sensors, and force sensors, to provide feedback on the grasp execution and improve the robustness and reliability of the grasping process.\\
-
-Robotic grasping requires precise coordination between the visual perception of the surrounding environment, efficient grasp planning and robustness in terms of the type of objects to grasp. 
-
-
+There are several challenges in robotic grasping, such as object recognition, pose estimation, and grasp planning. To grasp an object, a robot needs to detect the object's location (through, for example, a wrist camera), orientation, and size accurately, estimate the best grasp point and orientation, and then execute the grasp with appropriate force and control to ensure a secure hold. The grasping process can be performed using various types of end effectors, including grippers, suction cups, or specialized tools designed for specific tasks. In this project, we will use a pair of DIGIT tactile sensors mounted onto each finger of the gripper to collect sensory readings.
 
 \section{Pybullet}
-Pybullet \cite{pybullet} is a physics engine and simulator designed to be used in robotics, machine learning and computer graphics. It is a Python wrapper for the Bullet Physics Library, which is an open-source physics engine that can simulate rigid body dynamics, soft body dynamics, and fluids.
+Pybullet \cite{pybullet} is a physics engine and simulator designed to be used in robotics, machine learning and computer graphics. It is a Python wrapper for the Bullet Physics Library, which is an open-source physics engine that can simulate rigid body dynamics, soft body dynamics, and fluids.\\
+
+This project includes the development of a Pybullet simulation for the real robot setup. The simulation was developed collaboratively with Jeffery Wei, a Master's student working on a similar robotics project. Together, we combined and integrated the URDF files of the arm, gripper and DIGIT sensors into the simulation, and added several features that are essential for further development, including support for inverse kinematics, simple grasp planning and execution, and manual manipulation of end effector poses.
 
 \section{Related Literature}
 \label{}
