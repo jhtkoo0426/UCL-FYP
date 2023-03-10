@@ -1,6 +1,5 @@
 <robot name="block">
   <link name="block">
-
     <inertial>
       <origin xyz="0 0 0" />
       <mass value="0.1" />
@@ -12,9 +11,6 @@
       <geometry>
         <box size="0.025 0.05 0.05" />
       </geometry>
-      <material name="red">
-        <color rgba="0.4 0.4 1.0 1.0"/>
-      </material>
     </visual>
 
     <collision>
@@ -23,8 +19,5 @@
         <box size="0.025 0.05 0.05" />
       </geometry>
     </collision>
-
   </link>
-
-
 </robot>

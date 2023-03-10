@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 
 class ClutteredPushGrasp:
     # Global constants
-    SIMULATION_STEP_DELAY = 1 / 10000.
+    SIMULATION_STEP_DELAY = 1 / 250000.
 
 
     def __init__(self, robot, models: Models, camera=None, vis=False) -> None:
@@ -140,6 +140,8 @@ class ClutteredPushGrasp:
             self.collect_data_mlp()
         self.generativeModelButtonVal = p.readUserDebugParameter(self.generativeModelButton) + 1.0
 
+
+    # HELPER FUNCTIONS FOR SIMULATION
     def gripperCollisionDetection(self):
         """
         Determines if the gripper is in contact with an object.
@@ -154,19 +156,22 @@ class ClutteredPushGrasp:
         """
         Determines if the given depth and color tactile data provide any meaningful results, i.e. the mean is above a 
         certain threshold as a sanity check.
+
+        We use a threshold of 1e-3 to determine the minimal acceptable mean for the tactile data
         """
         av_d0, av_d1 = np.mean(depth[0]), np.mean(depth[1])         # Mean of depth data for each finger
         av_c0, av_c1 = np.mean(color[0]), np.mean(color[1])         # Mean of color data for each finger
+        
+        # Additionally, we scale av_d0 and av_d1 to the range (0, 255) to match the range
+        # of color data
+        av_d0, av_d1 = av_d0 * 255, av_d1 * 255
         return all(i >= 1e-3 for i in [av_d0, av_d1, av_c0, av_c1])
     
     # HELPER FUNCTIONS FOR DATA COLLECTION PIPELINE
     # Generate random poses by applying Gaussian noise to a base pose(s)
-    def generateGaussianNoisePose(self, z_padding):
+    def generateGaussianNoisePose(self):
         """
         Generates a random end effector pose following a Gaussian distribution.
-
-        @param z_padding: (float) slight padding to prevent the robot from colliding with the object when moving
-                          to it via inverse kinematics
         
         @returns random_poses: filled array of generated end effector poses
         """
@@ -175,39 +180,41 @@ class ClutteredPushGrasp:
         base_hand_poses = {
             "bottle": np.array([0.1296842396259308, 0.014147371053695679, 0.13684210181236267, 0.09915781021118164, 1.520420789718628, 0.5952490568161011]),
             "block": np.array([0.0, 0.0, 0.2, 0.0, 1.570796251296997, 1.5707963705062866]),
-            "mug": np.array([0.0, 0.0, 0.14210526645183563, 0.0, 1.570796251296997, 1.5707963705062866])
+            "sphere": np.array([0.0, 0.0, 0.2, 0.0, 1.570796251296997, 1.5707963705062866])
         }
 
         # Apply 6d gaussian noise to base hand pose
         sixd_noise = {
-            "bottle": np.random.normal(0, 0.025, 6),
+            "bottle": np.random.normal(0, 0.01, 6),
             "block": np.random.normal(0, 0.01, 6),
-            "mug": np.random.normal(0, 0.01, 6)
+            "sphere": np.random.normal(0, 0.01, 6)
         }
         
         noisy_poses = base_hand_poses[self.object_name] + sixd_noise[self.object_name]
-        noisy_poses[2] += z_padding
+        noisy_poses[2] += self.Z_PADDING
         return noisy_poses
     
-    def execute_pose(self, grasp_pose, velocity_scale, z_padding):
+    def execute_pose(self, grasp_pose):
         """
         Executes a grasp given a specific hand pose
         """
 
         # 1. Move arm to pose and prepare gripper
-        self.robot.manipulate_ee(grasp_pose, 'end', velocity_scale)
+        self.robot.manipulate_ee(grasp_pose, 'end', self.VELOCITY_SCALE)
         self.robot.open_gripper()
-        self.fixed_step_sim(500)
+        self.fixed_step_sim(1000)
 
         # 2. Lower the arm by z=2
         lower_sixd_pose = grasp_pose.copy()
-        lower_sixd_pose[2] = lower_sixd_pose[2] - z_padding
-        self.robot.manipulate_ee(lower_sixd_pose, 'end', velocity_scale)
-        self.fixed_step_sim(500)
+        lower_sixd_pose[2] -= self.Z_PADDING
+
+        # print(f"Lower pose: {lower_sixd_pose}")
+        self.robot.manipulate_ee(lower_sixd_pose, 'end', self.VELOCITY_SCALE)
+        self.fixed_step_sim(200)
 
         # 3. Close gripper to perform grasp
         self.robot.close_gripper()
-        self.fixed_step_sim(1000)
+        self.fixed_step_sim(200)
 
         # 4. Determine if gripper is in stable contact with object (measure over 500 steps)
         isGripperInContactTimeframe1 = self.gripperCollisionDetection()
@@ -218,7 +225,7 @@ class ClutteredPushGrasp:
         if isGripperInContactTimeframe1 and isGripperInContactTimeframe2:
             # 6. Record depth and color tactile data
             self.digit_step()
-            self.fixed_step_sim(500)
+            self.fixed_step_sim(200)
             color = np.asarray(self.color)      # (2, 160, 120, 3)
             depth = np.asarray(self.depth)      # (2, 160, 120)
 
@@ -226,23 +233,26 @@ class ClutteredPushGrasp:
             tactile_data_is_valid = self.checkTactileReadingsValid(depth, color)
 
             if tactile_data_is_valid:
+                upper_grasp_pose = grasp_pose.copy()
+                upper_grasp_pose[2] += self.Z_PADDING
+                
                 # 7. Lift object for 5s to determine successful vs unsuccessful grasp
-                upper_sixd_pose = grasp_pose.copy()
-                upper_sixd_pose[2] += z_padding
-                self.robot.manipulate_ee(upper_sixd_pose, 'end', velocity_scale)
+                self.robot.manipulate_ee(upper_grasp_pose, 'end', self.VELOCITY_SCALE)
+                self.fixed_step_sim(200)
 
-                # 8. Record object z position to determine if it moved after a while
+                # 8. Record object z position
                 grasped_object_z_pos = self.container.getPos()[2]
-                self.fixed_step_sim(1500)
 
-                # 9. Record success/failure
+                # 9. Record success/failure by determining if object moved after 1500 steps
+                self.fixed_step_sim(1000)
                 final_object_z_pos = self.container.getPos()[2]
 
                 # 10. Determine if the grabbed object stays in the same z position AND the z position is not 0 (as defined in container.getInitPos())
                 delta_z = final_object_z_pos - grasped_object_z_pos
-                grasp_outcome = True if delta_z > z_padding and final_object_z_pos > 0 else False
+                grasp_outcome = True if delta_z > self.Z_PADDING and final_object_z_pos > 0 else False
 
                 return (depth, color, grasp_outcome)
+            return None
         return None
 
     def collect_data(self):
@@ -268,8 +278,8 @@ class ClutteredPushGrasp:
         failure_count = 0
 
         while success_count < self.RANDOM_POSES_COUNT or failure_count < self.RANDOM_POSES_COUNT:
-            random_pose = self.generateGaussianNoisePose(self.Z_PADDING)
-            generated_grasp_data = self.execute_pose(random_pose, self.VELOCITY_SCALE, self.Z_PADDING)
+            random_pose = self.generateGaussianNoisePose()
+            generated_grasp_data = self.execute_pose(random_pose)
 
             if generated_grasp_data is not None:
                 depth, color, grasp_is_good = generated_grasp_data
@@ -295,8 +305,9 @@ class ClutteredPushGrasp:
                     print(f"Data analysed and saved - Successes: {success_count} | Failures: {failure_count}")
 
             # 7. Reset robot and arm only
-            self.robot.reset()
-            self.container.resetObject()
+            # self.robot.reset()
+            # self.container.resetObject()
+            self.reset_simulation()
             self.fixed_step_sim(500)
             count += 1
         

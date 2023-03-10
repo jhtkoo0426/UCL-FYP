@@ -20,7 +20,7 @@ object_control_panel:
 # Neccesary parameters of the target object;
 # The global scaling is used to shrink the size of the object
 target_object:
-  object_name: bottle    # Objects can either be "block", "bottle" or "mug"
+  object_name: block  # Objects can either be "block", "bottle", "cylinder" or "mug"
   object_position: [0, 0, 0.25]
   global_scaling : 1.0
 
@@ -39,5 +39,5 @@ data_collection:
 
 # Parameters to adjust for robot
 robot:
-  z_padding: 0.2          # Prevents the robot from colliding with the object when moving to it
+  z_padding: 0.2        # Prevents the robot from colliding with the object when moving to it
   velocity_scale: 0.15    # Scales the robot's speed in simulation
