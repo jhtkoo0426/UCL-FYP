@@ -36,7 +36,7 @@ def run_simulation():
     p.resetDebugVisualizerCamera(**robot.camera_info)
     digits.add_camera(robot.id, robot.link_ID)
     cam1_pos, cam1_orient = env.digits.cameras["cam1"].get_pose()
-    print("camera position of digit is", cam1_pos, cam1_orient)
+    # print("camera position of digit is", cam1_pos, cam1_orient)
 
     # mug_start_pos = [0, -0.2, 0.5]
     # mug_start_orientation_euler = [0, 0, 0]

@@ -50,20 +50,20 @@ class RobotBase(object):
         self.__init_robot__()
         self.__parse_joint_info__()
         self.__post_load__()
-        print(self.joints)
+        # print(self.joints)
 
     # Read and load parameters from the parameters.yaml file 
     def load_digit_parm(self):
         with open("./src/parameters.yaml", 'r') as f:
             file_data = yaml.load(f, Loader=yaml.FullLoader)
 
-        self.tacto_info = file_data['tacto']
-        self.camera_info = file_data['pybullet_camera']
-        self.panel_info = file_data["object_control_panel"]
-        self.link_ID = file_data["digit_link_id"]
-        
-        # Identify the defined object from the parameters.yaml file
-        self.object_info = file_data["target_object"]
+        self.tacto_info     = file_data['tacto']
+        self.camera_info    = file_data['pybullet_camera']
+        self.panel_info     = file_data["object_control_panel"]
+        self.link_ID        = file_data["digit_link_id"]
+        self.object_info    = file_data["target_object"]
+        self.robot_info     = file_data["robot"]
+        self.data_info      = file_data["data_collection"]
 
 
     def step_simulation(self):
