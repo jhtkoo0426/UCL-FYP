@@ -27,13 +27,18 @@ class Thing:
             self.urdf_path = "./src/urdf/objects/cylinder.urdf"
         elif name == "sphere":
             self.urdf_path = "./src/urdf/objects/small_sphere/sphere_small.urdf"
-        else:
-            self.urdf_path = "./src/urdf/objects/block.urdf"
+        elif name == "block" or name == "block1":
+            self.urdf_path = "./src/urdf/objects/block1/block1.urdf"
+        elif name == "block2":
+            self.urdf_path = "./src/urdf/objects/block2/block2.urdf"
+        elif name == "block3":
+            self.urdf_path = "./src/urdf/objects/block3/block3.urdf"
+        elif name == "cube":
+            self.urdf_path = "./src/urdf/objects/cube/cube_small.urdf"
 
         id = p.loadURDF(self.urdf_path, self.initPos, self.initOrientation, useFixedBase=False, globalScaling=self.objectScale)
         self.setID(id)
         self.resetVelocity()
-
 
     def setInitPos(self,pos):
         self.initPos=pos
