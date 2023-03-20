@@ -142,23 +142,6 @@ class RobotBase(object):
     def close_gripper(self):
         self.move_gripper(self.gripper_range[0])
 
-    def move_ee(self, action, control_method):
-        assert control_method in ('joint', 'end')
-        if control_method == 'end':
-            x, y, z, roll, pitch, yaw = action
-            pos = (x, y, z)
-            orn = p.getQuaternionFromEuler((roll, pitch, yaw))
-            joint_poses = p.calculateInverseKinematics(self.id, self.eef_id, pos, orn,
-                                                       self.arm_lower_limits, self.arm_upper_limits, self.arm_joint_ranges, self.arm_rest_poses,
-                                                       maxNumIterations=100)
-        elif control_method == 'joint':
-            assert len(action) == self.arm_num_dofs
-            joint_poses = action
-        # arm
-        for i, joint_id in enumerate(self.arm_controllable_joints):
-            p.setJointMotorControl2(self.id, joint_id, p.POSITION_CONTROL, joint_poses[i],
-                                    force=self.joints[joint_id].maxForce, maxVelocity=self.joints[joint_id].maxVelocity)
-
     def manipulate_ee(self, action, control_method, velocity_scale=1):
         assert control_method in ('joint', 'end')
         if control_method == 'end':
@@ -166,7 +149,7 @@ class RobotBase(object):
             pos = (x, y, z)
             orn = p.getQuaternionFromEuler((roll, pitch, yaw))
             joint_poses = p.calculateInverseKinematics(self.id, self.eef_id, pos, orn,
-                                                       self.arm_lower_limits, self.arm_upper_limits, self.arm_joint_ranges, self.arm_rest_poses,
+                                                       self.arm_lower_limits, self.arm_upper_limits, self.arm_joint_ranges,
                                                        maxNumIterations=100)
         elif control_method == 'joint':
             assert len(action) == self.arm_num_dofs

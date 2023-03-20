@@ -34,7 +34,7 @@ def run_simulation():
     env.reset()
 
     action = [0, 0, 0.5, 0, 1.571, 1.571]
-    robot.move_ee(action=action, control_method='end')
+    robot.manipulate_ee(action=action, control_method='end')
 
     while True:
         env.step()
