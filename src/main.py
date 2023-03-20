@@ -2,6 +2,8 @@ import os
 
 import numpy as np
 import pybullet as p
+
+from simulation.simulation import Simulator
 from env import ClutteredPushGrasp
 from robot import Panda, UR5Robotiq85, UR5Robotiq140
 from utilities import YCBModels, Camera
@@ -31,29 +33,12 @@ def run_simulation():
     env = ClutteredPushGrasp(robot, ycb_models, camera, vis=True)
     env.reset()
 
-    # Initialize DIGIT tactile sensors
-    digits = tacto.Sensor(**robot.tacto_info, background = robot.bg)
-    p.resetDebugVisualizerCamera(**robot.camera_info)
-    digits.add_camera(robot.id, robot.link_ID)
-    cam1_pos, cam1_orient = env.digits.cameras["cam1"].get_pose()
-    print("camera position of digit is", cam1_pos, cam1_orient)
-
-    # mug_start_pos = [0, -0.2, 0.5]
-    # mug_start_orientation_euler = [0, 0, 0]
-    # mug_start_orientation = p.getQuaternionFromEuler(mug_start_orientation_euler)
-
-    # mug = px.Body("urdf/objects/mug/mug.urdf",use_fixed_base=True, global_scaling = 0.5)
-    # # print("mug px file is",mug)
-    # mug.set_base_pose(mug_start_pos, mug_start_orientation)
-
-    # digits.add_body(env.container) 
-    # digits.add_object(env.container.urdf_path, env.container.id, env.container.objectScale)
+    action = [0, 0, 0.5, 0, 1.571, 1.571]
+    robot.manipulate_ee(action=action, control_method='end')
 
     while True:
-        obs = env.step(env.read_debug_parameter(), 'end')
+        env.step()
         env.digit_step()
-        color, depth = digits.render()
-        digits.updateGUI(color, depth)
 
 
 if __name__ == '__main__':

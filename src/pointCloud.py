@@ -168,9 +168,9 @@ def getPointCloud(target, extraCamPos=None):
 
     o3d.visualization.draw_geometries([pcl])
     
-    print('Length of target object points array')
-    print(len(objPoints))
-    print(len(objColor))
+    # print('Length of target object points array')
+    # print(len(objPoints))
+    # print(len(objColor))
 
     # Poisson mesh method
     #-------------------------------------------------------------------------------------
@@ -238,10 +238,10 @@ def getPointCloud(target, extraCamPos=None):
         pcl.colors = o3d.open3d.cpu.pybind.utility.Vector3dVector(
             np.array(colors))
         
-        print(pcl.points[1])
+        # print(pcl.points[1])
         filename = "generated_pointcloud.ply"
         val = o3d.io.write_point_cloud(filename, pcl)
-        print(f"Generated point cloud : {val}")
+        # print(f"Generated point cloud : {val}")
         #o3d.visualization.draw_geometries([pcl])
         
         pcd.estimate_normals()
