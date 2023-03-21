@@ -9,7 +9,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <cylinder length="0.065" radius="0.015"/>
+        <cylinder length="0.035" radius="0.0225"/>
       </geometry>
       <material name="purple">
         <color rgba="0.4 0.4 1.0 1.0"/>
@@ -19,7 +19,7 @@
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <geometry>
-        <cylinder length="0.065" radius="0.015"/>
+        <cylinder length="0.035" radius="0.0225"/>
       </geometry>
     </collision>
   </link>

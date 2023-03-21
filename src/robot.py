@@ -126,6 +126,7 @@ class RobotBase(object):
         """
         reset to rest poses
         """
+        
         for rest_pose, joint_id in zip(self.arm_rest_poses, self.arm_controllable_joints):
             p.resetJointState(self.id, joint_id, rest_pose)
 

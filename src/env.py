@@ -213,6 +213,12 @@ class ClutteredPushGrasp:
 
         # 1. Move arm to pose and prepare gripper
         self.robot.manipulate_ee(grasp_pose, 'end', self.VELOCITY_SCALE)
+
+        # 1b. [Temporary fix - Reset object in case the gripper collides with the object unexpectedly]
+        self.fixed_step_sim(500)
+        self.container.resetObject()
+        self.fixed_step_sim(1000)
+
         self.robot.open_gripper()
         self.fixed_step_sim(500)
 
@@ -252,9 +258,10 @@ class ClutteredPushGrasp:
                 # 9. Determine grasp success
                 grasp_outcome = True if final_object_z_pos >= self.Z_PADDING else False
                 return (depth, color, grasp_outcome)
-            return None
         
-        self.fixed_step_sim(500)
+        # After grasp execution, release object and move robot to specific pose to prevent collision
+        # self.robot.open_gripper()
+        # self.robot.manipulate_ee(grasp_pose, 'end', self.VELOCITY_SCALE)
         return None
 
     def save_dataset(self, dataset_filename, folder_name, dataset):
@@ -350,6 +357,8 @@ class ClutteredPushGrasp:
 
             # We need 10 good and 10 bad grasps per seed pose
             while success_count < SEED_POSE_COUNT or failure_count < SEED_POSE_COUNT:
+                # 11. Reset robot and arm only
+                self.reset_simulation()
                 self.fixed_step_sim(1000)
                 noisy_pose = self.generateGaussianNoisePose(seed_pose, self.object_name)
                 grasp_data = self.execute_pose(noisy_pose)
@@ -379,10 +388,7 @@ class ClutteredPushGrasp:
                             failure_count += 1
                             total_poses += 1
                             print(f"Data saved - Successes: {success_count} | Failures: {failure_count} | Total: {total_poses}")
-                
-                # 11. Reset robot and arm only
-                self.reset_simulation()
-                self.fixed_step_sim(500)
+
             print("Collected enough data for seed pose. Moving to next pose")
 
             # Reset counters
@@ -390,7 +396,7 @@ class ClutteredPushGrasp:
             failure_count = 0
 
         # Save collected data into .npy files for future loading
-        folder_name = "mlp_model"
+        folder_name = "datasets"
         file_path = f"{self.object_name}_ds/"
         self.save_dataset(file_path + "depth_ds.npy", folder_name, tactile_depth_data)
         self.save_dataset(file_path + "color_ds.npy", folder_name, tactile_color_data)
@@ -431,10 +437,14 @@ class ClutteredPushGrasp:
                 (-0.1296842098236084, 0.0, 0.08421052992343903, -3.140000104904175, 0.33052611351013184, -0.033069491386413574)
             ],
             "cylinder2": [
-            
+               
+                (0.0, -0.0589473694562912, 0.15789473056793213, 0.0, 1.1898949146270752, 1.5707963705062866),
+                (0.0, -0.09903157502412796, 0.12105263024568558, 0.0, 0.7932631969451904, 1.5707963705062866),
+                (-0.1061052605509758, -0.016505271196365356, 0.11052631586790085, 0.0, 0.6280002593994141, 0.14881229400634766),
+                (0.08016842603683472, 0.009431585669517517, 0.15263158082962036, 0.0, 2.148421049118042, 0.13227760791778564)
             ],
             "cylinder3": [
-            
+                
             ]
         }
         return poses
