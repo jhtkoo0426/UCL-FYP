@@ -84,6 +84,7 @@ class ClutteredPushGrasp:
         self.mlpDataColButtonVal = 2.0
         self.openGripperButtonVal = 2.0
         self.closeGripperButtonVal = 2.0
+        self.getObjectFeaturesButtonVal = 2.0
         self.resetSimulationButtonVal = 2.0
 
     # READ USER DEBUG PARAMETERS (BUTTONS IN GUI) AND EXECUTE CORRRESPONDING ACTIONS
@@ -98,6 +99,12 @@ class ClutteredPushGrasp:
             self.robot.open_gripper()
         self.openGripperButtonVal = p.readUserDebugParameter(self.openGripperButton) + 1.0
     
+    def readGetObjectFeaturesButton(self):
+        if p.readUserDebugParameter(self.getObjectFeaturesButton) >= self.getObjectFeaturesButtonVal:
+            object_geometric_features = self.getObjectGeometry(self.container.ID)
+            print(object_geometric_features)
+        self.getObjectFeaturesButtonVal = p.readUserDebugParameter(self.getObjectFeaturesButton)+ 1.0
+
     def readCloseGripperButton(self):
         if p.readUserDebugParameter(self.closeGripperButton) >= self.closeGripperButtonVal:
             self.robot.close_gripper()
@@ -480,6 +487,7 @@ class ClutteredPushGrasp:
         self.readMLPDataCollectionButton()
         self.readOpenGripperButton()
         self.readCloseGripperButton()
+        self.readGetObjectFeaturesButton()
         
         self.digit_step()
         self.fixed_step_sim(1000)
@@ -511,12 +519,13 @@ class ClutteredPushGrasp:
         # Re-initialize simulation buttons
         self.initButtonVals()
         self.resetSimulationButton  = p.addUserDebugParameter("Reset simulation", 1, 0, 1)
-        self.pointCloudButton       = p.addUserDebugParameter("Get point cloud", 1, 0, 1)
-        self.jointObsButton         = p.addUserDebugParameter("Get joint coordinates", 1, 0, 1)
-        self.baselineDataColButton   = p.addUserDebugParameter("Collect sensory data", 1, 0, 1)
-        self.mlpDataColButton  = p.addUserDebugParameter("Execute generative model", 1, 0, 1)
-        self.openGripperButton      = p.addUserDebugParameter("Open gripper", 1, 0, 1)
-        self.closeGripperButton     = p.addUserDebugParameter("Close gripper", 1, 0, 1)
+        self.pointCloudButton = p.addUserDebugParameter("Get point cloud", 1, 0, 1)
+        self.jointObsButton = p.addUserDebugParameter("Get joint coordinates", 1, 0, 1)
+        self.baselineDataColButton = p.addUserDebugParameter("Collect sensory data", 1, 0, 1)
+        self.mlpDataColButton = p.addUserDebugParameter("Execute generative model", 1, 0, 1)
+        self.openGripperButton = p.addUserDebugParameter("Open gripper", 1, 0, 1)
+        self.closeGripperButton = p.addUserDebugParameter("Close gripper", 1, 0, 1)
+        self.getObjectFeaturesButton = p.addUserDebugParameter("Get object features", 1, 0, 1)
 
     # Reset the whole simulation
     def reset_simulation(self):
