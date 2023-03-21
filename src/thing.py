@@ -20,12 +20,19 @@ class Thing:
         """
 
         if name == "block" or name == "block1":
-            self.urdf_path = "./src/urdf/objects/block1/block1.urdf"
+            self.urdf_path = "./src/urdf/objects/blocks/block1.urdf"
         elif name == "block2":
-            self.urdf_path = "./src/urdf/objects/block2/block2.urdf"
+            self.urdf_path = "./src/urdf/objects/blocks/block2.urdf"
         elif name == "block3":
-            self.urdf_path = "./src/urdf/objects/block3/block3.urdf"
+            self.urdf_path = "./src/urdf/objects/blocks/block3.urdf"
+        elif name == "cylinder1":
+            self.urdf_path = "./src/urdf/objects/cylinders/cylinder1.urdf"
+        elif name == "cylinder2":
+            self.urdf_path = "./src/urdf/objects/cylinders/cylinder2.urdf"
+        elif name == "cylinder3":
+            self.urdf_path = "./src/urdf/objects/cylinders/cylinder3.urdf"
 
+        print(self.urdf_path)
         id = p.loadURDF(self.urdf_path, self.initPos, self.initOrientation, useFixedBase=False, globalScaling=self.objectScale)
         self.setID(id)
         self.resetVelocity()

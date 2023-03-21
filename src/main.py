@@ -37,7 +37,7 @@ def run_simulation():
     robot.manipulate_ee(action=action, control_method='end')
 
     while True:
-        env.step()
+        env.step(env.read_debug_parameter(), 'end')
         env.digit_step()
 
 

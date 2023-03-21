@@ -76,6 +76,18 @@ class ClutteredPushGrasp:
         for _ in range(step_size):
             self.step_simulation()
 
+    # Read the values of the sliders in the simulation GUI
+    def read_debug_parameter(self):        
+        # read the value of task parameter        
+        x = p.readUserDebugParameter(self.xin)        
+        y = p.readUserDebugParameter(self.yin)        
+        z = p.readUserDebugParameter(self.zin)       
+        roll = p.readUserDebugParameter(self.rollId)        
+        pitch = p.readUserDebugParameter(self.pitchId)        
+        yaw = p.readUserDebugParameter(self.yawId)        
+        gripper_opening_length = p.readUserDebugParameter(self.gripper_opening_length_control)
+        return x, y, z, roll, pitch, yaw, gripper_opening_length
+
     # Initialize simulation GUI button values
     def initButtonVals(self):
         self.pointCloudButtonVal = 2.0
@@ -86,6 +98,7 @@ class ClutteredPushGrasp:
         self.closeGripperButtonVal = 2.0
         self.getObjectFeaturesButtonVal = 2.0
         self.resetSimulationButtonVal = 2.0
+        self.fetch6dButtonVal = 2.0
 
     # READ USER DEBUG PARAMETERS (BUTTONS IN GUI) AND EXECUTE CORRRESPONDING ACTIONS
     def readPointCloudButton(self):
@@ -129,6 +142,11 @@ class ClutteredPushGrasp:
         if p.readUserDebugParameter(self.mlpDataColButton) >= self.mlpDataColButtonVal:
             self.collect_data_mlp()
         self.mlpDataColButtonVal = p.readUserDebugParameter(self.mlpDataColButton) + 1.0
+    
+    def readFetch6dButton(self, action):        
+        if p.readUserDebugParameter(self.fetch6dButton) >= self.fetch6dButtonVal:           
+            print(f"End effector 6D pose: {action}")        
+        self.fetch6dButtonVal = p.readUserDebugParameter(self.fetch6dButton) + 1.0
 
 
     # HELPER FUNCTIONS FOR SIMULATION
@@ -176,6 +194,9 @@ class ClutteredPushGrasp:
             "block1": np.random.normal(0, 0.01, 6),
             "block2": np.random.normal(0, 0.01, 6),
             "block3": np.random.normal(0, 0.01, 6),
+            "cylinder1": np.random.normal(0, 0.01, 6),
+            "cylinder2": np.random.normal(0, 0.01, 6),
+            "cylinder3": np.random.normal(0, 0.01, 6),
         }
         
         noisy_poses = pose + sixd_noise[object_name]
@@ -402,6 +423,19 @@ class ClutteredPushGrasp:
                 (0.0, 0.0, 0.15789473056793213, 0.0, 1.570796251296997, 1.5707963705062866),
                 (0.0, -0.12496842443943024, 0.10000000149011612, 0.0, 0.5288419723510742, 1.5707963705062866),
             ],
+            "cylinder1": [
+                (0.0, 0.0, 0.17894737422466278, 0.0, 1.570796251296997, 1.5707963705062866),
+                (0.0, -0.10138948261737823, 0.1473684161901474, 0.0, 0.8263156414031982, 1.5707963705062866),
+                (-0.1178947389125824, 0.0, 0.11578947305679321, 0.0, 0.5618946552276611, -0.049604058265686035),
+                (0.0, 0.0825263261795044, 0.17894737422466278, 0.0, 0.8593685626983643, -1.5707963705062866),
+                (-0.1296842098236084, 0.0, 0.08421052992343903, -3.140000104904175, 0.33052611351013184, -0.033069491386413574)
+            ],
+            "cylinder2": [
+            
+            ],
+            "cylinder3": [
+            
+            ]
         }
         return poses
 
@@ -465,13 +499,16 @@ class ClutteredPushGrasp:
 
 
     # CORE FUNCTIONS FOR RUNNING THE SIMULATION
-    def step(self):
+    def step(self, action, control_method='joint'):
         """
         action: (x, y, z, roll, pitch, yaw, gripper_opening_length) for End Effector Position Control
                 (a1, a2, a3, a4, a5, a6, a7, gripper_opening_length) for Joint Position Control
         control_method:  'end' for end effector position control
                          'joint' for joint position control
         """
+
+        self.robot.manipulate_ee(action[:-1], control_method)
+        self.robot.move_gripper(action[-1])
 
         # in the step simulation, get the joint orientation
         sixd = self.robot.get_joint_obs()
@@ -485,6 +522,7 @@ class ClutteredPushGrasp:
         self.readOpenGripperButton()
         self.readCloseGripperButton()
         self.readGetObjectFeaturesButton()
+        self.readFetch6dButton(action[:-1])
         
         self.digit_step()
         self.fixed_step_sim(1000)
@@ -513,6 +551,15 @@ class ClutteredPushGrasp:
     
     # Reset user-defined parameters (GUI slider values)
     def resetUserDebugParameters(self):
+        # Re-initialize sliders        
+        self.xin = p.addUserDebugParameter("x", -0.224, 0.224, 0)
+        self.yin = p.addUserDebugParameter("y", -0.224, 0.224, 0)
+        self.zin = p.addUserDebugParameter("z", 0, 1., 0.5)
+        self.rollId = p.addUserDebugParameter("roll", -3.14, 3.14, 0)
+        self.pitchId = p.addUserDebugParameter("pitch", -3.14, 3.14, np.pi/2)
+        self.yawId = p.addUserDebugParameter("yaw", -np.pi/2, np.pi/2, np.pi/2)
+        self.gripper_opening_length_control = p.addUserDebugParameter("Gripper opening length", 0, self.robot.gripper_range[1], self.robot.gripper_range[1])
+        
         # Re-initialize simulation buttons
         self.initButtonVals()
         self.resetSimulationButton  = p.addUserDebugParameter("Reset simulation", 1, 0, 1)
@@ -523,6 +570,7 @@ class ClutteredPushGrasp:
         self.openGripperButton = p.addUserDebugParameter("Open gripper", 1, 0, 1)
         self.closeGripperButton = p.addUserDebugParameter("Close gripper", 1, 0, 1)
         self.getObjectFeaturesButton = p.addUserDebugParameter("Get object features", 1, 0, 1)
+        self.fetch6dButton = p.addUserDebugParameter("Get end effector pose", 1, 0, 1)
 
     # Reset the whole simulation
     def reset_simulation(self):

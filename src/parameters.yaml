@@ -20,7 +20,7 @@ object_control_panel:
 # Neccesary parameters of the target object;
 # The global scaling is used to shrink the size of the object
 target_object:
-  object_name: bottle1 # Objects can either be "block", "bottle"
+  object_name: cylinder3 # Objects can either be "block", "bottle"
   object_position: [0, 0, 0.25]
   global_scaling : 1.0
 
