@@ -25,12 +25,6 @@ class Thing:
             self.urdf_path = "./src/urdf/objects/block2/block2.urdf"
         elif name == "block3":
             self.urdf_path = "./src/urdf/objects/block3/block3.urdf"
-        elif name == "bottle":
-            self.urdf_path = "./src/urdf/objects/bleach_cleanser/model.urdf"
-        elif name == "cylinder1":
-            self.urdf_path = "./src/urdf/objects/cylinder1/cylinder1.urdf"
-        elif name == "sphere":
-            self.urdf_path = "./src/urdf/objects/small_sphere/sphere_small.urdf"
 
         id = p.loadURDF(self.urdf_path, self.initPos, self.initOrientation, useFixedBase=False, globalScaling=self.objectScale)
         self.setID(id)
