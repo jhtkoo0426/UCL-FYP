@@ -171,8 +171,6 @@ class ClutteredPushGrasp:
         sixd_noise = {
             # Baseline noise
             "block": np.random.normal(0, 0.01, 6),
-            "bottle": np.random.normal(0, 0.01, 6),
-            "sphere": np.random.normal(0, 0.01, 6),
 
             # MLP noise
             "block1": np.random.normal(0, 0.01, 6),
@@ -324,11 +322,11 @@ class ClutteredPushGrasp:
         end_effector_poses = np.empty((TOTAL_POSES, 6))                             # End effector is a 6D structure
         tactile_depth_data = np.empty((TOTAL_POSES, 2, 160, 120))                   # Depth data (160x120) per finger (x2)
         tactile_color_data = np.empty((TOTAL_POSES, 2, 160, 120, 3))                # Color data (160x120x3) per finger (x2)
-        geometric_data     = self.getObjectGeometry(body_id=self.container.ID)      # W, H, D, convexity (3x2)
         grasp_outcomes     = np.empty(0)
 
         for seed_pose in poses[self.object_name]:
             print(f"Starting seed pose simulation: {seed_pose}")
+
             # We need 10 good and 10 bad grasps per seed pose
             while success_count < SEED_POSE_COUNT or failure_count < SEED_POSE_COUNT:
                 self.fixed_step_sim(1000)
@@ -361,7 +359,6 @@ class ClutteredPushGrasp:
                             total_poses += 1
                             print(f"Data saved - Successes: {success_count} | Failures: {failure_count} | Total: {total_poses}")
                 
-        
                 # 11. Reset robot and arm only
                 self.reset_simulation()
                 self.fixed_step_sim(500)
