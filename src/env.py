@@ -314,9 +314,9 @@ class ClutteredPushGrasp:
         MLP_POSES_COUNT = 200
         TOTAL_POSES = MLP_POSES_COUNT * len(poses)
 
-        end_effector_poses = np.empty((TOTAL_POSES, 6))                             # End effector is a 6D structure
-        tactile_depth_data = np.empty((TOTAL_POSES, 2, 160, 120))                   # Depth data (160x120) per finger (x2)
-        tactile_color_data = np.empty((TOTAL_POSES, 2, 160, 120, 3))                # Color data (160x120x3) per finger (x2)
+        end_effector_poses = np.empty((0, 6))                             # End effector is a 6D structure
+        tactile_depth_data = np.empty((0, 2, 160, 120))                   # Depth data (160x120) per finger (x2)
+        tactile_color_data = np.empty((0, 2, 160, 120, 3))                # Color data (160x120x3) per finger (x2)
         geometric_data     = self.getObjectGeometry(body_id=self.container.ID)      # W, H, D, convexity (3x2)
         grasp_outcomes     = np.empty(0)
 
@@ -343,7 +343,6 @@ class ClutteredPushGrasp:
                             grasp_outcomes = np.append(grasp_outcomes, np.ones(shape=(1,)), axis=0)
                             success_count += 1
                             total_poses += 1
-                            print(f"Data saved - Successes: {success_count} | Failures: {failure_count} | Total: {total_poses}")
                         elif grasp_is_good is False and failure_count < SEED_POSE_COUNT:
                             # Save recorded data to corresponding datasets
                             end_effector_poses = np.append(end_effector_poses, np.array([noisy_pose]), axis=0)
@@ -352,7 +351,7 @@ class ClutteredPushGrasp:
                             grasp_outcomes = np.append(grasp_outcomes, np.zeros(shape=(1,)), axis=0)
                             failure_count += 1
                             total_poses += 1
-                            print(f"Data saved - Successes: {success_count} | Failures: {failure_count} | Total: {total_poses}")
+                        print(f"Check shape: {end_effector_poses.shape} Successes: {success_count} | Failures: {failure_count} | Total: {total_poses}")
                 
         
                 # 11. Reset robot and arm only
@@ -365,7 +364,7 @@ class ClutteredPushGrasp:
             failure_count = 0
 
         # Save collected data into .npy files for future loading
-        folder_name = "mlp_model"
+        folder_name = "datasets"
         file_path = f"{self.object_name}_ds/"
         self.save_dataset(file_path + "depth_ds.npy", folder_name, tactile_depth_data)
         self.save_dataset(file_path + "color_ds.npy", folder_name, tactile_color_data)
