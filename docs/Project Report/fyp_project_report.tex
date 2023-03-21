@@ -89,11 +89,11 @@ Supervisors: Prof. Marc Deisenroth, Dr. Yasemin Bekiroglu}
 % Abstract
 %----------------------------------------------------------------------------------
 \begin{abstract}
-Robotic grasping is a fundamental subdomain of robotics that involves the manipulation of objects using a gripper or end effector. Many different approaches have been proposed for robotic grasping, with various assumptions regarding the available information about the scene (robot setup, environment) and the type of objects in question (known, unknown, familiar). These approaches range from designing simplifying hand models, to completely end-to-end systems inferring grasp parameters from raw data using generative models.\\
+Robotic grasp synthesis has been studied extensively as robotic grasping skills have a significant impact on the success of subsequent manipulation tasks. Various approaches have been proposed for robotic grasp planning, with different assumptions regarding the available information about the type of objects in question (known, unknown, familiar). These approaches range from heuristic rules, designing simplifying hand models, to completely end-to-end systems inferring grasp parameters from raw data.\\
 
-However, the majority of these approaches do not address robustness in grasping, which refers to the ability of a robot to perform a grasping task consistently and accurately despite changes in the object.\\
+However, the majority of these approaches do not address robustness in grasping, which refers to the ability of a robot to perform a grasping task consistently and accurately even in the case of unexpected disturbances or large degree of errors in perception. There are several fundamental problems that need to be addressed for achieving better robustness in grasping tasks. These include mainly dealing with uncertainties in sensing, actuation and the perceptual data.\\
 
-This project addresses several fundamental problems for achieving better robustness in grasping tasks. These include, for example, dealing with uncertainties in sensing and actuation, scalability and adding constraints in terms of task. In this project, we present a robust learning framework that attempts to perform inferred grasp configurations from hand poses, using simple geometry on a two-finger hand. The project addresses two core complications for the framework: a) balancing the trade-off between data representation and data dimensionality; and b) a correction policy which aims to gradually synthesise good grasps.
+In this project, we study how to build a robust learning framework that can be employed to construct robust grasp configurations using multi-modal data, e.g. tactile, and visual. The project addresses the following main issues with the robotic grasping systems: a) balancing the trade-off between data representation and data dimensionality; b) analyzing the modelling effects of different modalities, e.g. tactile and visual, and features to capture the underlying characteristics of the overall grasping process; c) a correction policy that relies on assessing grasp success before further manipulation using perceptual data, to choose the right grasping configuration.
 \end{abstract}
 
 
@@ -213,8 +213,11 @@ These components are collectively controlled by the robot's control system, whic
 
 \section{Related Literature}
 \label{sec:2.3}
+
+
 \subsection{More Than a Feeling: Learning to Grasp and Regrasp using Vision and Touch (Calandra et al)\cite{calandra}}
 \label{sec:2.3.1}
+Humans rely on rich tactile feedback to grasp objects, however, most of the recent robotic grasping studies only focus on visual input. The authors propose an end-to-end action-conditional model (a multimodal CNN) to learn regrasping policies from visual-tactile data, by predicting outcome of a candidate grasp adjustment, then executing a grasp by iteratively selecting the most promising actions\cite{calandra}.
 
 
 \subsection{Generalizing Regrasping with Supervised Policy Learning (Hausman et al)\cite{hausman}}
@@ -272,7 +275,9 @@ The fundamental features of the Pybullet simulation for this project (\hyperref[
     \label{fig:pbSimScreenshot}
 \end{figure}
 
-These parameters are defined through the Pybullet API, could be manually adjusted 
+These parameters are defined through the p.addUserDebugParameters() function in the Pybullet API, which is represented in the simulation as a variable sliding bar. For this simulation, uses can manually adjust the end effector pose of the robot (3-dimensional Cartesian coordinates and Euler angles) and the opening width of the gripper.
+
+
 
 
 \subsection{Data Collection}
