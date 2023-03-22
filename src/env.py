@@ -450,17 +450,7 @@ class ClutteredPushGrasp:
         return poses
 
 
-    # HELPER FUNCTIONS FOR GENERATIVE MODEL
-    
-    # Fetch the radius of a rigid body if it is p.GEOM_SPHERE or p.GEOM_CAPSULE
-    def getRigidBodyRadius(self, body_id):
-        obj_shape = p.getCollisionShapeData(body_id, -1)
-        radius = None
-
-        if obj_shape[0][1] == p.GEOM_SPHERE:
-            radius = obj_shape[0][3][0]
-        return radius if not None else None
-
+    # HELPER FUNCTIONS FOR MLP MODEL
     # Calculate the curvature of a rigid body using the principal curvature estimation algorithm
     # This function only works for meshes that include a .obj file.
     def getRigidBodyCurvature(self, body_id, k):
@@ -502,6 +492,7 @@ class ClutteredPushGrasp:
     # Get geometric features of an object
     def getObjectGeometry(self, body_id):
         obj_shape = p.getCollisionShapeData(objectUniqueId=body_id, linkIndex=-1)
+        print(obj_shape)
         width, depth, height = obj_shape[0][3]
         curvature_data = self.getRigidBodyCurvature(body_id, k=3)
         curvature_data = curvature_data.flatten()
