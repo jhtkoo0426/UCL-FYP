@@ -344,12 +344,10 @@ class ClutteredPushGrasp:
         total_poses = 0
 
         SEED_POSE_COUNT = 10
-        MLP_POSES_COUNT = 200
-        TOTAL_POSES = MLP_POSES_COUNT * len(poses)
 
-        end_effector_poses = np.empty((TOTAL_POSES, 6))                             # End effector is a 6D structure
-        tactile_depth_data = np.empty((TOTAL_POSES, 2, 160, 120))                   # Depth data (160x120) per finger (x2)
-        tactile_color_data = np.empty((TOTAL_POSES, 2, 160, 120, 3))                # Color data (160x120x3) per finger (x2)
+        end_effector_poses = np.empty((0, 6))                             # End effector is a 6D structure
+        tactile_depth_data = np.empty((0, 2, 160, 120))                   # Depth data (160x120) per finger (x2)
+        tactile_color_data = np.empty((0, 2, 160, 120, 3))                # Color data (160x120x3) per finger (x2)
         grasp_outcomes     = np.empty(0)
 
         for seed_pose in poses[self.object_name]:
@@ -388,6 +386,7 @@ class ClutteredPushGrasp:
                             failure_count += 1
                             total_poses += 1
                             print(f"Data saved - Successes: {success_count} | Failures: {failure_count} | Total: {total_poses}")
+                        print(end_effector_poses.shape)
 
             print("Collected enough data for seed pose. Moving to next pose")
 
