@@ -58,7 +58,7 @@
 %----------------------------------------------------------------------------------
 % Title Page
 %----------------------------------------------------------------------------------
-\title{{\vspace{-2in}\includegraphics[scale=0.4]{BSc Computer Science/Year 3/COMP0029 Individual Project for Year 3 BSc/Project Report/Media/ucl_logo.png}}\\
+\title{{\vspace{-2in}\includegraphics[scale=0.4]{docs/Project Report/Media/ucl_logo.png}}\\
 \vspace{2cm}
 \begin{adjustwidth}{1cm}{1cm}
     \centering
@@ -89,11 +89,11 @@ Supervisors: Prof. Marc Deisenroth, Dr. Yasemin Bekiroglu}
 % Abstract
 %----------------------------------------------------------------------------------
 \begin{abstract}
-Robotic grasping is a fundamental subdomain of robotics that involves the manipulation of objects using a gripper or end effector. Many different approaches have been proposed for robotic grasping, with various assumptions regarding the available information about the scene (robot setup, environment) and the type of objects in question (known, unknown, familiar). These approaches range from designing simplifying hand models, to completely end-to-end systems inferring grasp parameters from raw data using generative models.\\
+Robotic grasp synthesis has been studied extensively as robotic grasping skills have a significant impact on the success of subsequent manipulation tasks. Various approaches have been proposed for robotic grasp planning, with different assumptions regarding the available information about the type of objects in question (known, unknown, familiar). These approaches range from heuristic rules, designing simplifying hand models, to completely end-to-end systems inferring grasp parameters from raw data.\\
 
-However, the majority of these approaches do not address robustness in grasping, which refers to the ability of a robot to perform a grasping task consistently and accurately despite changes in the object.\\
+However, the majority of these approaches do not address robustness in grasping, which refers to the ability of a robot to perform a grasping task consistently and accurately even in the case of unexpected disturbances or large degree of errors in perception. There are several fundamental problems that need to be addressed for achieving better robustness in grasping tasks. These include mainly dealing with uncertainties in sensing, actuation and the perceptual data.\\
 
-This project addresses several fundamental problems for achieving better robustness in grasping tasks. These include, for example, dealing with uncertainties in sensing and actuation, scalability and adding constraints in terms of task. In this project, we present a robust learning framework that attempts to perform inferred grasp configurations from hand poses, using simple geometry on a two-finger hand. The project addresses two core complications for the framework: a) balancing the trade-off between data representation and data dimensionality; and b) a correction policy which aims to gradually synthesise good grasps.
+In this project, we study how to build a robust learning framework that can be employed to construct robust grasp configurations using multi-modal data, e.g. tactile, and visual. The project addresses the following main issues with the robotic grasping systems: a) balancing the trade-off between data representation and data dimensionality; b) analyzing the modelling effects of different modalities, e.g. tactile and visual, and features to capture the underlying characteristics of the overall grasping process; c) a correction policy that relies on assessing grasp success before further manipulation using perceptual data, to choose the right grasping configuration.
 \end{abstract}
 
 
@@ -128,7 +128,6 @@ Backed with survey findings, a simple Pybullet simulation is developed to collec
 Finally, the project will propose a learning framework that infers hand poses for good grasps using a generative model with Gaussian processes. The framework is also tested on a real setup of the robot and the performances will be displayed and analysed in depth.
 
 
-
 \section{Project Aims and Objectives}
 \label{sec:1.2}
 
@@ -161,12 +160,12 @@ These are additional objectives depending on the progress of the project:
 
 
 \newpage
-
 \section{Project Approach}
 \label{sec:1.3}
-We approached the project in four stages. The first stage involves the implementation of a simple Pybullet environment that simulates a \hyperref[sec:]{real robot setup} at the Statistical Machine Learning Group lab. The environment enables robot and gripper control for future stages of the project. The second stage was the development of a data collection pipeline in the simulation for various primitive object types (block, cylinder) to gather tactile and visual data. The third stage is concerned with the implementation and testing of a logistic regression classifier as the baseline approach. The final stage focuses on the research and development of a learning-based approach.\\
+We approached the project in four stages. The first stage involves the implementation of a simple Pybullet environment that simulates a \hyperref[sec:]{real robot setup} at the Statistical Machine Learning Group lab. The environment enables robot and gripper control for future stages of the project. The second stage was the development of a data collection pipeline in the simulation for various primitive object types (block, cylinder) to gather tactile and visual data. The third stage is concerned with the implementation and testing of a logistic regression classifier as the baseline approach. The final stage focuses on the implementation and testing of a learning-based approach.\\
 
 Any technologies and tools required for the project will also be stated and justified in the corresponding sections.
+
 
 \section{Report Structure}
 \label{sec:1.4}
@@ -194,43 +193,66 @@ Robotic grasping refers to the ability of a robot to pick up and manipulate obje
 
 There are several challenges in robotic grasping, such as object recognition, pose estimation, and grasp planning. To grasp an object, a robot needs to detect the object's location (through, for example, a wrist camera), orientation, and size accurately, estimate the best grasp point and orientation, and then execute the grasp with appropriate force and control to ensure a secure hold. The grasping process can be performed using various types of end effectors, including grippers, suction cups, or specialized tools designed for specific tasks. In this project, we will use a pair of DIGIT tactile sensors mounted onto each finger of the gripper to collect sensory readings.
 
-\section{Pybullet}
-Pybullet \cite{pybullet} is a physics engine and simulator designed to be used in robotics, machine learning and computer graphics. It is a Python wrapper for the Bullet Physics Library, which is an open-source physics engine that can simulate rigid body dynamics, soft body dynamics, and fluids.\\
 
-This project includes the development of a Pybullet simulation for the real robot setup. The simulation was developed collaboratively with Jeffery Wei, a Master's student working on a similar robotics project. Together, we combined and integrated the URDF files of the arm, gripper and DIGIT sensors into the simulation, and added several features that are essential for further development, including support for inverse kinematics, simple grasp planning and execution, and manual manipulation of end effector poses.
+\section{Pybullet}
+\label{sec:2.2}
+Pybullet \cite{pybullet} is a physics engine and simulator designed to be used in robotics, machine learning and computer graphics. It is a Python wrapper for the Bullet Physics Library, which is an open-source physics engine that can simulate rigid body dynamics, soft body dynamics, and fluids.
+
+
+\section{Robotic Arms}
+In grasping tasks, we are primarily concerned with the manipulation of a robotic arm, identify the object and guide the arm towards it to perform a grasp. A physical robotic arm consists of several important components that work together to perform various grasping tasks:
+\begin{enumerate}
+    \item \textbf{Base}
+    \item \textbf{Joints}
+    \item \textbf{Actuators}
+    \item \textbf{End Effectors}
+    \item \textbf{Sensors}
+\end{enumerate}
+
+These components are collectively controlled by the robot's control system, which is responsible for controlling the movement of the arm, processing sensor data, and coordinating the actions of every component. The control system may be a simple physical microcontroller, but in the context of this project, we will use the Pybullet \cite{pybullet} package to achieve our robot manipulation functions.
 
 \section{Related Literature}
-\label{}
+\label{sec:2.3}
+
+
 \subsection{More Than a Feeling: Learning to Grasp and Regrasp using Vision and Touch (Calandra et al)\cite{calandra}}
-\label{}
+\label{sec:2.3.1}
+Humans rely on rich tactile feedback to grasp objects, however, most of the recent robotic grasping studies only focus on visual input. The authors propose an end-to-end action-conditional model (a multimodal CNN) to learn regrasping policies from visual-tactile data, by predicting outcome of a candidate grasp adjustment, then executing a grasp by iteratively selecting the most promising actions\cite{calandra}.
 
 
 \subsection{Generalizing Regrasping with Supervised Policy Learning (Hausman et al)\cite{hausman}}
-\label{}
+\label{sec:2.3.2}
 
 
 \subsection{Simultaneous Tactile Exploration and Grasp Refinement for Unknown Objects (Farias et al)\cite{farias}}
-\label{}
+\label{sec:2.3.3}
+
 
 \section{Conclusion on Literature Review}
+\label{sec:2.4}
 
 
 %----------------------------------------------------------------------------------
 % Section 3: Developing a Pybullet simulation
 % Describes the detailed process of developing the simulation for the project
 %----------------------------------------------------------------------------------
-\chapter{Experimentation and Development of a Pybullet Simulation}
+\chapter{Experimentation and Development of Pybullet Simulation}
 \label{chap:3}
-\section{Real Robot Setup}
-A physical robot was set up at the Statistical Machine Learning Group lab at UCL Here East for its robotics projects. The robot is equipped with the following components:
+Throughout this project, we utilised the Pybullet \cite{pybullet} physics engine to develop our baseline and proposed learning models. This section provides the details for the practical aspects of the project. We will: 1) describe the robot setup which is responsible for the experimentation and validation of our approaches; 2) provide and overview for the testing and calibration of physical DIGIT \cite{digit} tactile sensors, and 3) document the development of the Pybullet simulation to collect tactile, visual and geometric data required for training our models.
+
+\section{Robot Setup}
+\label{sec:3.1}
+We use a robotic arm as our robot setup in this project. The setup includes the following components:
 \begin{enumerate}
-    \item A Panda robot developed by the German Robotics company Franka Emika \cite{franka}, consisting of a robotic arm with an end effector
+    \item A Panda robot developed by the German Robotics company Franka Emika \cite{franka}, consisting of a robotic arm with an end effector. We will refer this component as the Panda arm in further sections.
     \item A 2-Finger Adaptive Robot Gripper 85 \cite{robotiq} mounted to the end effector of the Panda robot
     \item Two DIGIT \cite{digit} tactile sensors, one mounted on each finger of the gripper. These tactile sensors are responsible for providing tactile readings and feedback as depth and RGB color images.
 \end{enumerate}
 {\color{red}If possible add a picture with annotations}
 
+
 \section{Experimenting with Tactile Sensors}
+\label{sec:3.2}
 Since this project is primarily concerned with tactile data, the deployment and usage of DIGIT \cite{digit} tactile sensors was considered a top priority for the project.\\
 
 To get familiar with the sensors before implementing our proposed learning framework, we experimented on a DIGIT tactile sensor and collected 200 examples of tactile readings manually. This dataset consisted of raw, colored, tactile readings of random finger positions and forces on the tactile sensors. Each example in the dataset is a 3-dimensional Numpy array with dimensions (240,320,3) which represents a RGB image. A simple figure below visualises 10 random examples of said tactile readings:
@@ -240,6 +262,27 @@ To get familiar with the sensors before implementing our proposed learning frame
     \caption{DIGIT tactile readings of 10 random examples}
     \label{fig:digit\_readings}
 \end{figure}
+
+
+\section{Pybullet Simulation}
+\label{sec:3.3}
+The fundamental features of the Pybullet simulation for this project (\hyperref[fig:pbSimScreenshot]{Figure 3.2} was developed collaboratively with Jeffery Wei, a Master's student working on a similar robotics project. This includes 1) combining URDF files for the real robot setup (arm, gripper and DIGIT sensors - see \hyperref[sec:3.1]{Section 3.1}), and 2) implementing three essential functions to support simple grasp planning, grasp execution, and manipulation of end effector poses using user-defined parameters.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.25]{docs/Project Report/Media/pybullet_sim.png}
+    \caption{Screenshot of Pybullet simulation for the project}
+    \label{fig:pbSimScreenshot}
+\end{figure}
+
+These parameters are defined through the p.addUserDebugParameters() function in the Pybullet API, which is represented in the simulation as a variable sliding bar. For this simulation, uses can manually adjust the end effector pose of the robot (3-dimensional Cartesian coordinates and Euler angles) and the opening width of the gripper.
+
+
+
+
+\subsection{Data Collection}
+\label{sec:3.3.1}
+
 
 
 %----------------------------------------------------------------------------------

@@ -19,16 +19,23 @@ class Thing:
         for better organization, should move the urdf path to the arg85 yaml file as well...
         """
 
-        if name == "mug":
-            self.urdf_path = "./src/urdf/objects/mug/mug.urdf"
-        elif name == "bottle":
-            self.urdf_path = "./src/urdf/objects/bleach_cleanser/model.urdf"
-        else:
-            self.urdf_path = "./src/urdf/objects/block.urdf"
+        if name == "block" or name == "block1":
+            self.urdf_path = "./src/urdf/objects/blocks/block1.urdf"
+        elif name == "block2":
+            self.urdf_path = "./src/urdf/objects/blocks/block2.urdf"
+        elif name == "block3":
+            self.urdf_path = "./src/urdf/objects/blocks/block3.urdf"
+        elif name == "cylinder1":
+            self.urdf_path = "./src/urdf/objects/cylinders/cylinder1.urdf"
+        elif name == "cylinder2":
+            self.urdf_path = "./src/urdf/objects/cylinders/cylinder2.urdf"
+        elif name == "cylinder3":
+            self.urdf_path = "./src/urdf/objects/cylinders/cylinder3.urdf"
 
+        print(self.urdf_path)
         id = p.loadURDF(self.urdf_path, self.initPos, self.initOrientation, useFixedBase=False, globalScaling=self.objectScale)
         self.setID(id)
-
+        self.resetVelocity()
 
     def setInitPos(self,pos):
         self.initPos=pos
@@ -58,10 +65,14 @@ class Thing:
     def setInitOrientation(self, quat):
         self.initOrientation=quat
     
+    def resetVelocity(self):
+        p.resetBaseVelocity(self.ID, [0, 0, 0], [0, 0, 0])
+    
     def resetObject(self):
         pos = (0, 0, 0)
         orn = p.getQuaternionFromEuler([0,0,0])
         p.resetBasePositionAndOrientation(self.ID, pos, orn)
+        self.resetVelocity()
 
     def getInitOrientation(self):
         return self.initOrientation 
