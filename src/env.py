@@ -284,9 +284,9 @@ class ClutteredPushGrasp:
         """      
 
         # Arrays to populate when collecting data
-        end_effector_poses = np.empty((self.RANDOM_POSES_COUNT, 6))                # End effector is a 6D structure
-        tactile_depth_data = np.empty((self.RANDOM_POSES_COUNT, 2, 160, 120))      # Depth data (160x120) per finger (x2)
-        tactile_color_data = np.empty((self.RANDOM_POSES_COUNT, 2, 160, 120, 3))   # Color data (160x120x3) per finger (x2)
+        end_effector_poses = np.empty((0, 6))                # End effector is a 6D structure
+        tactile_depth_data = np.empty((0, 2, 160, 120))      # Depth data (160x120) per finger (x2)
+        tactile_color_data = np.empty((0, 2, 160, 120, 3))   # Color data (160x120x3) per finger (x2)
         grasp_outcomes     = np.empty(0)
 
         # Counters for logging
@@ -301,6 +301,9 @@ class ClutteredPushGrasp:
         }
 
         while success_count < self.RANDOM_POSES_COUNT or failure_count < self.RANDOM_POSES_COUNT:
+            # Reset robot and arm only
+            self.reset_simulation()
+            self.fixed_step_sim(1000)
             random_pose = self.generateGaussianNoisePose(base_hand_poses[self.object_name], self.object_name)
             generated_grasp_data = self.execute_pose(random_pose)
 
@@ -318,6 +321,7 @@ class ClutteredPushGrasp:
                         tactile_color_data = np.append(tactile_color_data, np.array([color]), axis=0)
                         grasp_outcomes = np.append(grasp_outcomes, np.ones(shape=(1,)), axis=0)
                         success_count += 1
+                        print(f"Data analysed and saved - Successes: {success_count} | Failures: {failure_count}")
                     elif not grasp_is_good and (grasp_outcomes == 0).sum() < self.RANDOM_POSES_COUNT:
                         # Save recorded data to corresponding datasets
                         end_effector_poses = np.append(end_effector_poses, np.array([random_pose]), axis=0)
@@ -325,7 +329,7 @@ class ClutteredPushGrasp:
                         tactile_color_data = np.append(tactile_color_data, np.array([color]), axis=0)
                         grasp_outcomes = np.append(grasp_outcomes, np.zeros(shape=(1,)), axis=0)
                         failure_count += 1
-                    print(f"Data analysed and saved - Successes: {success_count} | Failures: {failure_count}")
+                        print(f"Data analysed and saved - Successes: {success_count} | Failures: {failure_count}")
 
         folder_name = "baseline_model"
         # Save collected data into .npy files for future loading
