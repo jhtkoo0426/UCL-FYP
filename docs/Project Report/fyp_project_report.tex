@@ -1,4 +1,4 @@
-\documentclass[12pt, a4paper]{report}
+\documentclass[11pt, a4paper]{report}
 \usepackage{setspace}
 %\usepackage{subfigure}
 
@@ -11,6 +11,8 @@
 \usepackage[a4paper,margin=3cm]{geometry}
 \usepackage{changepage}
 \usepackage{mathptmx}
+
+% Fancy style
 
 % Tables
 \usepackage{multirow, multicol}
@@ -121,6 +123,8 @@ In this project, we study how to build a robust learning framework that can be e
 
 \section{Outline of Problem}
 \label{sec:1.1}
+The field of robotic grasping has seen remarkable advancements in recent years, driven by the convergence of machine learning, computer vision, and robotics. This technology has the potential to be utilised in manufacturing, warehouse automation and household robotics. However, the development of robust and efficient grasping systems presents several challenges, for example, how do we determine an optimal data representation of the collected visuo-tactile data? How does a grasping system learn to adopt to new object shapes and geometric features? These are some questions that this project aims to investigate.\\
+
 The project first analyses various literature concerned with learning frameworks to robotic grasping that involves different combinations of sensory (tactile and visual) data. These frameworks mainly adapt either a learning-based approach to formulate a regrasping policy, or tactile exploration to maximise grasp quality and improve object shape representation.\\
 
 Backed with survey findings, a simple Pybullet simulation is developed to collect tactile and visual data. This data is essential for training a logistic regression classifier to tackle a binary classification problem for good and bad labelled grasps. The classifier serves as the baseline approach for the project and a means to discover the best data representation for the data in question.\\
@@ -131,7 +135,7 @@ Finally, the project will propose a learning framework that infers hand poses fo
 \section{Project Aims and Objectives}
 \label{sec:1.2}
 
-\subsection{Aims}
+\subsection{Project aims}
 \label{sec:1.2.1}
 The aim of this project is for the development and testing of a robust robotic system that can learn to pick up an object with simple geometry using a two-finger hand. The project will take a learning-based approach to grasping through, for example, Bayesian optimization \cite{nogueria, frazier}. The learning-based approach should be compared with a baseline approach from the related literature (e.g. \cite{nogueria, danielczuk, breyer}) for evaluation. 
 
@@ -150,20 +154,17 @@ The project aim is divided into several objectives that are expected to be compl
     \end{enumerate}
 \end{enumerate}
 
-\subsection{Additional Objectives}
-These are additional objectives depending on the progress of the project:
-\begin{enumerate}
-    \item Quickly adapt to new object shapes based on prior trials with other shapes.
-    \item Add simple touch feedback in simulation (e.g. \cite{bekiroglu}).
-    \item Include task constraints: e.g. moving a cup or keeping the cup upright.
-\end{enumerate}
-
-
 \newpage
 \section{Project Approach}
 \label{sec:1.3}
-We approached the project in four stages. The first stage involves the implementation of a simple Pybullet environment that simulates a \hyperref[sec:]{real robot setup} at the Statistical Machine Learning Group lab. The environment enables robot and gripper control for future stages of the project. The second stage was the development of a data collection pipeline in the simulation for various primitive object types (block, cylinder) to gather tactile and visual data. The third stage is concerned with the implementation and testing of a logistic regression classifier as the baseline approach. The final stage focuses on the implementation and testing of a learning-based approach.\\
-
+We approached the project in four stages:
+\begin{enumerate}
+    \item Carry out background reading on robotic grasping, including policy learning, regression methods and grasp inference
+    \item Implement of a simple Pybullet environment consisting of a robot arm, gripper and DIGIT tactile sensors
+    \item Develop a data collection pipeline to gather tactile and visual data for rigid bodies in the simulation
+    \item Implement and test a baseline approach using the simulation
+    \item Implement and test the proposed learning-based approach using the simulation.
+\end{enumerate}
 Any technologies and tools required for the project will also be stated and justified in the corresponding sections.
 
 
@@ -198,16 +199,6 @@ There are several challenges in robotic grasping, such as object recognition, po
 \label{sec:2.2}
 Pybullet \cite{pybullet} is a physics engine and simulator designed to be used in robotics, machine learning and computer graphics. It is a Python wrapper for the Bullet Physics Library, which is an open-source physics engine that can simulate rigid body dynamics, soft body dynamics, and fluids.
 
-
-\section{Robotic Arms}
-In grasping tasks, we are primarily concerned with the manipulation of a robotic arm, identify the object and guide the arm towards it to perform a grasp. A physical robotic arm consists of several important components that work together to perform various grasping tasks:
-\begin{enumerate}
-    \item \textbf{Base}
-    \item \textbf{Joints}
-    \item \textbf{Actuators}
-    \item \textbf{End Effectors}
-    \item \textbf{Sensors}
-\end{enumerate}
 
 These components are collectively controlled by the robot's control system, which is responsible for controlling the movement of the arm, processing sensor data, and coordinating the actions of every component. The control system may be a simple physical microcontroller, but in the context of this project, we will use the Pybullet \cite{pybullet} package to achieve our robot manipulation functions.
 
