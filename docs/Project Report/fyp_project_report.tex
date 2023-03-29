@@ -37,10 +37,11 @@
 \newtheorem{fact}[theorem]{FACT}
 \newtheorem{example}[theorem]{EXAMPLE}
 \newtheorem{property}[theorem]{PROPERTY}
-\def \set#1{\{#1\} }
 
 % Positioning figures
 \usepackage{float}
+\usepackage[demo]{graphicx}
+\usepackage{subfig}
 
 % Equations
 \usepackage{amsmath}
@@ -123,7 +124,9 @@ In this project, we study how to build a robust learning framework that can be e
 
 \section{Outline of Problem}
 \label{sec:1.1}
-The field of robotic grasping has seen remarkable advancements in recent years, driven by the convergence of machine learning, computer vision, and robotics. This technology has the potential to be utilised in manufacturing, warehouse automation and household robotics. However, the development of robust and efficient grasping systems presents several challenges, for example, how do we determine an optimal data representation of the collected visuo-tactile data? How does a grasping system learn to adopt to new object shapes and geometric features? These are some questions that this project aims to investigate.\\
+The field of robotic grasping has seen remarkable advancements in recent years, driven by the convergence of machine learning, computer vision, and robotics. This technology has the potential to be utilised in manufacturing, warehouse automation and household robotics. However, the development of robust and efficient grasping systems presents several challenges.\\
+
+Robustness in a robotic grasping system refers to its versatility of accurately recognising and grasping objects with varying geometric features (width, depth, curvature, etc). Robustness is increasingly becoming a vital factor in the study of grasp stability and quality. However, facilitating robustness makes it practically difficult to design a single gripper that can effectively grasp all objects. As a result, researchers and engineers have developed dedicated grippers tailored to specific grasping tasks or types of objects.\\
 
 The project first analyses various literature concerned with learning frameworks to robotic grasping that involves different combinations of sensory (tactile and visual) data. These frameworks mainly adapt either a learning-based approach to formulate a regrasping policy, or tactile exploration to maximise grasp quality and improve object shape representation.\\
 
@@ -229,51 +232,12 @@ Humans rely on rich tactile feedback to grasp objects, however, most of the rece
 %----------------------------------------------------------------------------------
 \chapter{Experimentation and Development of Pybullet Simulation}
 \label{chap:3}
-Throughout this project, we utilised the Pybullet \cite{pybullet} physics engine to develop our baseline and proposed learning models. This section provides the details for the practical aspects of the project. We will: 1) describe the robot setup which is responsible for the experimentation and validation of our approaches; 2) provide and overview for the testing and calibration of physical DIGIT \cite{digit} tactile sensors, and 3) document the development of the Pybullet simulation to collect tactile, visual and geometric data required for training our models.
 
-\section{Robot Setup}
-\label{sec:3.1}
-We use a robotic arm as our robot setup in this project. The setup includes the following components:
-\begin{enumerate}
-    \item A Panda robot developed by the German Robotics company Franka Emika \cite{franka}, consisting of a robotic arm with an end effector. We will refer this component as the Panda arm in further sections.
-    \item A 2-Finger Adaptive Robot Gripper 85 \cite{robotiq} mounted to the end effector of the Panda robot
-    \item Two DIGIT \cite{digit} tactile sensors, one mounted on each finger of the gripper. These tactile sensors are responsible for providing tactile readings and feedback as depth and RGB color images.
-\end{enumerate}
-{\color{red}If possible add a picture with annotations}
+\section{Implementation of basic functionalities}
+Arm control, grasp control, position control, gripper control, get 6d pose, reset
 
-
-\section{Experimenting with Tactile Sensors}
-\label{sec:3.2}
-Since this project is primarily concerned with tactile data, the deployment and usage of DIGIT \cite{digit} tactile sensors was considered a top priority for the project.\\
-
-To get familiar with the sensors before implementing our proposed learning framework, we experimented on a DIGIT tactile sensor and collected 200 examples of tactile readings manually. This dataset consisted of raw, colored, tactile readings of random finger positions and forces on the tactile sensors. Each example in the dataset is a 3-dimensional Numpy array with dimensions (240,320,3) which represents a RGB image. A simple figure below visualises 10 random examples of said tactile readings:
-\begin{figure}[H]
-    \centering
-    \includegraphics[scale=0.4]{docs/Project Report/Media/tacto_testing.png}
-    \caption{DIGIT tactile readings of 10 random examples}
-    \label{fig:digit\_readings}
-\end{figure}
-
-
-\section{Pybullet Simulation}
-\label{sec:3.3}
-The fundamental features of the Pybullet simulation for this project (\hyperref[fig:pbSimScreenshot]{Figure 3.2} was developed collaboratively with Jeffery Wei, a Master's student working on a similar robotics project. This includes 1) combining URDF files for the real robot setup (arm, gripper and DIGIT sensors - see \hyperref[sec:3.1]{Section 3.1}), and 2) implementing three essential functions to support simple grasp planning, grasp execution, and manipulation of end effector poses using user-defined parameters.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[scale=0.25]{docs/Project Report/Media/pybullet_sim.png}
-    \caption{Screenshot of Pybullet simulation for the project}
-    \label{fig:pbSimScreenshot}
-\end{figure}
-
-These parameters are defined through the p.addUserDebugParameters() function in the Pybullet API, which is represented in the simulation as a variable sliding bar. For this simulation, uses can manually adjust the end effector pose of the robot (3-dimensional Cartesian coordinates and Euler angles) and the opening width of the gripper.
-
-
-
-
-\subsection{Data Collection}
-\label{sec:3.3.1}
-
+\section{Parameters}
+yaml parameters, loading parameters
 
 
 %----------------------------------------------------------------------------------
@@ -281,21 +245,78 @@ These parameters are defined through the p.addUserDebugParameters() function in 
 %----------------------------------------------------------------------------------
 \chapter{Baseline and Feature Representation Analysis}
 \label{chap:4}
-Mention the following:
-- What common feature representations are there
-- Results from your own testing
-    - Collected tactile sensor readings (as tactile data) and end effector poses (as visual data)
-    - Data was processed in 3 ways: raw, PCA with 3 main components, Convnet
-    - Each type of processed data was then run with different feature combinations: tactile, vision \& tactile+vision
-    - Display results
-- Select the most promising representation and use it for actual generative model in Sec 4.
+Given different combinations of multi-modal data (tactile and visual) collected from grasping an object, we would like to a) determine whether the outcome (successful or unsuccessful) of the grasp is ascertainable based on this data; and b) determine the best feature representation for said data.
 
+\section{Multi-modal Data Collection}
+\label{sec:4.1}
+In this experiment, we collect tactile and visual data on a smooth rectangular block by executing randomly-generated end effector poses.
+
+\subsection{Generating Random Grasps}
+\label{sec:4.1.1}
+Using our Pybullet simulation, we manually manipulate the end effector to varying positions in the proximity of the block, and record three different end effector poses ($i=0,1,2$) to guarantee some variation in the orientation and position of the grasps. Each end effector pose $S_i$ is a 6-tuple consisting of 3 Cartesian coordinates representing the spatial position of the end effector relative to the robot, and 3 Euler angles representing the orientation of the end effector:
+\begin{equation}
+    S_i=(x,y,z,\alpha,\beta,\gamma)
+\end{equation}
+We treat each manually-selected pose independently as a seed grasp configuration, and generate a pre-determined number $N$ of random poses $X_n$ from the seed by adding a small amount of Gaussian noise $K_n$ ($\mu=0$ and $\sigma=0.01$) to each dimension of the seed pose. Mathematically, for every $S_i$, the randomly generated grasps are denoted as:
+\begin{equation}
+    X_n=S_i+K_n
+\end{equation}
+where $K\sim N(0,0.01)$. To prevent collision between the gripper and the object when initializing the end effector pose, we add some padding to the z-dimension, denoted as $p_z$.
+
+\subsection{Data Collection}
+\label{sec:4.1.2}
+We execute each randomly-generated pose $X_n$ by commanding the robot to perform a simple pick-and-place task. First, it needs to move the end effector to the desired position $X_n$, with a padding distance of $p_z$ to avoid colliding with the object. Then, it lowers the end effector vertically by an offset of $p_z$ to reach the target object. Once the end effector is in position, the robot closes the gripper to perform the grasp on the object. To ensure grasp stability, the robot measures the number of contact points between the two fingers and the object. If the gripper is in stable contact, the robot records depth and color tactile data using the DIGIT tactile sensors.\\
+
+Before lifting the object, the robot performs a sanity check on the recorded tactile data. This is extremely important as it prevents adding meaningless data (Fig. \ref{fig:1}) to the training dataset.
+\begin{figure}[H]%
+    \centering
+    \subfloat[\centering Invalid tactile data]{{\includegraphics[width=7cm]{docs/Project Report/Media/4_1_2_failed_tactile_data.png} }}%
+    \qquad
+    \subfloat[\centering Valid tactile data]{{\includegraphics[width=6.7cm]{docs/Project Report/Media/4_1_2_valid_tactile_data.png} }}%
+    \caption{Sanity check for tactile data}%
+    \label{fig:1}%
+\end{figure}
+
+Once the robot verifies that the object is stably held, it lifts the object vertically by an offset of $p_z$ to return to $X_n$. Finally, the robot determines the outcome of the grasp by detecting the change in the object's z-position.
+
+\section{Data Sampling and Pre-processing}
+\label{sec:4.2}
+Data was processed in 3 ways: raw, PCA with 3 main components, Convnet
+
+\section{Visualising the Dataset}
+Add skeleton hand plot, and some subplots of color and depth images
+
+\section{Baseline Model Training}
+
+\section{Evaluation of Baseline Model Results}
+
+\section{Conclusion}
+\subsection{Feature Representation}
+Select the most promising representation and use it for actual generative model in Sec 4.
+
+\subsection{Analysis of Results}
 
 %----------------------------------------------------------------------------------
 % Section 5: Actual Model
 %----------------------------------------------------------------------------------
 \chapter{Actual Model}
 \label{chap:5}
+
+\section{Multilayer Perceptron}
+2 layers
+
+\section{Data representation}
+CNN dimension-reduced data
+
+\section{Training}
+
+\section{Validation}
+
+\section{Interesting experiments}
+\begin{itemize}
+    \item Train with data of 2 blocks, test with data of 1 block
+    \item Train with data of multiple types of objects (e.g. block + cylinder)
+\end{itemize}
 
 
 
