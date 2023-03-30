@@ -270,14 +270,16 @@ We execute each randomly-generated pose $X_n$ by commanding the robot to perform
 Before lifting the object, the robot performs a sanity check on the recorded tactile data. This is extremely important as it prevents adding meaningless data (Fig. \ref{fig:1}) to the training dataset.
 \begin{figure}[H]%
     \centering
-    \subfloat[\centering Invalid tactile data]{{\includegraphics[width=7cm]{docs/Project Report/Media/4_1_2_failed_tactile_data.png} }}%
+    \subfloat[\centering Invalid tactile data]{{\includegraphics[width=7cm]{docs/Project Report/Media/4_1_2_failure_tactile_data.png} }}%
     \qquad
-    \subfloat[\centering Valid tactile data]{{\includegraphics[width=6.7cm]{docs/Project Report/Media/4_1_2_valid_tactile_data.png} }}%
+    \subfloat[\centering Valid tactile data]{{\includegraphics[width=7cm]{docs/Project Report/Media/4_1_2_valid_tactile_data.png} }}%
     \caption{Sanity check for tactile data}%
     \label{fig:1}%
 \end{figure}
 
-Once the robot verifies that the object is stably held, it lifts the object vertically by an offset of $p_z$ to return to $X_n$. Finally, the robot determines the outcome of the grasp by detecting the change in the object's z-position.
+Once the robot verifies that the object is stably held, it lifts the object vertically by an offset of $p_z$ to return to $X_n$. Finally, the robot determines and records the outcome of the grasp by detecting the change in the object's z-position.\\
+
+After performing the procedure for $N$ random poses, we save all the gathered data into individual .npy files. Specifically, we create separate files for the depth, color, grasp outcomes, and random pose data.
 
 \section{Data Sampling and Pre-processing}
 \label{sec:4.2}
