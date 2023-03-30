@@ -53,6 +53,10 @@
 \newcommand{\HRule}[1]{\rule{\linewidth}{#1}}
 \setcounter{tocdepth}{5}
 \setcounter{secnumdepth}{5}
+\usepackage{titlesec}
+\titleformat{\chapter}[display]
+{\normalfont\huge\bfseries}{\chaptertitlename\ \thechapter}{20pt}{\Huge}
+\titlespacing*{\chapter}{0pt}{0pt}{20pt}
 
 % Helper packages - delete these before submission
 \usepackage{xcolor}
@@ -243,7 +247,7 @@ yaml parameters, loading parameters
 %----------------------------------------------------------------------------------
 % Section 4: Designing a Baseline Model and Deciding on Feature Representation of Tactile and Visual Data
 %----------------------------------------------------------------------------------
-\chapter{Baseline and Feature Representation Analysis}
+\chapter{Baseline and Feature Representation \\ Analysis}
 \label{chap:4}
 Given different combinations of multi-modal data (tactile and visual) collected from grasping an object, we would like to a) determine whether the outcome (successful or unsuccessful) of the grasp is ascertainable based on this data; and b) determine the best feature representation for said data.
 
@@ -277,16 +281,54 @@ Before lifting the object, the robot performs a sanity check on the recorded tac
     \label{fig:1}%
 \end{figure}
 
-Once the robot verifies that the object is stably held, it lifts the object vertically by an offset of $p_z$ to return to $X_n$. Finally, the robot determines and records the outcome of the grasp by detecting the change in the object's z-position.\\
+Once the robot verifies that the object is stably held, it lifts the object vertically by an offset of $p_z$ to return to $X_n$. Finally, the robot determines and records the outcome of the grasp by detecting the change in the object's z-position $\Delta z$:
+
+\begin{equation}
+    outcome=\begin{cases}1 & \Delta z\geq p_z \\ 0 & \Delta z<p_z\end{cases}
+\end{equation}
 
 After performing the procedure for $N$ random poses, we save all the gathered data into individual .npy files. Specifically, we create separate files for the depth, color, grasp outcomes, and random pose data.
 
-\section{Data Sampling and Pre-processing}
+\newpage
+\section{Visualising Hand Poses}
 \label{sec:4.2}
-Data was processed in 3 ways: raw, PCA with 3 main components, Convnet
+Before we train our baseline model, we are interested if a clear decision boundary exists between successful and unsuccessful grasps. We create a visualisation of each hand pose $X_n$ in a 3-dimensional space, using its Cartesian coordinates and the "pitch-row-yaw" rotational matrix representation $R$ of its Euler angles ($\alpha,\beta,\gamma$) \cite{euleranglewolfram}:
 
-\section{Visualising the Dataset}
-Add skeleton hand plot, and some subplots of color and depth images
+\begin{equation}
+    R=R_x\cdot(R_y\cdot R_z)
+\end{equation}
+
+\noindent where $R_x$, $R_y$ and $R_z$ are the rotational matrices about the $x$, $y$ and $z$-axis respectively:
+
+\begin{figure}[H]
+    \centering
+    \begin{equation*}
+        R_x = \begin{pmatrix}1&0&0 \\ 0&cos(\alpha)&sin(\alpha) \\ 0&-sin(\alpha)&cos(\alpha)\end{pmatrix}\;\;
+        R_y = \begin{pmatrix}cos(\beta)&0&-sin(\beta) \\ 0&1&0 \\ sin(\beta)&0&cos(\beta)\end{pmatrix}\;\;
+        R_z = \begin{pmatrix}cos(\gamma)&sin(\gamma)&0 \\ -sin(\gamma)&cos(\gamma)&0 \\ 0&0&1 \end{pmatrix}
+    \end{equation*}
+    \caption{Rotational matrices for each axis in the rotational matrix representation of Euler angles}
+    \label{fig:rm_representation}
+\end{figure}
+
+\noindent Using this information, we annotate 20 random hand poses from our dataset in a 3-dimensional plot. Each 6D hand pose is represented using a skeleton 2-finger model, where green and red poses denote successful and unsuccessful grasps respectively:
+\begin{figure}[H]%
+    \centering
+    \subfloat[\centering Invalid tactile data]{{\includegraphics[width=7cm]{docs/Project Report/Media/hand_pose1.png} }}%
+    \qquad
+    \subfloat[\centering Valid tactile data]{{\includegraphics[width=7cm]{docs/Project Report/Media/hand_pose2.png} }}%
+    \caption{Visualisation of 20 end effector poses}%
+    \label{fig:hand_poses}%
+\end{figure}
+
+\newpage
+\section{Data Sampling and Pre-processing}
+Data was processed in 3 ways: raw, PCA with 3 main components, Convnet
+\begin{figure}[H]
+    \includegraphics[scale=0.7]{docs/Project Report/Media/nn.png}
+    \caption{Caption}
+    \label{fig:my_label}
+\end{figure}
 
 \section{Baseline Model Training}
 
@@ -388,6 +430,10 @@ Since Pybullet is no longer being maintained, consider to move to mujico
     Farias et al,
     \textit{Simultaneous Tactile Exploration and Grasp Refinement for Unknown Objects},
     2021
+
+% Other references
+\bibitem{euleranglewolfram}
+    \href{https://mathworld.wolfram.com/EulerAngles.html}{Weisstein, Eric W. "Euler Angles." From MathWorld--A Wolfram Web Resource.}
 
 % References for technologies used
 \bibitem{digit}
