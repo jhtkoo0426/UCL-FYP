@@ -188,7 +188,8 @@ class ClutteredPushGrasp:
         # Apply 6d gaussian noise to base hand pose
         sixd_noise = {
             # Baseline noise
-            "block": np.random.normal(0, 0.01, 6),
+            "block": np.insert(np.random.normal(0, 0.01, 5), 2, 0),
+            # "block": np.random.normal(0, 0.01, 6),
 
             # MLP noise
             "block1": np.random.normal(0, 0.01, 6),
@@ -296,6 +297,7 @@ class ClutteredPushGrasp:
         # Base hand poses for different objects will vary as a result of manual trials on these objects.
         base_hand_poses = {
             "bottle": np.array([0.1296842396259308, 0.014147371053695679, 0.13684210181236267, 0.09915781021118164, 1.520420789718628, 0.5952490568161011]),
+            "block": np.array([0.0, 0.0, 0.2, 0.0, 1.570796251296997, 1.5707963705062866]),
             "block1": np.array([0.0, 0.0, 0.2, 0.0, 1.570796251296997, 1.5707963705062866]),
             "sphere": np.array([0.0, 0.0, 0.2, 0.0, 1.570796251296997, 1.5707963705062866])
         }
