@@ -269,25 +269,40 @@ where $K\sim N(0,0.01)$. To prevent collision between the gripper and the object
 
 \subsection{Data Collection}
 \label{sec:4.1.2}
-We execute each randomly-generated pose $X_n$ by commanding the robot to perform a simple pick-and-place task. First, it moves the end effector to the desired position $X_n$ with a vertical padding distance $p_z$ above the object to avoid collision. Then, the robot lowers the end effector by removing the padding $p_z$ to reach the target object. Once the end effector is in position, the robot closes the gripper to perform the grasp on the object. To ensure grasp stability, the robot measures the number of contact points between the two fingers and the object. If the gripper is in stable contact, the robot records depth and color tactile data using the DIGIT tactile sensors.\\
+Prior to executing each randomly-generated pose $X_n$ as a pick-and-place task, we first reset the position and orientation of our robot to an initial, predefined configuration (\ref{fig:4.1a}). Next, we utilise Pybullet's built-in inverse kinematics method to manipulate the robot's end effector to $X_n$. To avoid collision with the object, we include a vertical padding distance $p_z$ above the object (\ref{fig:4.1b}). Then, the robot lowers the end effector by removing the padding $p_z$ to reach the target object and closes its gripper (\ref{fig:4.1c}).
 
-Before lifting the object, the robot performs a sanity check on the recorded tactile data. For every executed pose, a pair of sensor readings (Fig. \ref{fig:1}) of dimensions 160x120 are collected from DIGIT tactile sensors mounted on the two fingers of the gripper. To simplify the sanity check, we concatenate these readings side-by-side as 160x240 images and determine if the average value of their pixels is above a specific threshold. This helps us filter out random noise (Fig. 4.1a) and preserve the accurate depth data (Fig 4.1b).
 \begin{figure}[H]%
     \centering
-    \subfloat[\centering Invalid depth data]{{\includegraphics[width=7cm]{docs/Project Report/Media/4_1_2_failure_depth_data.png} }}%
+    \subfloat[\centering Reset robot to initial configuration]{{\includegraphics[width=7cm]{docs/Project Report/Media/4_1_2_init_config.png}\label{fig:4.1a}}}%
     \qquad
-    \subfloat[\centering Valid depth data]{{\includegraphics[width=7cm]{docs/Project Report/Media/4_1_2_valid_depth_data.png} }}%
-    \caption{Concatenated depth data for each finger}%
-    \label{fig:1}%
+    \subfloat[\centering Move end effector to specific pose (with vertical padding)]{{\includegraphics[width=7cm]{docs/Project Report/Media/4_1_2_ee_pose_with_pad.png}\label{fig:4.1b}}}%
+    \qquad
+    \subfloat[\centering Remove vertical padding and close gripper]{{\includegraphics[width=7cm]{docs/Project Report/Media/4_1_2_ee_pose_no_pad.png}\label{fig:4.1c}}}%
+    \qquad
+    \subfloat[\centering Lift object]{{\includegraphics[width=7cm]{docs/Project Report/Media/4_1_2_pick_obj.png}\label{fig:4.1d}}}%
+    \caption{Tactile and visual data collection procedure on a single generated hand pose}%
+    \label{fig:4.1}%
 \end{figure}
 
-Once the robot verifies that the object is stably held (i.e. the tactile data is valid), it lifts the object vertically upwards by an offset of $p_z$ and holds the object for 750 steps. Finally, the robot records a binary outcome of the grasp by determining if the change in the object's z-position $\Delta z$ is greater or equal to the vertical padding $p_z$:
+Before lifting the object, the robot measures the number of contact points between the two fingers and the object to ensure grasp stability. We define a grasp to be stable if there are a non-zero number of contact points, in which the robot records depth and color tactile information using the DIGIT tactile sensors on each finger. We concatenate each pair of depth and color tactile readings into a $(160\times240)$ gray-scale image and a $(160\times240\times3)$ RGB image respectively.\\
+
+After collecting the tactile readings, the robot performs a sanity check on the recorded depth tactile data. Since the color data is an RGB representation of the depth data, it does not require any additional checks. To facilitate the sanity check, we analyze whether the average pixel value exceeds a particular threshold. This process enables us to remove any erroneous signals (\ref{fig:4.2a}) and preserve the precise depth data (\ref{fig:4.2b}). By utilizing this method, we can enhance the quality of the data and ensure accurate lifting of the object.
+\begin{figure}[H]%
+    \centering
+    \subfloat[\centering Invalid depth data]{{\includegraphics[width=7cm]{docs/Project Report/Media/4_1_2_failure_depth_data.png}\label{fig:4.2a}}}%
+    \qquad
+    \subfloat[\centering Valid depth data]{{\includegraphics[width=7cm]{docs/Project Report/Media/4_1_2_valid_depth_data.png}\label{fig:4.2b}}}%
+    \caption{Concatenated depth data for each finger}%
+    \label{fig:4.2}%
+\end{figure}
+
+Once the robot verifies that the object is stably held (i.e. the tactile data is valid), it lifts the object vertically upwards by an offset of $p_z$ and holds the object for 750 steps (\ref{fig:4.1d}). Finally, the robot records a binary outcome of the grasp by determining if the change in the object's z-position $\Delta z$ is greater or equal to the vertical padding $p_z$:
 
 \begin{equation}
     outcome=\begin{cases}1 & \Delta z\geq p_z \\ 0 & \Delta z<p_z\end{cases}
 \end{equation}
 
-After executing each random pose, we append the collected data to specific, individual arrays. Once complete, these arrays are saved to separate .npy files which can be loaded for further analysis. Specifically, we create one file each for the depth, color, grasp outcomes, and random pose data.
+After executing each random pose, we append the collected tactile data, end effector pose and grasp outcome to individual arrays. Once the required data for our $N$ random end effector poses has been collected, these arrays are saved to separate files which can be loaded for further analysis. Specifically, we create one .npy file each for the depth, color, grasp outcomes, and random pose data.
 
 \newpage
 \section{Visualising Hand Poses}
@@ -322,18 +337,19 @@ Before we train our baseline model, we are interested if a clear decision bounda
 \end{figure}
 \noindent From the above figures, we are able to visually determine a rough decision boundary between successful (green) and unsuccessful (red) grasps. This serves as the primary motivation for a Logistic Regression model as our baseline approach.
 
-\newpage
-\section{Data Pre-processing}
+
+\section{Feature Engineering}
 \label{sec:4.3}
+We aim to assess the efficacy of utilising our multi-modal dataset for our grasping task through experimenting with various combinations of the tactile and visual (random end effector poses) data.
 
 \subsection{Multi-modal Data Combinations}
 \label{sec:4.3.1}
-We want to analyse how different combinations of tactile and visual data affect the accuracy of our baseline models. In this project, we are concerned with the following combinations of multi-modal data:
+In this project, we segregate our dataset into tactile-only, visual-only and concatenated tactile and visual datasets:
 \begin{table}[H]
     \centering
     \begin{tabular}{|p{3cm}|p{4cm}|p{6cm}|}
         \hline
-        Data Combination & Shape & Creation \\
+        Data Combination & Dimensions & Creation \\
         \hline
         Tactile only & $N\times160\times240\times4$ & Concatenating the depth ($N\times160\times240$) and color ($N\times160\times240\times3$) data \\
         \hline
@@ -342,21 +358,21 @@ We want to analyse how different combinations of tactile and visual data affect 
         Tactile + Visual & $N\times(160\times240\times4+6)$ & Concatenating the flattened tactile-only and visual-only datasets \\
         \hline
     \end{tabular}
-    \caption{Used combinations of multi-modal data}
-    \label{tab:1}
+    \caption{Various segregated datasets}
+    \label{tab:4.1}
 \end{table}
 
 \subsection{Dimensionality Reduction}
 \label{sec:4.3.2}
-In addition to the different data combinations, we applied two dimensionality reduction techniques to the data: PCA and CNN feature extraction.
+Due to the high dimensionality nature of our tactile and visual datasets, we experimented with two popular dimensionality reduction techniques, PCA and CNN feature extraction, to hopefully capture as much of its variation as possible.
 
 \subsubsection{Principal Component Analysis (PCA)}
 \label{sec:4.3.2.1}
-For each image representation of our data combinations, we select the top 3 eigenvectors that correspond to the largest eigenvalues as the principal components for the data.
+For each image in the tactile and visual datasets, we select the top 3 eigenvectors that correspond to the largest eigenvalues as the principal components for the data.
 
 \subsubsection{Convolution Neural Network (CNN) Feature Extraction}
 \label{sec:4.3.2.2}
-We create a 3-layer convolution neural network to extract the important features from our data combinations. Each convolution layer is interwined with a MaxPool2D layer with a $2\times2$ kernel. \hyperref[fig:cnnarch]{Fig 4.4} illustrates the architecture for the CNN we used:
+We create a 3-layer convolution neural network to extract the important features from our data combinations. Each convolution layer is interwined with a MaxPool2D layer with a $2\times2$ kernel. \hyperref[fig:cnnarch]{Fig 4.5} illustrates the architecture for the CNN we used:
 \begin{figure}[H]
     \includegraphics[scale=0.7]{docs/Project Report/Media/nn.png}
     \caption{Architecture for feature extraction CNN}
