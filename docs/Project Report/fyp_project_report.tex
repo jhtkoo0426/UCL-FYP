@@ -1,9 +1,6 @@
-\documentclass[11pt, a4paper]{report}
-\usepackage{setspace}
-%\usepackage{subfigure}
+\documentclass[12pt, a4paper]{report}
 
 % Page styling
-%\pagestyle{plain}
 \usepackage{amssymb,graphicx,color}
 \usepackage{amsfonts}
 \usepackage{extsizes}
@@ -12,7 +9,9 @@
 \usepackage{changepage}
 \usepackage{mathptmx}
 
-% Fancy style
+% Spacing
+\usepackage{setspace}
+\setstretch{1.2}
 
 % Tables
 \usepackage{multirow, multicol}
@@ -57,9 +56,6 @@
 \titleformat{\chapter}[display]
 {\normalfont\huge\bfseries}{\chaptertitlename\ \thechapter}{20pt}{\Huge}
 \titlespacing*{\chapter}{0pt}{0pt}{20pt}
-
-% Helper packages - delete these before submission
-\usepackage{xcolor}
 
 
 %----------------------------------------------------------------------------------
@@ -128,27 +124,26 @@ In this project, we study how to build a robust learning framework that can be e
 
 \section{Outline of Problem}
 \label{sec:1.1}
-The field of robotic grasping has seen remarkable advancements in recent years, driven by the convergence of machine learning, computer vision, and robotics. This technology has the potential to be utilised in manufacturing, warehouse automation and household robotics. However, the development of robust and efficient grasping systems presents several challenges.\\
+Humans are able to grasp objects seemingly intuitively. We can efficiently identify and reach for objects, adjust our finger placements and optimally balance contact forces through the coordination of our wrists, arms, and shoulders when we approach and lift objects. Our sense of touch plays a major role, providing us with information about the object's size, shape, texture, weight, and other physical properties. This information is processed by our brains, giving us instructions on how to adjust our grasp pose and apply the appropriate amount of force needed to pick up the object. Without the sense of touch, grasping objects would be much more difficult and less efficient. Therefore, incorporating touch sensing into robotic grasping can help robots better identify and adjust to objects, making them more effective in interacting with the physical world.\\
 
-Robustness in a robotic grasping system refers to its versatility of accurately recognising and grasping objects with varying geometric features (width, depth, curvature, etc). Robustness is increasingly becoming a vital factor in the study of grasp stability and quality. However, facilitating robustness makes it practically difficult to design a single gripper that can effectively grasp all objects. As a result, researchers and engineers have developed dedicated grippers tailored to specific grasping tasks or types of objects.\\
+Recent advancements in machine learning, computer vision, and robotics have led to remarkable progress in the field of robotic grasping. This technology holds great promise for a range of applications, including manufacturing, warehouse automation, and household robotics. However, little work has been done on increasing robustness in grasping systems that utilise multi-modal (tactile and visual) data.\\
 
-The project first analyses various literature concerned with learning frameworks to robotic grasping that involves different combinations of sensory (tactile and visual) data. These frameworks mainly adapt either a learning-based approach to formulate a regrasping policy, or tactile exploration to maximise grasp quality and improve object shape representation.\\
+Robustness in a robotic grasping system refers to its versatility of accurately recognising and grasping objects with varying geometric features (width, depth, curvature, etc) and its ability to successfully grasp the objects. Robustness is increasingly becoming a vital factor in the study of grasp stability and quality, however, incorporating robustness makes it practically difficult to design a single gripper that can effectively grasp all objects. As a result, researchers and engineers have developed dedicated grippers tailored to specific grasping tasks or types of objects.\\
 
-Backed with survey findings, a simple Pybullet simulation is developed to collect tactile and visual data. This data is essential for training a logistic regression classifier to tackle a binary classification problem for good and bad labelled grasps. The classifier serves as the baseline approach for the project and a means to discover the best data representation for the data in question.\\
+However, developing a robust and efficient grasping system present several challenges. One major hurdle is the incorporation of touch sensing into robotic grasping, which is hindered by hardware limitations such as sensor sensitivity and cost, as well as difficulties in integrating tactile inputs into standard control schemes \cite{calandra}. Consequently, most robotic grasping research has focused on vision and depth as the primary input modalities \cite{calandra}. However, vision-based grasping approaches have limitations in measuring and reacting to ongoing contact forces, which hinders the full potential benefits of interaction. As a result, these approaches mostly rely on pre-selecting a grasp configuration, such as location, orientation, and forces, before making contact with the object. Addressing these limitations and integrating tactile feedback could significantly improve robotic grasping, leading to more efficient and effective interactions between robots and the physical world.\\
 
-Finally, the project will propose a learning framework that infers hand poses for good grasps using a generative model with Gaussian processes. The framework is also tested on a real setup of the robot and the performances will be displayed and analysed in depth.
+Another challenge is developing a concrete strategy for improving grasp quality and planning while conserving efficiency of the overall system. Results from our \hyperref[chap:2]{literature survey} suggest that such strategies can be summarised into three types: (1) choice of object representation, where coarse approximations of the underlying true shape of an object can simplify the generation of new grasps \cite{farias} \cite{geidenstam}; (2) use of local symmetry properties to capture key geometric features of the object to generate promising grasp candidates \cite{farias} \cite{przybylski}; (3) optimising shape modelling where target objects are parameterized using smooth, differentiable functions from point clouds using spectral analysis \cite{farias}.
 
 
-\section{Project Aims and Objectives}
+\section{Project Aims}
 \label{sec:1.2}
+Having gained a comprehensive understanding of the previously discussed optimizations and strategies, our research project focuses on the development and testing of a robust robotic system that can learn to pick up an object with simple geometry using a two-finger hand. The project will take a learning-based approach to grasping through, for example, Bayesian optimization \cite{nogueria, frazier}. The learning-based approach should be compared with a baseline approach from the related literature (e.g. \cite{nogueria, danielczuk, breyer}) for evaluation, for example, a simple regression classifier to differentiate between good and bad grasps.
 
-\subsection{Project aims}
-\label{sec:1.2.1}
-The aim of this project is for the development and testing of a robust robotic system that can learn to pick up an object with simple geometry using a two-finger hand. The project will take a learning-based approach to grasping through, for example, Bayesian optimization \cite{nogueria, frazier}. The learning-based approach should be compared with a baseline approach from the related literature (e.g. \cite{nogueria, danielczuk, breyer}) for evaluation. 
 
-\subsection{Objectives}
-\label{sec:1.2.2}
-The project aim is divided into several objectives that are expected to be completed throughout the academic year. 
+\newpage
+\section{Project Objectives}
+\label{sec:1.3}
+This project is concerned with the development of a complete simulation with supporting features for data collection and analysis. Therefore, the aims of this project are split according to our system requirements, which we describe in detail below. These objectives are expected to be completed throughout the academic year:
 \begin{enumerate}
     \item Set up a simulation environment, e.g. PyBullet or NVIDIA Isaac. 
     \item Create a data collection pipeline for sensory data (e.g. visual and force/torque readings) via the simulator.
@@ -161,29 +156,54 @@ The project aim is divided into several objectives that are expected to be compl
     \end{enumerate}
 \end{enumerate}
 
-\newpage
+
 \section{Project Approach}
-\label{sec:1.3}
-We approached the project in four stages:
+\label{sec:1.4}
+This section discusses the important phases for the project and the approach taken at each phase. Technologies required for completing a particular phase will be documented and justified.
+
+\subsection{Planning Phase - Design and Research}
+\label{sec:1.4.1}
+We first conduct a literature survey to explore and categorise research projects related to robotic grasping by data input, grasping method and the problem these projects address. Simultaneously, background research was conducted on grasp learning \cite{platt} and robot manipulation to obtain a general understanding of the project's task.
+
+\subsection{Early Development Phase - Pybullet Simulation}
+\label{sec:1.4.2}
+This project is completely conducted via a simulation environment, including data collection, robot manipulation, experimentation and testing of our approaches. Therefore, the development of a Pybullet simulation was considered a top priority in the early phases of the project. The robot we used for our simulation consists of the following components:
 \begin{enumerate}
-    \item Carry out background reading on robotic grasping, including policy learning, regression methods and grasp inference
-    \item Implement of a simple Pybullet environment consisting of a robot arm, gripper and DIGIT tactile sensors
-    \item Develop a data collection pipeline to gather tactile and visual data for rigid bodies in the simulation
-    \item Implement and test a baseline approach using the simulation
-    \item Implement and test the proposed learning-based approach using the simulation.
+    \item Arm: UR5 Robot Arm Manipulator (see: \cite{ur5})
+    \item Gripper: Robotiq 2-Finger Adaptive Robot Gripper 85 (see: \cite{robotiq})
+    \item Tactile sensors: DIGIT tactile sensors \cite{digit} mounted onto each finger of the gripper
 \end{enumerate}
-Any technologies and tools required for the project will also be stated and justified in the corresponding sections.
+The Pybullet simulation should support the following features for our project:
+\begin{enumerate}
+    \item manual robot (end effector) manipulation
+    \item real-time display of tactile data (depth and color cameras)
+    \item a grasp planner using inverse kinematics
+    \item a random end effector pose generator for creating varying grasp poses
+    \item a tactile data collection pipeline using randomly-generated end effector grasp poses
+\end{enumerate}
+
+\subsection{Baseline Development Phase}
+\label{sec:1.4.3}
+This phase focuses on determining the optimal dataset representation for our collected multi-modal data, consisting of tactile sensor readings, visual end effector poses relative to the arm, and the respective grasp outcomes of each end effector pose. In addition, we experiment with several feature engineering techniques, for example dimensionality reduction using ConvNets and Principal Component Analysis (PCA).
+
+\subsection{Execution Phase - Learning Approach Implementation}
+\label{sec:1.4.4}
+Following the outcomes of our baseline approach where we identified the optimal feature representation of our dataset, we move on to develop our learning-based approach which is trained on three primitive object types. In addition to tactile sensor readings and visual data (randomly-generated end effector poses), we include the object features for each object class in our dataset, and train this dataset on a multilayer perceptron (MLP). Finally, we conduct several interesting experiments, including (1) training our MLP using various segmentations of our dataset; and (2) validate our MLP on unseen objects that comprise of similar geometric features to that of the primitive objects that our MLP was trained on.
+
+\subsection{Documentation Phase}
+\label{sec:1.4.5}
+The final phase of the project involves the completion of the project report, writing documentation on setting up and using the simulation, as well as including a brief description on the methodology behind our baseline and learning-based approaches which are implemented in Jupyter Notebook.
 
 
 \section{Report Structure}
-\label{sec:1.4}
+\label{sec:1.5}
 Chapter 2 covers the background and literature review for the project, including important terms and definitions, core packages for the project as well as the analysis of several related literature concerning the data representation of tactile, sensory and temporal data, robotic regrasping approaches and tactile exploration.\\
 
 Chapter 3 documents the development of the Pybullet simulation for the project and the experimentation and analysis of physical DIGIT sensors.\\
 
 Chapter 4 documents the development and testing of the baseline approach logistic regression classifier). It incorporates findings from Chapter 2 to discover the best data representation (raw, PCA, CNN) and the type of data to include (tactile only, visual only, both).\\
 
-Chapter 5 documents the development and implementation of the proposed approach using a Gaussian process generative model that attempts to infer good grasp configurations from random hand poses.\\
+Chapter 5 documents the development and implementation of the proposed approach using a multilayer perceptron model that attempts to infer good grasp configurations on three primitive object classes from random hand poses, trained on data collected from the Pybullet simulation. The dataset includes tactile sensor readings, random hand poses and geometric features of the target objects.\\
 
 Chapter 6 summarises the results and performances of the project, as well as making suggestions for future work and improvement based on these findings.
 
@@ -364,11 +384,11 @@ In this project, we segregate our dataset into tactile-only, visual-only and con
 
 \subsection{Dimensionality Reduction}
 \label{sec:4.3.2}
-Due to the high dimensionality nature of our tactile and visual datasets, we experimented with two popular dimensionality reduction techniques, PCA and CNN feature extraction, to hopefully capture as much of its variation as possible.
+Due to the high dimensionality nature of our tactile and visual datasets, we experimented with two popular dimensionality reduction techniques, PCA and CNN feature extraction, to retain as much information as possible from the dataset.
 
 \subsubsection{Principal Component Analysis (PCA)}
 \label{sec:4.3.2.1}
-For each image in the tactile and visual datasets, we select the top 3 eigenvectors that correspond to the largest eigenvalues as the principal components for the data.
+For each image in the tactile and visual datasets, we select the top 2 eigenvectors that correspond to the largest eigenvalues as the principal components for the data.
 
 \subsubsection{Convolution Neural Network (CNN) Feature Extraction}
 \label{sec:4.3.2.2}
@@ -402,6 +422,16 @@ Select the most promising representation and use it for actual generative model 
 CNN dimension-reduced data
 
 \section{Training}
+Data from 3 categories, 9 objects, per object: 100 stable, 100 unstable, 1800 grasps in total, 900 stable, 900 unstable.
+
+* train with data from 2 objects from each category. And test with data from remaining objects. 
+* randonly subsample the grasps, repeat the experiemtns 5 times.
+* repeat that for every object. 
+
+* report using tactile only, vision only (hand poses + geometric features)
+* combine all
+
+* predict the stability label
 
 \section{Validation}
 
@@ -480,6 +510,18 @@ Since Pybullet is no longer being maintained, consider to move to mujico
     \textit{Simultaneous Tactile Exploration and Grasp Refinement for Unknown Objects},
     2021
 
+\bibitem{geidenstam}
+    S. Geidenstam et al., “Learning of 2d grasping strategies from box-based 3d object approximations.” in Robotics: Science and Systems, vol.
+    2008, 2009.
+
+\bibitem{przybylski}
+    M. Przybylski, T. Asfour, and R. Dillmann, “Unions of balls for shape approximation in robot grasping,” in IEEE/RSJ Int. Conf. Intell. Rob. Sys. IEEE, 2010, pp. 1592–1599
+
+\bibitem{platt}
+    Robert Platt,
+    \textit{Grasp Learning: Models, Methods and Performance},
+    2022
+
 % Other references
 \bibitem{euleranglewolfram}
     \href{https://mathworld.wolfram.com/EulerAngles.html}{Weisstein, Eric W. "Euler Angles." From MathWorld--A Wolfram Web Resource.}
@@ -505,10 +547,13 @@ Since Pybullet is no longer being maintained, consider to move to mujico
 }
 
 \bibitem{franka}
-    \href{https://www.franka.de}{Franka Emika}
+    Franka Emika, \href{https://www.franka.de}{https://www.franka.de}
 
 \bibitem{robotiq}
-    \href{https://robotiq.com/products/2f85-140-adaptive-robot-gripper}{Robotiq}
+    Robotiq, \href{https://robotiq.com/products/2f85-140-adaptive-robot-gripper}{https://robotiq.com/products/2f85-140-adaptive-robot-gripper}
+
+\bibitem{ur5}
+    UR5 (Universal Robots), \href{https://www.universal-robots.com/products/ur5-robot/}{https://www.universal-robots.com/products/ur5-robot/}
 
 \end{thebibliography}
 
