@@ -82,12 +82,11 @@ BSc Computer Science\\ \\
 Supervisors: Prof. Marc Deisenroth, Dr. Yasemin Bekiroglu}
 
 
-
 \begin{document}
 \onehalfspacing
 \maketitle
-
-
+\pagenumbering{roman}
+\setcounter{page}{i}
 %----------------------------------------------------------------------------------
 % Abstract
 %----------------------------------------------------------------------------------
@@ -113,7 +112,6 @@ In this project, we study how to build a robust learning framework that can be e
 % Contents
 %----------------------------------------------------------------------------------
 \tableofcontents
-\setcounter{page}{1}
 
 
 %----------------------------------------------------------------------------------
@@ -121,6 +119,8 @@ In this project, we study how to build a robust learning framework that can be e
 %----------------------------------------------------------------------------------
 \chapter{Introduction}
 \label{chap:1}
+\pagenumbering{arabic}
+\setcounter{page}{1}
 
 \section{Outline of Problem}
 \label{sec:1.1}
@@ -208,45 +208,38 @@ Chapter 5 documents the development and implementation of the proposed approach 
 Chapter 6 summarises the results and performances of the project, as well as making suggestions for future work and improvement based on these findings.
 
 
+
 %----------------------------------------------------------------------------------
-% Section 2: Literature Review
-% Focuses on important terms used throughout the report & academic papers read in-depth
+% Section 2: Background and Literature Review
 %----------------------------------------------------------------------------------
 \chapter{Background and Literature Review}
 \label{chap:2}
 
 \section{Robotic Grasping}
 \label{sec:2.1}
-Robotic grasping refers to the ability of a robot to pick up and manipulate objects using its mechanical grippers or other end effectors. It requires precise coordination between the visual perception of the environment and efficient grasp planning, as well as robustness in terms of the object type, which is the main focus of this project.\\
+% Robotic grasping refers to the ability of a robot to pick up and manipulate objects using its mechanical grippers or other end effectors. It requires precise coordination between the visual perception of the environment and efficient grasp planning, as well as robustness in terms of the object type, which is the main focus of this project.\\
 
-There are several challenges in robotic grasping, such as object recognition, pose estimation, and grasp planning. To grasp an object, a robot needs to detect the object's location (through, for example, a wrist camera), orientation, and size accurately, estimate the best grasp point and orientation, and then execute the grasp with appropriate force and control to ensure a secure hold. The grasping process can be performed using various types of end effectors, including grippers, suction cups, or specialized tools designed for specific tasks. In this project, we will use a pair of DIGIT tactile sensors mounted onto each finger of the gripper to collect sensory readings.
+% There are several challenges in robotic grasping, such as object recognition, pose estimation, and grasp planning. To grasp an object, a robot needs to detect the object's location (through, for example, a wrist camera), orientation, and size accurately, estimate the best grasp point and orientation, and then execute the grasp with appropriate force and control to ensure a secure hold. The grasping process can be performed using various types of end effectors, including grippers, suction cups, or specialized tools designed for specific tasks.
 
+\subsection{Grasp Representation}
+\label{sec:2.1.1}
 
-\section{Pybullet}
+\subsection{Grasp Quality Evaluation}
+\label{sec:2.1.2}
+
+\subsection{Sampling High-Quality Grasp Candidates}
+\label{sec:2.1.3}
+
+\section{Grasp Planning}
 \label{sec:2.2}
-Pybullet \cite{pybullet} is a physics engine and simulator designed to be used in robotics, machine learning and computer graphics. It is a Python wrapper for the Bullet Physics Library, which is an open-source physics engine that can simulate rigid body dynamics, soft body dynamics, and fluids.
 
 
-These components are collectively controlled by the robot's control system, which is responsible for controlling the movement of the arm, processing sensor data, and coordinating the actions of every component. The control system may be a simple physical microcontroller, but in the context of this project, we will use the Pybullet \cite{pybullet} package to achieve our robot manipulation functions.
-
-\section{Related Literature}
+\section{Common Grasping Approaches}
 \label{sec:2.3}
+% Humans rely on rich tactile feedback to grasp objects, however, most of the recent robotic grasping studies only focus on visual input. The authors propose an end-to-end action-conditional model (a multimodal CNN) to learn regrasping policies from visual-tactile data, by predicting outcome of a candidate grasp adjustment, then executing a grasp by iteratively selecting the most promising actions\cite{calandra}.
 
 
-\subsection{More Than a Feeling: Learning to Grasp and Regrasp using Vision and Touch (Calandra et al)\cite{calandra}}
-\label{sec:2.3.1}
-Humans rely on rich tactile feedback to grasp objects, however, most of the recent robotic grasping studies only focus on visual input. The authors propose an end-to-end action-conditional model (a multimodal CNN) to learn regrasping policies from visual-tactile data, by predicting outcome of a candidate grasp adjustment, then executing a grasp by iteratively selecting the most promising actions\cite{calandra}.
-
-
-\subsection{Generalizing Regrasping with Supervised Policy Learning (Hausman et al)\cite{hausman}}
-\label{sec:2.3.2}
-
-
-\subsection{Simultaneous Tactile Exploration and Grasp Refinement for Unknown Objects (Farias et al)\cite{farias}}
-\label{sec:2.3.3}
-
-
-\section{Conclusion on Literature Review}
+\section{Conclusion}
 \label{sec:2.4}
 
 
@@ -275,11 +268,11 @@ Given different combinations of multi-modal data (tactile and visual) collected 
 \label{sec:4.1}
 In this experiment, we collect tactile and visual data on a smooth rectangular block by executing randomly-generated end effector poses.
 
-\subsection{Generating Random Grasps}
+\subsection{Random Grasp Synthesis}
 \label{sec:4.1.1}
 Using our Pybullet simulation, we manually manipulate the end effector to varying positions in the proximity of the block, and record three different end effector poses ($i=0,1,2$) to guarantee some variation in the orientation and position of the grasps. Each end effector pose $S_i$ is a 6-tuple consisting of 3 Cartesian coordinates representing the spatial position of the end effector relative to the robot, and 3 Euler angles representing the orientation of the end effector:
 \begin{equation}
-    S_i=(x,y,z,\alpha,\beta,\gamma)
+    S_i=(x,y,z,r_x,r_y,r_z)
 \end{equation}
 We treat each manually-selected pose independently as a seed grasp configuration, and generate a pre-determined number $N$ of random poses $X_n$ from the seed by adding a small amount of Gaussian noise $K_n$ ($\mu=0$ and $\sigma=0.01$) to each dimension of the seed pose. Mathematically, for every $S_i$, the randomly generated grasps are denoted as:
 \begin{equation}
@@ -330,17 +323,17 @@ After executing each random pose, we append the collected tactile data, end effe
 Before we train our baseline model, we are interested if a clear decision boundary exists between successful and unsuccessful grasps. We create a visualisation of each hand pose $X_n$ in a 3-dimensional space, using its Cartesian coordinates and the "pitch-row-yaw" rotational matrix representation $R$ of its Euler angles ($\alpha,\beta,\gamma$) \cite{euleranglewolfram}:
 
 \begin{equation}
-    R=R_x\cdot(R_y\cdot R_z)
+    R=r_x\cdot(r_y\cdot r_z)
 \end{equation}
 
-\noindent where $R_x$, $R_y$ and $R_z$ are the rotational matrices about the $x$, $y$ and $z$-axis respectively:
+\noindent where $r_x$, $r_y$ and $r_z$ are the rotational matrices about the $x$, $y$ and $z$-axis respectively:
 
 \begin{figure}[H]
     \centering
     \begin{equation*}
-        R_x = \begin{pmatrix}1&0&0 \\ 0&cos(\alpha)&sin(\alpha) \\ 0&-sin(\alpha)&cos(\alpha)\end{pmatrix}\;\;
-        R_y = \begin{pmatrix}cos(\beta)&0&-sin(\beta) \\ 0&1&0 \\ sin(\beta)&0&cos(\beta)\end{pmatrix}\;\;
-        R_z = \begin{pmatrix}cos(\gamma)&sin(\gamma)&0 \\ -sin(\gamma)&cos(\gamma)&0 \\ 0&0&1 \end{pmatrix}
+        r_x = \begin{pmatrix}1&0&0 \\ 0&cos(\alpha)&sin(\alpha) \\ 0&-sin(\alpha)&cos(\alpha)\end{pmatrix}\;\;
+        r_y = \begin{pmatrix}cos(\beta)&0&-sin(\beta) \\ 0&1&0 \\ sin(\beta)&0&cos(\beta)\end{pmatrix}\;\;
+        r_z = \begin{pmatrix}cos(\gamma)&sin(\gamma)&0 \\ -sin(\gamma)&cos(\gamma)&0 \\ 0&0&1 \end{pmatrix}
     \end{equation*}
     \caption{Rotational matrices for each axis in the rotational matrix representation of Euler angles}
     \label{fig:rm_representation}
@@ -349,9 +342,9 @@ Before we train our baseline model, we are interested if a clear decision bounda
 \noindent Using this information, we annotate 20 random hand poses from our dataset in a 3-dimensional plot. Each 6D hand pose is represented using a skeleton 2-finger model, where green and red poses denote successful and unsuccessful grasps respectively:
 \begin{figure}[H]%
     \centering
-    \subfloat[\centering Orientation 1]{{\includegraphics[width=7cm]{docs/Project Report/Media/hand_pose1.png} }}%
+    \subfloat[\centering Orientation 1]{{\includegraphics[width=6.5cm]{docs/Project Report/Media/hand_pose1.png} }}%
     \qquad
-    \subfloat[\centering Orientation 2]{{\includegraphics[width=7cm]{docs/Project Report/Media/hand_pose2.png} }}%
+    \subfloat[\centering Orientation 2]{{\includegraphics[width=6.5cm]{docs/Project Report/Media/hand_pose2.png} }}%
     \caption{Visualisation of 20 end effector poses}%
     \label{fig:hand_poses}%
 \end{figure}
