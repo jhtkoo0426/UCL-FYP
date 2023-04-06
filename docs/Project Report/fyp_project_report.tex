@@ -197,13 +197,13 @@ The final phase of the project involves the completion of the project report, wr
 
 \section{Report Structure}
 \label{sec:1.5}
-Chapter 2 covers the background and literature review for the project, including important terms and definitions, core packages for the project as well as the analysis of several related literature concerning the data representation of tactile, sensory and temporal data, robotic regrasping approaches and tactile exploration.\\
+Chapter 2 gives a brief overview of the background of robotic grasping and relevant literature the project. We investigate common grasp representations and grasp quality evaluation techniques, and analyse various data representations of multi-modal data (tactile, sensory, temporal) and policy-learning approaches.\\
 
-Chapter 3 documents the development of the Pybullet simulation for the project and the experimentation and analysis of physical DIGIT sensors.\\
+Chapter 3 documents the system architecture for the project and the development of a Pybullet simulation, including input components to enable data collection and simulation of our robot setup.\\
 
-Chapter 4 documents the development and testing of the baseline approach logistic regression classifier). It incorporates findings from Chapter 2 to discover the best data representation (raw, PCA, CNN) and the type of data to include (tactile only, visual only, both).\\
+Chapter 4 documents the development and testing of our baseline approach using a binary logistic regression classifier.\\
 
-Chapter 5 documents the development and implementation of the proposed approach using a multilayer perceptron model that attempts to infer good grasp configurations on three primitive object classes from random hand poses, trained on data collected from the Pybullet simulation. The dataset includes tactile sensor readings, random hand poses and geometric features of the target objects.\\
+Chapter 5 documents the development and testing of our proposed approach using a multilayer perceptron (MLP) model that attempts to infer good grasp configurations on three primitive object classes from random hand poses, trained on data collected from the Pybullet simulation. The dataset includes tactile sensor readings, random hand poses and geometric features of the target objects.\\
 
 Chapter 6 summarises the results and performances of the project, as well as making suggestions for future work and improvement based on these findings.
 
@@ -217,12 +217,36 @@ Chapter 6 summarises the results and performances of the project, as well as mak
 
 \section{Robotic Grasping}
 \label{sec:2.1}
-% Robotic grasping refers to the ability of a robot to pick up and manipulate objects using its mechanical grippers or other end effectors. It requires precise coordination between the visual perception of the environment and efficient grasp planning, as well as robustness in terms of the object type, which is the main focus of this project.\\
+In the field of robotics, grasping is a fundamental yet challenging skill of robots which refers to the autonomous ability of a robot to grasp and move objects with its mechanical grippers or other end effectors \cite{zhang}. It demands precise coordination between the visual perception of the surrounding environment and efficient grasp planning, as well as a robot's adaptiveness to unseen object classes (robustness).\\
 
-% There are several challenges in robotic grasping, such as object recognition, pose estimation, and grasp planning. To grasp an object, a robot needs to detect the object's location (through, for example, a wrist camera), orientation, and size accurately, estimate the best grasp point and orientation, and then execute the grasp with appropriate force and control to ensure a secure hold. The grasping process can be performed using various types of end effectors, including grippers, suction cups, or specialized tools designed for specific tasks.
+Robotic grasping is far away from developing into an intuitive and instinctive sense as in human beings. There are many unknown factors that enable humans to flawlessly perform grasps when provided with visual and tactile information. However, with the advancements of deep-learning and computer vision, semantic grasping is becoming the main focus and basis for autonomous robotic grasping systems \cite{zhang}, where a robot is trained on monocular images of a user-specified object type \cite{jang}.\\
 
+To successfully grasp an object, a robot needs to detect the object's location (through, for example, a wrist camera), orientation, and size accurately, estimate the best grasp point and orientation, and then execute the grasp with appropriate force and control to ensure a secure hold. The grasping process can be performed using various types of end effectors, including grippers, suction cups, or specialized tools designed for specific tasks.\\
+
+Therefore, accurate and efficient grasp representation and planning are paramount to ensure a smooth grasping process when performing grasping tasks.
+
+\newpage
 \subsection{Grasp Representation}
 \label{sec:2.1.1}
+A grasp in robotic grasping is a specific configuration of a robotic hand or gripper which allows it to firmly hold an object. These representations can be used in different grasp planning algorithms and can be combined to create more complex representations of grasps. Commonly-used grasp representations include: 
+
+\subsubsection{Meshes}
+\label{sec:2.1.1.1}
+In computer graphics and object modelling, a (polygon) mesh is a 3-dimensional representation or rigid reconstruction of the surface of an object. Typically, the representation is a collection of vertices, edges and faces that defines the object shape. Faces usually consist of triangles an object's surface that is composed of vertices, edges, and faces. Grasps can be represented as a set of vertices on the mesh that correspond to the location of the gripper's fingertips and palm.
+
+\subsubsection{Point Clouds}
+\label{sec:2.1.1.2}
+In the context of robotics, a point cloud is a discrete set of 3-dimensional Cartesian coordinates which collectively represents the surface of an object. The location of a gripper's fingertips can be represented as sets of points on the point cloud in order to annotate a grasp.\\
+
+In addition to grasp representations, point clouds can be merged for surface reconstruction (using, for example, Poisson surface reconstruction), which creates a mesh (or set of surfaces) that approximate the true shape of the target object.\\
+
+In the Pybullet simulation for this project, we include a simple feature that generates a point cloud of the rendered object of the simulation which can be inspected visually. In the physical world, a point cloud is generated using 3D scanners or photogrammetry software, which can be rendered and inspected in a virtual world.
+
+\subsubsection{Hand Configurations}
+\label{sec:2.1.1.3}
+A hand (or end effector) configuration describes the joint angles or positions of a robotic hand or gripper relative to the robot itself. This is a simple and straightforward approach to representing grasps.\\
+
+In this project, we use the terms "hand configurations" and "end effector poses" interchangeably.
 
 \subsection{Grasp Quality Evaluation}
 \label{sec:2.1.2}
@@ -504,16 +528,28 @@ Since Pybullet is no longer being maintained, consider to move to mujico
     2021
 
 \bibitem{geidenstam}
-    S. Geidenstam et al., “Learning of 2d grasping strategies from box-based 3d object approximations.” in Robotics: Science and Systems, vol.
+    S. Geidenstam et al.,
+    \textit{Learning of 2d grasping strategies from box-based 3d object approximations}, in Robotics: Science and Systems, vol.
     2008, 2009.
 
 \bibitem{przybylski}
-    M. Przybylski, T. Asfour, and R. Dillmann, “Unions of balls for shape approximation in robot grasping,” in IEEE/RSJ Int. Conf. Intell. Rob. Sys. IEEE, 2010, pp. 1592–1599
+    M. Przybylski, T. Asfour, and R. Dillmann,
+    \textit{Unions of balls for shape approximation in robot grasping}, in IEEE/RSJ Int. Conf. Intell. Rob. Sys. IEEE, 2010, pp. 1592–1599
 
 \bibitem{platt}
     Robert Platt,
     \textit{Grasp Learning: Models, Methods and Performance},
     2022
+
+\bibitem{zhang}
+    Hanbo Zhang et al.,
+    \textit{Robotic Grasping from Classical to Modern: A Survey},
+    2022
+    
+\bibitem{jang}
+    Jang et al.,
+    \textit{End-to-End Learning of Semantic Grasping},
+    
 
 % Other references
 \bibitem{euleranglewolfram}
