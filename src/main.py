@@ -33,8 +33,7 @@ def run_simulation():
     env = ClutteredPushGrasp(robot, ycb_models, camera, vis=True)
     env.reset()
 
-    action = [0, 0, 0.5, 0, 1.571, 1.571]
-    robot.manipulate_ee(action=action, control_method='end')
+    env.container.resetObject()
 
     while True:
         env.step(env.read_debug_parameter(), 'end')

@@ -31,6 +31,12 @@ class Thing:
             self.urdf_path = "./src/urdf/objects/cylinders/cylinder2.urdf"
         elif name == "cylinder3":
             self.urdf_path = "./src/urdf/objects/cylinders/cylinder3.urdf"
+        elif name == "mustard_bottle1":
+            self.urdf_path = "./src/urdf/objects/mustard_bottle/mustard_bottle1.urdf"
+        elif name == "mustard_bottle2":
+            self.urdf_path = "./src/urdf/objects/mustard_bottle/mustard_bottle2.urdf"
+        elif name == "mustard_bottle3":
+            self.urdf_path = "./src/urdf/objects/mustard_bottle/mustard_bottle3.urdf"
 
         print(self.urdf_path)
         id = p.loadURDF(self.urdf_path, self.initPos, self.initOrientation, useFixedBase=False, globalScaling=self.objectScale)
