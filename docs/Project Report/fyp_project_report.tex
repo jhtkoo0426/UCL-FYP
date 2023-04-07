@@ -359,7 +359,7 @@ Before we train our baseline model, we are interested if a clear decision bounda
         r_z = \begin{pmatrix}cos(\gamma)&sin(\gamma)&0 \\ -sin(\gamma)&cos(\gamma)&0 \\ 0&0&1 \end{pmatrix}
     \end{equation*}
     \caption{Rotational matrices for each axis in the rotational matrix representation of Euler angles}
-    \label{fig:rm_representation}
+    \label{fig:4.3}
 \end{figure}
 
 \noindent Using this information, we annotate 20 random hand poses from our dataset in a 3-dimensional plot. Each 6D hand pose is represented using a skeleton 2-finger model, where green and red poses denote successful and unsuccessful grasps respectively:
@@ -369,7 +369,7 @@ Before we train our baseline model, we are interested if a clear decision bounda
     \qquad
     \subfloat[\centering Orientation 2]{{\includegraphics[width=6.5cm]{docs/Project Report/Media/hand_pose2.png} }}%
     \caption{Visualisation of 20 end effector poses}%
-    \label{fig:hand_poses}%
+    \label{fig:4.4}%
 \end{figure}
 \noindent From the above figures, we are able to visually determine a rough decision boundary between successful (green) and unsuccessful (red) grasps. Therefore, we believe that it is feasible to fit this dataset using a simple binary classifier as our baseline approach.
 
@@ -408,15 +408,17 @@ For each image in the tactile and visual datasets, we select the top 2 eigenvect
 
 \subsubsection{Convolution Neural Network (CNN) Feature Extraction}
 \label{sec:4.3.2.2}
-We create a 3-layer convolution neural network to extract the important features from our data combinations. Each convolution layer is interwined with a MaxPool2D layer with a $2\times2$ kernel. \hyperref[fig:cnnarch]{Fig 4.5} illustrates the architecture for the CNN we used:
+We create a 3-layer convolution neural network to extract the important features from our data combinations. Each convolution layer is interwined with a MaxPool2D layer with a $2\times2$ kernel. \hyperref[fig:4.5]{Fig 4.5} illustrates the architecture for the CNN we used:
 \begin{figure}[H]
     \includegraphics[scale=0.7]{docs/Project Report/Media/nn.png}
     \caption{Architecture for feature extraction CNN}
-    \label{fig:cnnarch}
+    \label{fig:4.5}
 \end{figure}
 
-\section{Baseline Model}
+\section{Training}
 \label{sec:4.4}
+To improve the convergence speed and performance for training our Logistic Regression model, we normalise the tactile and visual datasets by column with zero mean and unit variance.
+
 
 \subsection{Overview}
 We propose a simple binary logistic regression classifier that predicts the grasp outcome for a given random end effector pose. The model is trained on the three datasets based on the discussed data combinations in \hyperref[sec:4.3.1]{Section 4.3.1}. In addition, we attempt to reduce the dimensionality of these datasets using the two techniques (PCA and ConvNet) discussed in \hyperref[sec:4.3.2]{Section 4.3.2}
@@ -495,7 +497,7 @@ The principal curvatures of an object mesh is pair of maximum and minimum values
 
 To compute the principal curvatures of an object in Pybullet, we first extract the mesh data of the object via \verb|getMeshData()|, a Pybullet built-in function that returns mesh information of triangle meshes \cite{pybullet}, namely (a) \textit{indices}, the number of vertices found in the mesh; and (b) \textit{vertices}, an array of 3-tuples describing the triangle meshes. Next, we compute the principal curvatures at each vertex of the mesh by iterating over all vertices and computing the covariance matrix of its neighboring vertices (refer to the \verb|ClusteredPushGrasp.getRigidBodyCurvature()| method in \verb|env.py|). To do this, we find its 10 nearest neighbours for each vertex in the mesh using a k-dimensional tree for fast nearest-neighbour queries (\verb|scipy.spatial.cKDTree|). The covariance matrix is then used to compute the eigenvalues and eigenvectors, which are sorted in descending order. The reciprocals of the top two eigenvalues are taken as the principal curvatures at the current vertex. Finally, the function returns the top $k$ principal curvatures as a $2\times k$ array of principal curvatures.\\
 
-Next, we determine whether the principal components are able to cluster the three object categories into their own respective groups. To do this, we concatenate the principal components with the 3 dimensions of the objects (refer to \hyperref[tbl:5.1]{Table 5.1}). Then, we normalize these features by column with mean 0 and variance 1. Finally, we perform PCA on the features and select the top $n$ components to visualise them. \hyperref[fig:5.1]{Figure 5.1} shows the results of these visualisations in 2D and 3D.
+Next, we determine whether the principal components are able to cluster the three object categories into their own respective groups. To do this, we concatenate the principal components with the 3 dimensions of the objects (refer to \hyperref[tbl:5.1]{Table 5.1}). Then, we normalize these features by column with zero mean and unit variance. Finally, we perform PCA on the features and select the top $n$ components to visualise them.
 
 \vspace*{-0.7cm}
 \begin{figure}[H]%
@@ -507,19 +509,54 @@ Next, we determine whether the principal components are able to cluster the thre
     \label{fig:5.1}%
 \end{figure}
 
+\hyperref[fig:5.1]{Figure 5.1} shows the results of these visualisations in 2D and 3D. We notice that object variations of each category are clustered fairly well together and correctly classified. Thus, we conclude that principal curvatures is a justifyable and accurate representation of geometric features for our dataset of objects.
 
-\subsection{Dataset Representation}
-\label{sec:5.2.1}
-Based on our analysis results of our baseline approach in \hyperref[sec:4.7]{Section 4.7}, we concluded that under limited dimensionality circumstances, the Logistic Regression model fits the dataset with the highest accuracy using a convolutional neural network as a dimensionality reduction technique.\\
+\section{Preprocessing}
+\label{sec:5.3}
+Based on our analysis results of our baseline approach in \hyperref[sec:4.7]{Section 4.7}, we concluded that under limited dimensionality circumstances, the Logistic Regression model fits the dataset with the highest accuracy using a convolutional neural network as a dimensionality reduction technique. Therefore, before training our MLP, we extract important features from our dataset using the same \hyperref[fig:4.5]{CNN} architecture. This results in a condensed dataset of shape $1200\times512$.\\
+
+To improve the convergence speed and performance for training our MLP model, we normalise the tactile and visual datasets with zero mean and unit variance. This also prevents the initialisation of large weights during back-propagation.
 
 \section{Training}
-
-\subsection{Preprocessing}
-dataset normalisatoin with sklearn.standardscaler
+\label{sec:5.4}
+We trained our MLP model on two versions of our dataset:
+\begin{enumerate}
+    \item tactile and visual data (end effector poses only)
+    \item tactile and visual data (end effector poses and object geometric features)
+\end{enumerate}
 
 \subsection{Training details}
-Data from 3 categories, 9 objects, per object: 4 seed poses, 80 stable grasps, 80 unstable grasps, 1440 grasps in total, 720 stable, 720 unstable.
+Split dataset into 80\% training and 20\% validation;
 
+\subsection{Loss function}
+simple binary cross-entropy with logits loss (sigmoid + bce loss in a single class)
+
+\subsection{Optimizer}
+Adam with lr=1e-3
+
+
+\section{Validation}
+\begin{figure}[H]%
+    \centering
+    \subfloat[\centering Invalid depth data]{{\includegraphics[width=7cm]{docs/Project Report/Media/mlp_no_geo_loss_curve.png}\label{fig:5.2a}}}%
+    \qquad
+    \subfloat[\centering Valid depth data]{{\includegraphics[width=7cm]{docs/Project Report/Media/mlp_no_geo_cm.png}\label{fig:5.2b}}}%
+    \caption{Results for MLP without geometric features}%
+    \label{fig:4.2}%
+\end{figure}
+Accuracy = 75.83\%
+
+\begin{figure}[H]%
+    \centering
+    \subfloat[\centering Invalid depth data]{{\includegraphics[width=7cm]{docs/Project Report/Media/mlp_geo_loss_curve.png}\label{fig:5.3a}}}%
+    \qquad
+    \subfloat[\centering Valid depth data]{{\includegraphics[width=7cm]{docs/Project Report/Media/mlp_geo_cm.png}\label{fig:5.3n}}}%
+    \caption{Results for MLP with geometric features}%
+    \label{fig:4.2}%
+\end{figure}
+Accuracy = 76.39\%
+
+\section{Interesting experiments}
 * train with data from 2 objects from each category. And test with data from remaining objects. 
 * randonly subsample the grasps, repeat the experiemtns 5 times.
 * repeat that for every object. 
@@ -528,15 +565,6 @@ Data from 3 categories, 9 objects, per object: 4 seed poses, 80 stable grasps, 8
 * combine all
 
 * predict the stability label
-
-\subsection{Loss function}
-
-\subsection{Optimizer}
-
-
-\section{Validation}
-
-\section{Interesting experiments}
 \begin{itemize}
     \item Train with data of 2 blocks, test with data of 1 block
     \item Train with data of multiple types of objects (e.g. block + cylinder)
