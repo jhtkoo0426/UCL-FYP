@@ -48,6 +48,8 @@
 
 % Code
 \usepackage{fancyvrb}
+\usepackage{listings}
+\lstset{basicstyle=\ttfamily, keywordstyle=\bfseries}
 
 % Spacing
 \newcommand{\HRule}[1]{\rule{\linewidth}{#1}}
@@ -489,32 +491,18 @@ To this end, we extracted and analysed several geometric features of the 9 objec
 
 \subsubsection{Principal Curvature}
 \label{sec:5.2.3.1}
-In differential geometry, the two principal curvatures at a given point of a surface are the maximum and minimum values of the curvature as expressed by the eigenvalues of the shape operator at that point. They measure how the surface bends by different amounts in different directions at that point \cite{principalcurvature}.\\
+The principal curvatures of an object mesh is pair of maximum and minimum values of curvatures at a certain point, expressed by the eigenvalues of the shape operator at that point \cite{principalcurvature}.\\
 
-To compute the principal curvatures of an object in Pybullet, we first extract the mesh data of the object via \verb|getMeshData()|, a Pybullet built-in function that returns mesh information of triangle meshes \cite{pybullet}, namely:
-\begin{enumerate}
-    \item \textit{indices}, the number of vertices found in the mesh; and
-    \item \textit{vertices}, an array of 3-tuples describing the triangle meshes.
-\end{enumerate}
-We then calculate the top $k$ principal curvatures according to the following algorithm:
-\begin{enumerate}
-    \item For each vertex in the mesh, find its 10 nearest neighbors.
-    \item Compute the covariance matrix of the neighbors.
-    \item Compute the eigenvalues and eigenvectors of the covariance matrix.
-    \item Sort the eigenvalues in descending order.
-    \item Compute the principal curvatures as the reciprocals of the two largest eigenvalues.
-\end{enumerate}
+To compute the principal curvatures of an object in Pybullet, we first extract the mesh data of the object via \verb|getMeshData()|, a Pybullet built-in function that returns mesh information of triangle meshes \cite{pybullet}, namely (a) \textit{indices}, the number of vertices found in the mesh; and (b) \textit{vertices}, an array of 3-tuples describing the triangle meshes. Next, we compute the principal curvatures at each vertex of the mesh by iterating over all vertices and computing the covariance matrix of its neighboring vertices (refer to the \verb|ClusteredPushGrasp.getRigidBodyCurvature()| method in \verb|env.py|). To do this, we find its 10 nearest neighbours for each vertex in the mesh using a k-dimensional tree for fast nearest-neighbour queries (\verb|scipy.spatial.cKDTree|). The covariance matrix is then used to compute the eigenvalues and eigenvectors, which are sorted in descending order. The reciprocals of the top two eigenvalues are taken as the principal curvatures at the current vertex. Finally, the function returns the top $k$ principal curvatures as a $2\times k$ array of principal curvatures.\\
 
-% Next, we compute the principal curvatures at each vertex of the mesh by iterating over all vertices and computing the covariance matrix of its neighboring vertices. The covariance matrix is then used to compute the eigenvalues and eigenvectors, which are sorted in descending order. The reciprocals of the top two eigenvalues are taken as the principal curvatures at the current vertex. Finally, the function returns the top $k$ principal curvatures as a numpy array.\\
+Next, we determine whether the principal components are able to cluster the three object categories into their own respective groups. To do this, we concatenate the principal components with the 3 dimensions of the objects (refer to \hyperref[tbl:5.1]{Table 5.1}). Then, we normalize these features by column with mean 0 and variance 1. Finally, we perform PCA on the features and select the top $n$ components to visualise them. \hyperref[fig:5.1]{Figure 5.1} shows the results of these visualisations in 2D and 3D.
 
-Next, we determine whether the principal components are able to cluster the three object categories into their own respective groups. To do this, we concatenate the principal components with the 3 dimensions of the objects (refer to \hyperref[tbl:5.1]{Table 5.1}). Then, we normalize these features by column with mean 0 and variance 1. Finally, we perform Principal Component Analysis on the features and select the top $n$ components to visualise them. \hyperref[fig:5.1]{Figure 5.1} shows the results of these visualisations in 2D and 3D.
-
-\vspace*{-0.5cm}
+\vspace*{-0.7cm}
 \begin{figure}[H]%
     \centering
-    \subfloat[\centering Top $k=2$ components]{{\includegraphics[width=0.45\textwidth]{docs/Project Report/Media/principal_curvature_2d.png} }}%
+    \subfloat[\centering Top $k=2$ components]{{\includegraphics[width=0.4\textwidth]{docs/Project Report/Media/principal_curvature_2d.png} }}%
     \qquad
-    \subfloat[\centering Top $k=3$ components]{{\includegraphics[width=0.45\textwidth]{docs/Project Report/Media/principal_curvature_3d.png} }}%
+    \subfloat[\centering Top $k=3$ components]{{\includegraphics[width=0.4\textwidth]{docs/Project Report/Media/principal_curvature_3d.png} }}%
     \caption{Clustering using PCA-extracted components based on principal curvatures of objects}%
     \label{fig:5.1}%
 \end{figure}
