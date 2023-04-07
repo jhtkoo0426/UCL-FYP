@@ -15,6 +15,7 @@
 
 % Tables
 \usepackage{multirow, multicol}
+\usepackage{booktabs}
 \setlength{\columnsep}{1cm}
 
 % Custom theorems
@@ -392,7 +393,7 @@ In this project, we segregate our dataset into tactile-only, visual-only and con
         \hline
     \end{tabular}
     \caption{Various segregated datasets}
-    \label{tab:4.1}
+    \label{tbl:4.1}
 \end{table}
 
 \subsection{Dimensionality Reduction}
@@ -430,6 +431,7 @@ Select the most promising representation and use it for actual generative model 
 
 \subsection{Analysis of Results}
 \label{sec:4.6.2}
+Mention dimensionality constraints on computability costs!
 
 %----------------------------------------------------------------------------------
 % Section 5: Proposed Approach
@@ -437,15 +439,95 @@ Select the most promising representation and use it for actual generative model 
 \chapter{Multilayer Perceptron Artificial Neural Network for Grasp Stability Prediction}
 \label{chap:5}
 
-\section{Overview}
+\section{Mutlilayer Perceptrons and Motivation}
+\label{sec:5.1}
 A multilayer perceptron (MLP) as a feedforward neural network consisting of a minimum of three fully-connected layers of perceptrons (neurons). Every MLP contains an input layer that receives input data, an output layer that produces a prediction based on patterns within the data, and at least one hidden layer that enable the MLP to learn complex representations of the data.\\
 
-In robotic grasping, there exists certain grasp configurations that yield a high grasp stability and success rate. For instance, grasping an object around its center of gravity can minimise rotational forces on the object that could cause it to tilt. MLPs excel at learning non-linear relationships between input and output data, therefore intuitively speaking, an MLP is a good candidate to learn such patterned configurations from the complex dataset and generalise them into a simple grasping strategy based on different object types.
+For robotic grasping on a specific object, there may exist certain grasp configurations that yield a high grasp stability and success rate. For instance, grasping an object around its center of gravity can minimise rotational forces on the object that could cause it to tilt, hence increasing the probability of a successful grasp. MLPs excel at learning non-linear relationships between input and output data. Therefore, intuitively, a MLP is a good candidate to learn such patterned configurations from the complex dataset and generalise them into a simple grasping strategy based on different object types.\\
 
-\section{Data representation}
-CNN dimension-reduced data
+To introduce robustness in robotic grasping for various object types, we trained our MLP model on three primitive object categories, namely rectangular boxes, cylinders, and bottle-shaped objects (which are more rigid than typical cylinders). Our intention is to explore the potential influence of an object's geometric characteristics, such as its width and height, on the model's accuracy.
+
+
+\section{Dataset Collection and Representation}
+\label{sec:5.2}
+
+\subsection{Object Variations}
+\label{sec:5.2.1}
+To enhance the robustness of our model, we have trained it on three primitive object categories that collectively represent a sizable proportion of daily-life objects: rectangular boxes, cylinders and bottles. For each object category, we generate three instances with slightly different dimensions. The 3D meshes of these object variations and their dimensions are listed in \hyperref[tbl:5.1]{Table 5.1}.
+
+\begin{table}[H]
+    \centering
+    \caption{3D meshes of all experimental object variations}
+    \resizebox{\textwidth}{!}{%
+        \begin{tabular}{lccccccccc}
+            \toprule
+            & \includegraphics[width=0.1\textwidth]{docs/Project Report/Media/block1.png} & \includegraphics[width=0.1\textwidth]{docs/Project Report/Media/block2.png} & \includegraphics[width=0.1\textwidth]{docs/Project Report/Media/block3.png} &
+            \includegraphics[width=0.1\textwidth]{docs/Project Report/Media/cylinder1.png} & \includegraphics[width=0.1\textwidth]{docs/Project Report/Media/cylinder2.png} & \includegraphics[width=0.1\textwidth]{docs/Project Report/Media/cylinder3.png} & \includegraphics[width=0.1\textwidth]{docs/Project Report/Media/mustard_bottle1.png} & \includegraphics[width=0.1\textwidth]{docs/Project Report/Media/mustard_bottle2.png} &  \includegraphics[width=0.1\textwidth]{docs/Project Report/Media/mustard_bottle3.png} \\
+            & Block 1 & Block 2 & Block 3 & Cylinder 1 & Cylinder 2 & Cylinder 3 & Bottle 1 & Bottle 2 & Bottle 3 \\
+            \midrule
+            Depth  & 0.025 & 0.03  & 0.05  & 0.04 & 0.045  & 0.05  & 0.06 & 0.04 & 0.04 \\
+            Width  & 0.05  & 0.025 & 0.025 & 0.04 & 0.045  & 0.05  & 0.04 & 0.06 & 0.06 \\
+            Height & 0.05  & 0.045 & 0.04  & 0.05 & 0.035  & 0.045 & 0.04 & 0.06 & 0.04 \\
+            Radius & --    & --    & --    & 0.02 & 0.0225 & 0.025 & --   & --   & --   \\
+            \bottomrule
+        \end{tabular}
+    }
+    \label{tbl:5.1}
+\end{table}
+
+
+\subsection{Data Collection}
+\label{sec:5.2.2}
+Utilising our Pybullet data collection pipeline from \hyperref[sec:4.2]{Section 4.2}, we collect multi-modal data for every object variation. Then, for each variation, we manually select $i=4$ seed poses and record the data of 20 successful and 20 unsuccessful grasps with Gaussian noise applied to the seed pose. This forms a dataset of 9x160=1440 grasps in total (720 stable and 720 unstable grasps) consisting tactile sensor readings and hand poses.
+
+
+\subsection{Geometric Features of an Object}
+\label{sec:5.2.3}
+Each primitive object category in our dataset possesses unique characteristics. For instance, the curvature of an object's surface can differentiate cylinders and bottles from blocks with ease. As objects within a primitive class often share similar geometric features (such as the curvature of cylinders), our model could potentially generalize successful and unsuccessful grasp poses within each object category by establishing a connection between those poses and the object's properties.\\
+
+To this end, we extracted and analysed several geometric features of the 9 object variations in order to determine which of them can effectively differentiate between the object categories.
+
+\subsubsection{Principal Curvature}
+\label{sec:5.2.3.1}
+In differential geometry, the two principal curvatures at a given point of a surface are the maximum and minimum values of the curvature as expressed by the eigenvalues of the shape operator at that point. They measure how the surface bends by different amounts in different directions at that point \cite{principalcurvature}.\\
+
+To compute the principal curvatures of an object in Pybullet, we first extract the mesh data of the object via \verb|getMeshData()|, a Pybullet built-in function that returns mesh information of triangle meshes \cite{pybullet}, namely:
+\begin{enumerate}
+    \item \textit{indices}, the number of vertices found in the mesh; and
+    \item \textit{vertices}, an array of 3-tuples describing the triangle meshes.
+\end{enumerate}
+We then calculate the top $k$ principal curvatures according to the following algorithm:
+\begin{enumerate}
+    \item For each vertex in the mesh, find its 10 nearest neighbors.
+    \item Compute the covariance matrix of the neighbors.
+    \item Compute the eigenvalues and eigenvectors of the covariance matrix.
+    \item Sort the eigenvalues in descending order.
+    \item Compute the principal curvatures as the reciprocals of the two largest eigenvalues.
+\end{enumerate}
+
+% Next, we compute the principal curvatures at each vertex of the mesh by iterating over all vertices and computing the covariance matrix of its neighboring vertices. The covariance matrix is then used to compute the eigenvalues and eigenvectors, which are sorted in descending order. The reciprocals of the top two eigenvalues are taken as the principal curvatures at the current vertex. Finally, the function returns the top $k$ principal curvatures as a numpy array.\\
+
+Next, we determine whether the principal components are able to cluster the three object categories into their own respective groups. To do this, we concatenate the principal components with the 3 dimensions of the objects (refer to \hyperref[tbl:5.1]{Table 5.1}). Then, we normalize these features by column with mean 0 and variance 1. Finally, we perform Principal Component Analysis on the features and select the top $n$ components to visualise them. \hyperref[fig:5.1]{Figure 5.1} shows the results of these visualisations in 2D and 3D.
+
+\vspace*{-0.5cm}
+\begin{figure}[H]%
+    \centering
+    \subfloat[\centering Top $k=2$ components]{{\includegraphics[width=0.45\textwidth]{docs/Project Report/Media/principal_curvature_2d.png} }}%
+    \qquad
+    \subfloat[\centering Top $k=3$ components]{{\includegraphics[width=0.45\textwidth]{docs/Project Report/Media/principal_curvature_3d.png} }}%
+    \caption{Clustering using PCA-extracted components based on principal curvatures of objects}%
+    \label{fig:5.1}%
+\end{figure}
+
+
+\subsection{Dataset Representation}
+\label{sec:5.2.1}
+Based on our analysis results of our baseline approach in \hyperref[sec:4.7]{Section 4.7}, we concluded that under limited dimensionality circumstances, the Logistic Regression model fits the dataset with the highest accuracy using a convolutional neural network as a dimensionality reduction technique.\\
 
 \section{Training}
+
+\subsection{Preprocessing}
+dataset normalisatoin with sklearn.standardscaler
 
 \subsection{Training details}
 Data from 3 categories, 9 objects, per object: 4 seed poses, 80 stable grasps, 80 unstable grasps, 1440 grasps in total, 720 stable, 720 unstable.
@@ -459,6 +541,11 @@ Data from 3 categories, 9 objects, per object: 4 seed poses, 80 stable grasps, 8
 
 * predict the stability label
 
+\subsection{Loss function}
+
+\subsection{Optimizer}
+
+
 \section{Validation}
 
 \section{Interesting experiments}
@@ -470,7 +557,7 @@ Data from 3 categories, 9 objects, per object: 4 seed poses, 80 stable grasps, 8
 
 
 %----------------------------------------------------------------------------------
-% Section 5: Future Work
+% Section 6: Future Work
 %----------------------------------------------------------------------------------
 \chapter{Future Work}
 \label{chap:6}
@@ -482,8 +569,6 @@ Since Pybullet is no longer being maintained, consider to move to mujico
 % Appendix section
 %----------------------------------------------------------------------------------
 \appendix
-
-
 \begin{thebibliography}{9}
 % Academic papers
 \bibitem{haarnoja}
@@ -563,6 +648,10 @@ Since Pybullet is no longer being maintained, consider to move to mujico
 % Other references
 \bibitem{euleranglewolfram}
     \href{https://mathworld.wolfram.com/EulerAngles.html}{Weisstein, Eric W. "Euler Angles." From MathWorld--A Wolfram Web Resource.}
+
+% Terms
+\bibitem{principalcurvature}
+    Principal curvature, \href{https://en.wikipedia.org/wiki/Principal_curvature}{https://en.wikipedia.org/wiki/Principal_curvature}
 
 % References for technologies used
 \bibitem{digit}
