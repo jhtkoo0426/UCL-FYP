@@ -188,8 +188,7 @@ class ClutteredPushGrasp:
         # Apply 6d gaussian noise to base hand pose
         sixd_noise = {
             # Baseline noise
-            "block": np.insert(np.random.normal(0, 0.01, 5), 2, 0),
-            # "block": np.random.normal(0, 0.01, 6),
+            "block": np.random.normal(0, 0.025, 6),
 
             # MLP noise
             "block1": np.random.normal(0, 0.01, 6),
@@ -300,42 +299,47 @@ class ClutteredPushGrasp:
 
         # Base hand poses for different objects will vary as a result of manual trials on these objects.
         base_hand_poses = {
-            "bottle": np.array([0.1296842396259308, 0.014147371053695679, 0.13684210181236267, 0.09915781021118164, 1.520420789718628, 0.5952490568161011]),
-            "block": np.array([0.0, 0.0, 0.2, 0.0, 1.570796251296997, 1.5707963705062866]),
-            "block1": np.array([0.0, 0.0, 0.2, 0.0, 1.570796251296997, 1.5707963705062866]),
-            "sphere": np.array([0.0, 0.0, 0.2, 0.0, 1.570796251296997, 1.5707963705062866])
+            "block": [(0.0, -0.014147371053695679, 0.17894737422466278, -3.140000104904175, 1.570796251296997, 1.5707963705062866),
+                (0.0, -0.0047158002853393555, 0.17894737422466278, -3.140000104904175, 1.570796251296997, 1.5707963705062866),
+                (0.0, 0.021221041679382324, 0.17894737422466278, -3.140000104904175, 1.570796251296997, 1.5707963705062866),]
         }
 
-        while success_count < self.RANDOM_POSES_COUNT or failure_count < self.RANDOM_POSES_COUNT:
+        # Calculate required poses for every seed pose
+        poses_count = self.RANDOM_POSES_COUNT // len(base_hand_poses[self.object_name])
+        
+
+        while success_count < poses_count or failure_count < poses_count:
             # Reset robot and arm only
             self.reset_simulation()
             self.fixed_step_sim(1000)
-            random_pose = self.generateGaussianNoisePose(base_hand_poses[self.object_name], self.object_name)
-            generated_grasp_data = self.execute_pose(random_pose)
+            
+            for pose in base_hand_poses[self.object_name]:
+                random_pose = self.generateGaussianNoisePose(pose, self.object_name)
+                generated_grasp_data = self.execute_pose(random_pose)
 
-            if generated_grasp_data is not None:
-                depth, color, grasp_is_good = generated_grasp_data
+                if generated_grasp_data is not None:
+                    depth, color, grasp_is_good = generated_grasp_data
 
-                # Only record the grasp data if the tactile data is valid
-                if depth is None or color is None:
-                    print(f"Not saving grasp data to dataset :(")
-                else:
-                    if grasp_is_good and (grasp_outcomes == 1).sum() < self.RANDOM_POSES_COUNT:
-                        # Save recorded data to corresponding datasets
-                        end_effector_poses = np.append(end_effector_poses, np.array([random_pose]), axis=0)
-                        tactile_depth_data = np.append(tactile_depth_data, np.array([depth]), axis=0)
-                        tactile_color_data = np.append(tactile_color_data, np.array([color]), axis=0)
-                        grasp_outcomes = np.append(grasp_outcomes, np.ones(shape=(1,)), axis=0)
-                        success_count += 1
-                        print(f"Data analysed and saved - Successes: {success_count} | Failures: {failure_count}")
-                    elif not grasp_is_good and (grasp_outcomes == 0).sum() < self.RANDOM_POSES_COUNT:
-                        # Save recorded data to corresponding datasets
-                        end_effector_poses = np.append(end_effector_poses, np.array([random_pose]), axis=0)
-                        tactile_depth_data = np.append(tactile_depth_data, np.array([depth]), axis=0)
-                        tactile_color_data = np.append(tactile_color_data, np.array([color]), axis=0)
-                        grasp_outcomes = np.append(grasp_outcomes, np.zeros(shape=(1,)), axis=0)
-                        failure_count += 1
-                        print(f"Data analysed and saved - Successes: {success_count} | Failures: {failure_count}")
+                    # Only record the grasp data if the tactile data is valid
+                    if depth is None or color is None:
+                        print(f"Not saving grasp data to dataset :(")
+                    else:
+                        if grasp_is_good and (grasp_outcomes == 1).sum() < poses_count:
+                            # Save recorded data to corresponding datasets
+                            end_effector_poses = np.append(end_effector_poses, np.array([random_pose]), axis=0)
+                            tactile_depth_data = np.append(tactile_depth_data, np.array([depth]), axis=0)
+                            tactile_color_data = np.append(tactile_color_data, np.array([color]), axis=0)
+                            grasp_outcomes = np.append(grasp_outcomes, np.ones(shape=(1,)), axis=0)
+                            success_count += 1
+                            print(f"Data analysed and saved - Successes: {success_count} | Failures: {failure_count}")
+                        elif not grasp_is_good and (grasp_outcomes == 0).sum() < poses_count:
+                            # Save recorded data to corresponding datasets
+                            end_effector_poses = np.append(end_effector_poses, np.array([random_pose]), axis=0)
+                            tactile_depth_data = np.append(tactile_depth_data, np.array([depth]), axis=0)
+                            tactile_color_data = np.append(tactile_color_data, np.array([color]), axis=0)
+                            grasp_outcomes = np.append(grasp_outcomes, np.zeros(shape=(1,)), axis=0)
+                            failure_count += 1
+                            print(f"Data analysed and saved - Successes: {success_count} | Failures: {failure_count}")
 
         folder_name = "baseline_model"
         # Save collected data into .npy files for future loading
@@ -416,11 +420,10 @@ class ClutteredPushGrasp:
     def load_mlp_poses(self):
         poses = {
             "block1": [
-                # (0.0, 0.0, 0.14210526645183563, 1.553473711013794, 1.553473711013794, 1.5707963705062866),
-                (0.0, -0.12261052429676056, 0.09473684430122375, 0.0, 0.4957895278930664, 1.5707963705062866),
-                (0.0, -0.14854736626148224, 0.08421052992343903, 0.0, 0.36357903480529785, 1.5707963705062866),
-                (0.0, -0.016505271196365356, 0.16842105984687805, 0.0, 1.570796251296997, 1.5707963705062866),
-                (-0.13675791025161743, -0.016505271196365356, 0.07894736528396606, 0.09915781021118164, 0.36357903480529785, 0.09920823574066162),
+                (0.0, -0.014147371053695679, 0.17894737422466278, -3.140000104904175, 1.570796251296997, 1.5707963705062866),
+                (0.0, -0.0047158002853393555, 0.17894737422466278, -3.140000104904175, 1.570796251296997, 1.5707963705062866),
+                (0.0, 0.021221041679382324, 0.17894737422466278, -3.140000104904175, 1.570796251296997, 1.5707963705062866),
+                (0.0, 0.0, 0.1894736886024475, -1.5865263938903809, 1.570796251296997, 1.5707963705062866)
             ],
             "block2": [
                 (0.0, -0.016505271196365356, 0.17894737422466278, 0.0, 1.570796251296997, 1.5707963705062866),
@@ -468,6 +471,7 @@ class ClutteredPushGrasp:
                 (0.0, 0.0, 0.24736842513084412, 2.2806313037872314, 1.570796251296997, 1.5707963705062866),
                 (-0.06366315484046936, 0.08724209666252136, 0.16842105984687805, 0.0, 0.5288419723510742, -0.7771308422088623),
                 (-0.056589484214782715, 0.09903159737586975, 0.15789473056793213, 0.0, 0.4957895278930664, -0.8928737640380859),
+                (0.08016842603683472, -0.07781052589416504, 0.1894736886024475, 0.0, 2.478947401046753, -0.6779226064682007)
             ]
         }
         return poses
