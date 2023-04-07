@@ -286,26 +286,22 @@ yaml parameters, loading parameters
 %----------------------------------------------------------------------------------
 \chapter{Baseline and Feature Representation \\ Analysis}
 \label{chap:4}
-Given different combinations of multi-modal data (tactile and visual) collected from grasping an object, we would like to a) determine whether the outcome (successful or unsuccessful) of the grasp is ascertainable based on this data; and b) determine the best feature representation for said data.
+Given different combinations of multi-modal data (tactile and visual) collected from grasping an object, we would like to a) determine whether the outcome (successful or unsuccessful) of the grasp is ascertainable based on this data; and b) determine the best feature representation for said data. Therefore, we conduct our experiments on a fixed object type, i.e., a single smooth rectangular block of dimensions (depth: 0.025, width: 0.05, height: 0.05).
 
-\section{Multi-modal Data Collection}
+\section{Random Grasp Synthesis}
 \label{sec:4.1}
-In this experiment, we collect tactile and visual data on a smooth rectangular block by executing randomly-generated end effector poses.
-
-\subsection{Random Grasp Synthesis}
-\label{sec:4.1.1}
-Using our Pybullet simulation, we manually manipulate the end effector to varying positions in the proximity of the block, and record three different end effector poses ($i=0,1,2$) to guarantee some variation in the orientation and position of the grasps. Each end effector pose $S_i$ is a 6-tuple consisting of 3 Cartesian coordinates representing the spatial position of the end effector relative to the robot, and 3 Euler angles representing the orientation of the end effector:
+Using our Pybullet simulation, we manually manipulate the end effector to varying positions in the proximity of the block, and record three different end effector poses ($i=0,1,2$) to guarantee some variation in the orientation and position of the grasps. In this work, we refer to such manually-selected end effector poses as seed poses, denoted as $S_i$. Each seed pose is a 6-tuple consisting of 3 Cartesian coordinates representing the spatial position of the end effector relative to the robot, as well as 3 Euler angles representing the orientation of the end effector:
 \begin{equation}
     S_i=(x,y,z,r_x,r_y,r_z)
 \end{equation}
-We treat each manually-selected pose independently as a seed grasp configuration, and generate a pre-determined number $N$ of random poses $X_n$ from the seed by adding a small amount of Gaussian noise $K_n$ ($\mu=0$ and $\sigma=0.01$) to each dimension of the seed pose. Mathematically, for every $S_i$, the randomly generated grasps are denoted as:
+For each independent seed pose, we generate a pre-determined number $N$ of random poses $X_n$ from the seed by adding a small amount of Gaussian noise $K_n$ ($\mu=0$ and $\sigma=0.01$) to each dimension of $S_i$. Mathematically, the randomly generated grasps are denoted as:
 \begin{equation}
     X_n=S_i+K_n
 \end{equation}
-where $K\sim N(0,0.01)$. To prevent collision between the gripper and the object when initializing the end effector pose, we add some padding to the z-dimension, denoted as $p_z$.
+The variance of the Gaussian noise can be adjusted for a more/less sparse distribution of the random poses. To prevent collision between the gripper and the object when initializing the end effector pose, we add some padding to the z-dimension, denoted as $p_z$.
 
-\subsection{Data Collection}
-\label{sec:4.1.2}
+\section{Data Collection}
+\label{sec:4.2}
 Prior to executing each randomly-generated pose $X_n$ as a pick-and-place task, we first reset the position and orientation of our robot to an initial, predefined configuration (\ref{fig:4.1a}). Next, we utilise Pybullet's built-in inverse kinematics method to manipulate the robot's end effector to $X_n$. To avoid collision with the object, we include a vertical padding distance $p_z$ above the object (\ref{fig:4.1b}). Then, the robot lowers the end effector by removing the padding $p_z$ to reach the target object and closes its gripper (\ref{fig:4.1c}).
 
 \begin{figure}[H]%
@@ -372,7 +368,7 @@ Before we train our baseline model, we are interested if a clear decision bounda
     \caption{Visualisation of 20 end effector poses}%
     \label{fig:hand_poses}%
 \end{figure}
-\noindent From the above figures, we are able to visually determine a rough decision boundary between successful (green) and unsuccessful (red) grasps. This serves as the primary motivation for a Logistic Regression model as our baseline approach.
+\noindent From the above figures, we are able to visually determine a rough decision boundary between successful (green) and unsuccessful (red) grasps. Therefore, we believe that it is feasible to fit this dataset using a simple binary classifier as our baseline approach.
 
 
 \section{Feature Engineering}
@@ -436,19 +432,23 @@ Select the most promising representation and use it for actual generative model 
 \label{sec:4.6.2}
 
 %----------------------------------------------------------------------------------
-% Section 5: Actual Model
+% Section 5: Proposed Approach
 %----------------------------------------------------------------------------------
-\chapter{Actual Model}
+\chapter{Multilayer Perceptron Artificial Neural Network for Grasp Stability Prediction}
 \label{chap:5}
 
-\section{Multilayer Perceptron}
-2 layers
+\section{Overview}
+A multilayer perceptron (MLP) as a feedforward neural network consisting of a minimum of three fully-connected layers of perceptrons (neurons). Every MLP contains an input layer that receives input data, an output layer that produces a prediction based on patterns within the data, and at least one hidden layer that enable the MLP to learn complex representations of the data.\\
+
+In robotic grasping, there exists certain grasp configurations that yield a high grasp stability and success rate. For instance, grasping an object around its center of gravity can minimise rotational forces on the object that could cause it to tilt. MLPs excel at learning non-linear relationships between input and output data, therefore intuitively speaking, an MLP is a good candidate to learn such patterned configurations from the complex dataset and generalise them into a simple grasping strategy based on different object types.
 
 \section{Data representation}
 CNN dimension-reduced data
 
 \section{Training}
-Data from 3 categories, 9 objects, per object: 100 stable, 100 unstable, 1800 grasps in total, 900 stable, 900 unstable.
+
+\subsection{Training details}
+Data from 3 categories, 9 objects, per object: 4 seed poses, 80 stable grasps, 80 unstable grasps, 1440 grasps in total, 720 stable, 720 unstable.
 
 * train with data from 2 objects from each category. And test with data from remaining objects. 
 * randonly subsample the grasps, repeat the experiemtns 5 times.
