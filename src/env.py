@@ -188,7 +188,7 @@ class ClutteredPushGrasp:
         # Apply 6d gaussian noise to base hand pose
         sixd_noise = {
             # Baseline noise
-            "block": np.random.normal(0, 0.025, 6),
+            "block": np.random.normal(0, 0.015, 6),
 
             # MLP noise
             "block1": np.random.normal(0, 0.01, 6),
@@ -304,42 +304,44 @@ class ClutteredPushGrasp:
                 (0.0, 0.021221041679382324, 0.17894737422466278, -3.140000104904175, 1.570796251296997, 1.5707963705062866),]
         }
 
-        # Calculate required poses for every seed pose
-        poses_count = self.RANDOM_POSES_COUNT // len(base_hand_poses[self.object_name])
-        
+        for seed_pose in base_hand_poses[self.object_name]:
+            print(f"Starting seed pose simulation: {seed_pose}")
 
-        while success_count < poses_count or failure_count < poses_count:
-            # Reset robot and arm only
-            self.reset_simulation()
-            self.fixed_step_sim(1000)
-            
-            for pose in base_hand_poses[self.object_name]:
-                random_pose = self.generateGaussianNoisePose(pose, self.object_name)
-                generated_grasp_data = self.execute_pose(random_pose)
+            while success_count < self.RANDOM_POSES_COUNT or failure_count < self.RANDOM_POSES_COUNT:
+                # Reset robot and arm only
+                self.reset_simulation()
+                self.fixed_step_sim(1000)
+                noisy_pose = self.generateGaussianNoisePose(seed_pose, self.object_name)
+                grasp_data = self.execute_pose(noisy_pose)
 
-                if generated_grasp_data is not None:
-                    depth, color, grasp_is_good = generated_grasp_data
+                if grasp_data is not None:
+                    depth, color, grasp_is_good = grasp_data
 
                     # Only record the grasp data if the tactile data is valid
                     if depth is None or color is None:
                         print(f"Not saving grasp data to dataset :(")
                     else:
-                        if grasp_is_good and (grasp_outcomes == 1).sum() < poses_count:
+                        if grasp_is_good is True and success_count < self.RANDOM_POSES_COUNT:
                             # Save recorded data to corresponding datasets
-                            end_effector_poses = np.append(end_effector_poses, np.array([random_pose]), axis=0)
+                            end_effector_poses = np.append(end_effector_poses, np.array([noisy_pose]), axis=0)
                             tactile_depth_data = np.append(tactile_depth_data, np.array([depth]), axis=0)
                             tactile_color_data = np.append(tactile_color_data, np.array([color]), axis=0)
                             grasp_outcomes = np.append(grasp_outcomes, np.ones(shape=(1,)), axis=0)
                             success_count += 1
                             print(f"Data analysed and saved - Successes: {success_count} | Failures: {failure_count}")
-                        elif not grasp_is_good and (grasp_outcomes == 0).sum() < poses_count:
+                        elif grasp_is_good is False and failure_count < self.RANDOM_POSES_COUNT:
                             # Save recorded data to corresponding datasets
-                            end_effector_poses = np.append(end_effector_poses, np.array([random_pose]), axis=0)
+                            end_effector_poses = np.append(end_effector_poses, np.array([noisy_pose]), axis=0)
                             tactile_depth_data = np.append(tactile_depth_data, np.array([depth]), axis=0)
                             tactile_color_data = np.append(tactile_color_data, np.array([color]), axis=0)
                             grasp_outcomes = np.append(grasp_outcomes, np.zeros(shape=(1,)), axis=0)
                             failure_count += 1
                             print(f"Data analysed and saved - Successes: {success_count} | Failures: {failure_count}")
+                        print(end_effector_poses.shape)
+
+            # Reset counters
+            success_count = 0
+            failure_count = 0
 
         folder_name = "baseline_model"
         # Save collected data into .npy files for future loading
@@ -482,18 +484,17 @@ class ClutteredPushGrasp:
     # This function only works for meshes that include a .obj file.
     def getRigidBodyCurvature(self, body_id, k):
         mesh_data = p.getMeshData(body_id)
-
         # Convert the mesh data to a numpy array
-        object_vertices, object_indices = np.array(mesh_data[0]), np.array(mesh_data[1])
+        indices, vertices = np.array(mesh_data[0]), np.array(mesh_data[1])
 
-        if object_vertices > 0:
+        if indices > 0:
             # Compute the principal curvatures at each vertex
-            curvatures = np.zeros((len(object_indices), 2))
-            tree = cKDTree(object_indices)
-            for i, vertex in enumerate(object_indices):
+            curvatures = np.zeros((len(vertices), 2))
+            tree = cKDTree(vertices)
+            for i, vertex in enumerate(vertices):
                 # Find the 10 nearest neighbors to the current vertex
                 _, indices = tree.query(vertex, k=10)
-                neighbors = object_indices[indices, :]
+                neighbors = vertices[indices, :]
 
                 # Compute the covariance matrix of the neighbors
                 centroid = np.mean(neighbors, axis=0)
@@ -519,7 +520,6 @@ class ClutteredPushGrasp:
     # Get geometric features of an object
     def getObjectGeometry(self, body_id):
         obj_shape = p.getCollisionShapeData(objectUniqueId=body_id, linkIndex=-1)
-        print(obj_shape)
         width, depth, height = obj_shape[0][3]
         curvature_data = self.getRigidBodyCurvature(body_id, k=3)
         curvature_data = curvature_data.flatten()
@@ -593,8 +593,8 @@ class ClutteredPushGrasp:
         self.resetSimulationButton  = p.addUserDebugParameter("Reset simulation", 1, 0, 1)
         self.pointCloudButton = p.addUserDebugParameter("Get point cloud", 1, 0, 1)
         self.jointObsButton = p.addUserDebugParameter("Get joint coordinates", 1, 0, 1)
-        self.baselineDataColButton = p.addUserDebugParameter("Collect sensory data", 1, 0, 1)
-        self.mlpDataColButton = p.addUserDebugParameter("Execute generative model", 1, 0, 1)
+        self.baselineDataColButton = p.addUserDebugParameter("Collect data (baseline)", 1, 0, 1)
+        self.mlpDataColButton = p.addUserDebugParameter("Collect data (proposed)", 1, 0, 1)
         self.openGripperButton = p.addUserDebugParameter("Open gripper", 1, 0, 1)
         self.closeGripperButton = p.addUserDebugParameter("Close gripper", 1, 0, 1)
         self.getObjectFeaturesButton = p.addUserDebugParameter("Get object features", 1, 0, 1)

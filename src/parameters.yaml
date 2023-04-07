@@ -20,7 +20,7 @@ object_control_panel:
 # Neccesary parameters of the target object;
 # The global scaling is used to shrink the size of the object
 target_object:
-  object_name: block    # Use "block" for baseline execution. For proposed approach, use one from 
+  object_name: cylinder3   # Use "block" for baseline execution. For proposed approach, use one from 
                         # ["block1", "block2", "block3", "cylinder1", "cylinder2", "cylinder_3", "mustard_bottle1", "mustard_bottle2", "mustard_bottle3"]
   object_position: [0, 0, 0.25]
   global_scaling : 1.0
@@ -36,7 +36,7 @@ simulation:
 
 # Parameters for data collection
 data_collection:
-  poses_count: 200
+  poses_count: 40
 
 # Parameters to adjust for robot
 robot:
