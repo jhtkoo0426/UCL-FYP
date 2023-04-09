@@ -19,24 +19,34 @@ class Thing:
         for better organization, should move the urdf path to the arg85 yaml file as well...
         """
 
+        # root = "./src/urdf/objects/"
+        root = "./src/urdf/new_dataset/"
+        self.urdf_path = root
+
         if name == "block" or name == "block1":
-            self.urdf_path = "./src/urdf/objects/blocks/block1.urdf"
+            self.urdf_path += "blocks/block1/block1.urdf"
         elif name == "block2":
-            self.urdf_path = "./src/urdf/objects/blocks/block2.urdf"
+            self.urdf_path += "blocks/block2/block2.urdf"
         elif name == "block3":
-            self.urdf_path = "./src/urdf/objects/blocks/block3.urdf"
+            self.urdf_path += "blocks/block3/block3.urdf"
         elif name == "cylinder1":
-            self.urdf_path = "./src/urdf/objects/cylinders/cylinder1.urdf"
+            self.urdf_path += "cylinders/cylinder1/cylinder1.urdf"
         elif name == "cylinder2":
-            self.urdf_path = "./src/urdf/objects/cylinders/cylinder2.urdf"
+            self.urdf_path += "cylinders/cylinder2/cylinder2.urdf"
         elif name == "cylinder3":
-            self.urdf_path = "./src/urdf/objects/cylinders/cylinder3.urdf"
+            self.urdf_path += "cylinders/cylinder3/cylinder3.urdf"
+        elif name == "bottle1":
+            self.urdf_path += "bottles/bottle1/bottle1.urdf"
+        elif name == "bottle2":
+            self.urdf_path += "bottles/bottle2/bottle2.urdf"
+        elif name == "bottle3":
+            self.urdf_path += "bottles/bottle3/bottle3.urdf"
         elif name == "mustard_bottle1":
-            self.urdf_path = "./src/urdf/objects/mustard_bottle/mustard_bottle1.urdf"
+            self.urdf_path += "bottles/bottle1/mustard_bottle1.urdf"
         elif name == "mustard_bottle2":
-            self.urdf_path = "./src/urdf/objects/mustard_bottle/mustard_bottle2.urdf"
+            self.urdf_path += "bottles/bottle2/mustard_bottle2.urdf"
         elif name == "mustard_bottle3":
-            self.urdf_path = "./src/urdf/objects/mustard_bottle/mustard_bottle3.urdf"
+            self.urdf_path += "bottles/bottle3/mustard_bottle3.urdf"
 
         print(self.urdf_path)
         id = p.loadURDF(self.urdf_path, self.initPos, self.initOrientation, useFixedBase=False, globalScaling=self.objectScale)
