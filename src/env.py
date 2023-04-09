@@ -115,7 +115,6 @@ class ClutteredPushGrasp:
     def readGetObjectFeaturesButton(self):
         if p.readUserDebugParameter(self.getObjectFeaturesButton) >= self.getObjectFeaturesButtonVal:
             object_geometric_features = self.getObjectGeometry(self.container.ID)
-            print(object_geometric_features)
         self.getObjectFeaturesButtonVal = p.readUserDebugParameter(self.getObjectFeaturesButton)+ 1.0
 
     def readCloseGripperButton(self):
@@ -429,6 +428,7 @@ class ClutteredPushGrasp:
                 (0.0, -0.0047158002853393555, 0.17894737422466278, -3.140000104904175, 1.570796251296997, 1.5707963705062866),
                 (0.0, 0.021221041679382324, 0.17894737422466278, -3.140000104904175, 1.570796251296997, 1.5707963705062866),
                 (0.0, 0.0, 0.1894736886024475, -1.5865263938903809, 1.570796251296997, 1.5707963705062866)
+                # new ds: (0.0, 0.0, 0.27368420362472534, 0.0, 1.570796251296997, 1.5707963705062866)
             ],
             "block2": [
                 (0.0, -0.016505271196365356, 0.17894737422466278, 0.0, 1.570796251296997, 1.5707963705062866),
@@ -478,9 +478,10 @@ class ClutteredPushGrasp:
                 (-0.056589484214782715, 0.09903159737586975, 0.15789473056793213, 0.0, 0.4957895278930664, -0.8928737640380859),
                 (0.08016842603683472, -0.07781052589416504, 0.1894736886024475, 0.0, 2.478947401046753, -0.6779226064682007)
             ],
-            "bottle1": [
-                (0.0, 0.009431585669517517, 0.2526315748691559, 2.5450527667999268, 1.570796251296997, 1.5707963705062866)
-            ]
+            # new_ds:
+            # "bottle1": [
+            #     (0.0, 0.009431585669517517, 0.2526315748691559, 2.5450527667999268, 1.570796251296997, 1.5707963705062866)
+            # ]
         }
         return poses
 
@@ -522,14 +523,14 @@ class ClutteredPushGrasp:
             return curvatures[:k]
         else:
             return np.zeros((k, 2))
+    
 
     # Get geometric features of an object
     def getObjectGeometry(self, body_id):
-        obj_shape = p.getCollisionShapeData(objectUniqueId=body_id, linkIndex=-1)
-        width, depth, height = obj_shape[0][3]
-        curvature_data = self.getRigidBodyCurvature(body_id, k=3)
-        curvature_data = curvature_data.flatten()
-        return (width, depth, height, curvature_data)
+        curvature_data = self.getRigidBodyCurvature(body_id, k=3).flatten()
+        circularity_data = self.getRigidBodyCircularity(body_id)
+        print(curvature_data, circularity_data)
+        return (curvature_data, circularity_data)
 
 
     # CORE FUNCTIONS FOR RUNNING THE SIMULATION
