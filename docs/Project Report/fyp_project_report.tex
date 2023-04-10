@@ -125,6 +125,7 @@ In this project, we study how to build a robust learning framework that can be e
 \pagenumbering{arabic}
 \setcounter{page}{1}
 
+
 \section{Outline of Problem}
 \label{sec:1.1}
 Humans are able to grasp objects seemingly intuitively. We can efficiently identify and reach for objects, adjust our finger placements and optimally balance contact forces through the coordination of our wrists, arms, and shoulders when we approach and lift objects. Our sense of touch plays a major role, providing us with information about the object's size, shape, texture, weight, and other physical properties. This information is processed by our brains, giving us instructions on how to adjust our grasp pose and apply the appropriate amount of force needed to pick up the object. Without the sense of touch, grasping objects would be much more difficult and less efficient. Therefore, incorporating touch sensing into robotic grasping can help robots better identify and adjust to objects, making them more effective in interacting with the physical world.\\
@@ -164,9 +165,11 @@ This project is concerned with the development of a complete simulation with sup
 \label{sec:1.4}
 This section discusses the important phases for the project and the approach taken at each phase. Technologies required for completing a particular phase will be documented and justified.
 
+
 \subsection{Planning Phase - Design and Research}
 \label{sec:1.4.1}
 We first conduct a literature survey to explore and categorise research projects related to robotic grasping by data input, grasping method and the problem these projects address. Simultaneously, background research was conducted on grasp learning \cite{platt} and robot manipulation to obtain a general understanding of the project's task.
+
 
 \subsection{Early Development Phase - Pybullet Simulation}
 \label{sec:1.4.2}
@@ -185,13 +188,16 @@ The Pybullet simulation should support the following features for our project:
     \item a tactile data collection pipeline using randomly-generated end effector grasp poses
 \end{enumerate}
 
+
 \subsection{Baseline Development Phase}
 \label{sec:1.4.3}
 This phase focuses on determining the optimal dataset representation for our collected multi-modal data, consisting of tactile sensor readings, visual end effector poses relative to the arm, and the respective grasp outcomes of each end effector pose. In addition, we experiment with several feature engineering techniques, for example dimensionality reduction using ConvNets and Principal Component Analysis (PCA).
 
+
 \subsection{Execution Phase - Learning Approach Implementation}
 \label{sec:1.4.4}
 Following the outcomes of our baseline approach where we identified the optimal feature representation of our dataset, we move on to develop our learning-based approach which is trained on three primitive object types. In addition to tactile sensor readings and visual data (randomly-generated end effector poses), we include the object features for each object class in our dataset, and train this dataset on a multilayer perceptron (MLP). Finally, we conduct several interesting experiments, including (1) training our MLP using various segmentations of our dataset; and (2) validate our MLP on unseen objects that comprise of similar geometric features to that of the primitive objects that our MLP was trained on.
+
 
 \subsection{Documentation Phase}
 \label{sec:1.4.5}
@@ -218,6 +224,7 @@ Chapter 6 summarises the results and performances of the project, as well as mak
 \chapter{Background and Literature Review}
 \label{chap:2}
 
+
 \section{Robotic Grasping}
 \label{sec:2.1}
 In the field of robotics, grasping is a fundamental yet challenging skill of robots which refers to the autonomous ability of a robot to grasp and move objects with its mechanical grippers or other end effectors \cite{zhang}. It demands precise coordination between the visual perception of the surrounding environment and efficient grasp planning, as well as a robot's adaptiveness to unseen object classes (robustness).\\
@@ -228,14 +235,17 @@ To successfully grasp an object, a robot needs to detect the object's location (
 
 Therefore, accurate and efficient grasp representation and planning are paramount to ensure a smooth grasping process when performing grasping tasks.
 
+
 \newpage
 \subsection{Grasp Representation}
 \label{sec:2.1.1}
 A grasp in robotic grasping is a specific configuration of a robotic hand or gripper which allows it to firmly hold an object. These representations can be used in different grasp planning algorithms and can be combined to create more complex representations of grasps. Commonly-used grasp representations include: 
 
+
 \subsubsection{Meshes}
 \label{sec:2.1.1.1}
 In computer graphics and object modelling, a (polygon) mesh is a 3-dimensional representation or rigid reconstruction of the surface of an object. Typically, the representation is a collection of vertices, edges and faces that defines the object shape. Faces usually consist of triangles an object's surface that is composed of vertices, edges, and faces. Grasps can be represented as a set of vertices on the mesh that correspond to the location of the gripper's fingertips and palm.
+
 
 \subsubsection{Point Clouds}
 \label{sec:2.1.1.2}
@@ -245,17 +255,21 @@ In addition to grasp representations, point clouds can be merged for surface rec
 
 In the Pybullet simulation for this project, we include a simple feature that generates a point cloud of the rendered object of the simulation which can be inspected visually. In the physical world, a point cloud is generated using 3D scanners or photogrammetry software, which can be rendered and inspected in a virtual world.
 
+
 \subsubsection{Hand Configurations}
 \label{sec:2.1.1.3}
 A hand (or end effector) configuration describes the joint angles or positions of a robotic hand or gripper relative to the robot itself. This is a simple and straightforward approach to representing grasps.\\
 
 In this project, we use the terms "hand configurations" and "end effector poses" interchangeably.
 
+
 \subsection{Grasp Quality Evaluation}
 \label{sec:2.1.2}
 
+
 \subsection{Sampling High-Quality Grasp Candidates}
 \label{sec:2.1.3}
+
 
 \section{Grasp Planning}
 \label{sec:2.2}
@@ -277,8 +291,10 @@ In this project, we use the terms "hand configurations" and "end effector poses"
 \chapter{Experimentation and Development of Pybullet Simulation}
 \label{chap:3}
 
+
 \section{Implementation of basic functionalities}
 Arm control, grasp control, position control, gripper control, get 6d pose, reset
+
 
 \section{Parameters}
 yaml parameters, loading parameters
@@ -291,6 +307,7 @@ yaml parameters, loading parameters
 \label{chap:4}
 Given different combinations of multi-modal data (tactile and visual) collected from grasping an object, we would like to a) determine whether the outcome (successful or unsuccessful) of the grasp is ascertainable based on this data; and b) determine the best feature representation for said data. Therefore, we conduct our experiments on a fixed object type, i.e., a single smooth rectangular block of dimensions (depth: 0.025, width: 0.05, height: 0.05).
 
+
 \section{Random Grasp Synthesis}
 \label{sec:4.1}
 Using our Pybullet simulation, we manually manipulate the end effector to varying positions in the proximity of the block, and record three different end effector poses ($i=0,1,2$) to guarantee some variation in the orientation and position of the grasps. In this work, we refer to such manually-selected end effector poses as seed poses, denoted as $S_i$. Each seed pose is a 6-tuple consisting of 3 Cartesian coordinates representing the spatial position of the end effector relative to the robot, as well as 3 Euler angles representing the orientation of the end effector:
@@ -302,6 +319,7 @@ For each independent seed pose, we generate a pre-determined number $N$ of rando
     X_n=S_i+K_n
 \end{equation}
 The variance of the Gaussian noise can be adjusted for a more/less sparse distribution of the random poses. To prevent collision between the gripper and the object when initializing the end effector pose, we add some padding to the z-dimension, denoted as $p_z$.
+
 
 \section{Data Collection}
 \label{sec:4.2}
@@ -323,6 +341,7 @@ Prior to executing each randomly-generated pose $X_n$ as a pick-and-place task, 
 Before lifting the object, the robot measures the number of contact points between the two fingers and the object to ensure grasp stability. We define a grasp to be stable if there are a non-zero number of contact points, in which the robot records depth and color tactile information using the DIGIT tactile sensors on each finger. We concatenate each pair of depth and color tactile readings into a $(160\times240)$ gray-scale image and a $(160\times240\times3)$ RGB image respectively.\\
 
 After collecting the tactile readings, the robot performs a sanity check on the recorded depth tactile data. Since the color data is an RGB representation of the depth data, it does not require any additional checks. To facilitate the sanity check, we analyze whether the average pixel value exceeds a particular threshold. This process enables us to remove any erroneous signals (\ref{fig:4.2a}) and preserve the precise depth data (\ref{fig:4.2b}). By utilizing this method, we can enhance the quality of the data and ensure accurate lifting of the object.
+
 \begin{figure}[H]%
     \centering
     \subfloat[\centering Invalid depth data]{{\includegraphics[width=7cm]{docs/Project Report/Media/4_1_2_failure_depth_data.png}\label{fig:4.2a}}}%
@@ -340,9 +359,10 @@ Once the robot verifies that the object is stably held (i.e. the tactile data is
 
 After executing each random pose, we append the collected tactile data, end effector pose and grasp outcome to individual arrays. Once the required data for our $N$ random end effector poses has been collected, these arrays are saved to separate files which can be loaded for further analysis. Specifically, we create one .npy file each for the depth, color, grasp outcomes, and random pose data.
 
+
 \newpage
 \section{Visualising Hand Poses}
-\label{sec:4.2}
+\label{sec:4.3}
 Before we train our baseline model, we are interested if a clear decision boundary exists between successful and unsuccessful grasps. We create a visualisation of each hand pose $X_n$ in a 3-dimensional space, using its Cartesian coordinates and the "pitch-row-yaw" rotational matrix representation $R$ of its Euler angles ($\alpha,\beta,\gamma$) \cite{euleranglewolfram}:
 
 \begin{equation}
@@ -374,12 +394,13 @@ Before we train our baseline model, we are interested if a clear decision bounda
 \noindent From the above figures, we are able to visually determine a rough decision boundary between successful (green) and unsuccessful (red) grasps. Therefore, we believe that it is feasible to fit this dataset using a simple binary classifier as our baseline approach.
 
 
-\section{Feature Engineering}
-\label{sec:4.3}
+\section{Feature Engineering \& Data Pre-processing}
+\label{sec:4.4}
 We aim to assess the efficacy of utilising our multi-modal dataset for our grasping task through experimenting with various combinations of the tactile and visual (random end effector poses) data.
 
+
 \subsection{Multi-modal Data Combinations}
-\label{sec:4.3.1}
+\label{sec:4.4.1}
 In this project, we segregate our dataset into tactile-only, visual-only and concatenated tactile and visual datasets:
 \begin{table}[H]
     \centering
@@ -398,16 +419,19 @@ In this project, we segregate our dataset into tactile-only, visual-only and con
     \label{tbl:4.1}
 \end{table}
 
+
 \subsection{Dimensionality Reduction}
-\label{sec:4.3.2}
-Due to the high dimensionality nature of our tactile and visual datasets, we experimented with two popular dimensionality reduction techniques, PCA and CNN feature extraction, to retain as much information as possible from the dataset.
+\label{sec:4.4.2}
+Due to the high dimensionality nature of our tactile and visual datasets, we experimented with two widely-used dimensionality reduction techniques, PCA and CNN feature extraction, to retain as much information as possible from the dataset.
+
 
 \subsubsection{Principal Component Analysis (PCA)}
-\label{sec:4.3.2.1}
+\label{sec:4.4.2.1}
 For each image in the tactile and visual datasets, we select the top 2 eigenvectors that correspond to the largest eigenvalues as the principal components for the data.
 
+
 \subsubsection{Convolution Neural Network (CNN) Feature Extraction}
-\label{sec:4.3.2.2}
+\label{sec:4.4.2.2}
 We create a 3-layer convolution neural network to extract the important features from our data combinations. Each convolution layer is interwined with a MaxPool2D layer with a $2\times2$ kernel. \hyperref[fig:4.5]{Fig 4.5} illustrates the architecture for the CNN we used:
 \begin{figure}[H]
     \includegraphics[scale=0.7]{docs/Project Report/Media/nn.png}
@@ -415,27 +439,60 @@ We create a 3-layer convolution neural network to extract the important features
     \label{fig:4.5}
 \end{figure}
 
-\section{Training}
-\label{sec:4.4}
-To improve the convergence speed and performance for training our Logistic Regression model, we normalise the tactile and visual datasets by column with zero mean and unit variance.
+
+\subsection{Data Pre-processing}
+\label{sec:4.4.3}
 
 
-\subsection{Overview}
-We propose a simple binary logistic regression classifier that predicts the grasp outcome for a given random end effector pose. The model is trained on the three datasets based on the discussed data combinations in \hyperref[sec:4.3.1]{Section 4.3.1}. In addition, we attempt to reduce the dimensionality of these datasets using the two techniques (PCA and ConvNet) discussed in \hyperref[sec:4.3.2]{Section 4.3.2}
 
-\section{Evaluation of Baseline Model Results}
+\section{Baseline Model \& Training}
 \label{sec:4.5}
+Based on our findings (\hyperref[sec:4.3]{Section 4.3}), we propose a simple binary logistic regression (LR) classifier to predict the grasp outcome for a given random end effector pose. Ideally, this LR model is able to determine a decision boundary for segregating successful and unsuccessful grasp poses.\\
+
+We train the classifier using the three discussed dataset combinations (\hyperref[sec:4.4.1]{Section 4.4.1}). Additionally, we apply a combination of dimensionality reduction techniques to these datasets discussed in (\hyperref[sec:4.4.2]{Section 4.4.2}), including ConvNet only and ConvNet with PCA (top $k=5$ principal components).
+
+
+\subsection{Summary of training results}
+\label{sec:4.5.1}
+Table 4.2 shows the accuracy for each LR model trained based on the dataset type and preprocessing method
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabular}{lccccc}
+        \toprule
+        & \multicolumn{3}{c}{Dataset} & \multicolumn{2}{c}{Property of sample} \\
+        \cmidrule{2-4}\cmidrule{5-6}
+        Preprocessing & Visual only & Tactile only & Both & Shape & Dimensionality \\
+        \midrule
+        Raw & 51.25\% & 85.00\% & 85.00\% & 160x240x4 & 153600 \\
+        CNN & -- & 83.75\% & 81.25\% & 64x10x15  & 9600 \\
+        CNN + PCA ($k=5$) & -- & 78.75\% & 80.00\% & 5 & 5\\
+        \bottomrule
+    \end{tabular}
+    \caption{Accuracy of LR model on dataset variations}
+    \label{tbl:4.2}
+\end{table}
+
+
+\subsection{Balancing trade-off between accuracy and dimensionality}
+\label{sec:4.5.2}
+Based on the results presented in \hyperref[tbl:4.2]{Table 4.2}, we have determined that using both tactile and visual data together produces the highest accuracy for our LR models. While raw data performed better than other pre-processing techniques, we recognize that the dimensionality of the data must also be considered. Therefore, we have found that extracting features from our dataset using a ConvNet and selecting only the top $k=5$ components provides comparable accuracy with significantly lower dimensionality.
+
 
 \section{Conclusion}
 \label{sec:4.6}
+
 
 \subsection{Feature Representation}
 \label{sec:4.6.1}
 Select the most promising representation and use it for actual generative model in Sec 4.
 
+
 \subsection{Analysis of Results}
 \label{sec:4.6.2}
 Mention dimensionality constraints on computability costs!
+
+
 
 %----------------------------------------------------------------------------------
 % Section 5: Proposed Approach
@@ -454,6 +511,7 @@ To introduce robustness in robotic grasping for various object types, we trained
 
 \section{Dataset Collection and Representation}
 \label{sec:5.2}
+
 
 \subsection{Object Variations}
 \label{sec:5.2.1}
@@ -491,31 +549,35 @@ Each primitive object category in our dataset possesses unique characteristics. 
 
 To this end, we extracted and analysed several geometric features of the 9 object variations in order to determine which of them can effectively differentiate between the object categories.
 
+
 \subsubsection{Principal Curvature}
 \label{sec:5.2.3.1}
-The principal curvatures of an object mesh is pair of maximum and minimum values of curvatures at a certain point, expressed by the eigenvalues of the shape operator at that point \cite{principalcurvature}.\\
-
-To compute the principal curvatures of an object in Pybullet, we first extract the mesh data of the object via \verb|getMeshData()|, a Pybullet built-in function that returns mesh information of triangle meshes \cite{pybullet}, namely (a) \textit{indices}, the number of vertices found in the mesh; and (b) \textit{vertices}, an array of 3-tuples describing the triangle meshes. Next, we compute the principal curvatures at each vertex of the mesh by iterating over all vertices and computing the covariance matrix of its neighboring vertices (refer to the \verb|ClusteredPushGrasp.getRigidBodyCurvature()| method in \verb|env.py|). To do this, we find its 10 nearest neighbours for each vertex in the mesh using a k-dimensional tree for fast nearest-neighbour queries (\verb|scipy.spatial.cKDTree|). The covariance matrix is then used to compute the eigenvalues and eigenvectors, which are sorted in descending order. The reciprocals of the top two eigenvalues are taken as the principal curvatures at the current vertex. Finally, the function returns the top $k$ principal curvatures as a $2\times k$ array of principal curvatures.\\
-
-Next, we determine whether the principal components are able to cluster the three object categories into their own respective groups. To do this, we concatenate the principal components with the 3 dimensions of the objects (refer to \hyperref[tbl:5.1]{Table 5.1}). Then, we normalize these features by column with zero mean and unit variance. Finally, we perform PCA on the features and select the top $n$ components to visualise them.
+The principal curvatures of an object mesh is pair of maximum and minimum values of curvatures at each vertex of the mesh, expressed by the eigenvalues of the shape operator at that vertex \cite{principalcurvature}. We investigate whether the top $k$ principal curvatures are able to categorize the object variations correctly.
 
 \vspace*{-0.7cm}
 \begin{figure}[H]%
     \centering
-    \subfloat[\centering Top $k=2$ components]{{\includegraphics[width=0.4\textwidth]{docs/Project Report/Media/principal_curvature_2d.png} }}%
+    \subfloat[\centering Top $k=2$ components; Variance captured: 91.43\%]{{\includegraphics[width=0.4\textwidth]{docs/Project Report/Media/principal_curvature_2d.png} }}%
     \qquad
-    \subfloat[\centering Top $k=3$ components]{{\includegraphics[width=0.4\textwidth]{docs/Project Report/Media/principal_curvature_3d.png} }}%
+    \subfloat[\centering Top $k=3$ components; Variance captured: 97.34\%]{{\includegraphics[width=0.4\textwidth]{docs/Project Report/Media/principal_curvature_3d.png} }}%
     \caption{Clustering using PCA-extracted components based on principal curvatures of objects}%
     \label{fig:5.1}%
 \end{figure}
 
-\hyperref[fig:5.1]{Figure 5.1} shows the results of these visualisations in 2D and 3D. We notice that object variations of each category are clustered fairly well together and correctly classified. Thus, we conclude that principal curvatures is a justifyable and accurate representation of geometric features for our dataset of objects.
+\hyperref[fig:5.1]{Figure 5.1} visualises the top $k=2$ and $k=3$ principal curvatures for all the object variations in our dataset. We found that the principal curvatures were able to:
+\begin{enumerate}
+    \item successfully cluster the object variations for each category
+    \item capture a high amount of variance of the curvatures for all objects
+\end{enumerate}
+\noindent Thus, we conclude that principal curvatures is a valid representation of geometric features for our dataset of objects.
+
 
 \section{Preprocessing}
 \label{sec:5.3}
 Based on our analysis results of our baseline approach in \hyperref[sec:4.7]{Section 4.7}, we concluded that under limited dimensionality circumstances, the Logistic Regression model fits the dataset with the highest accuracy using a convolutional neural network as a dimensionality reduction technique. Therefore, before training our MLP, we extract important features from our dataset using the same \hyperref[fig:4.5]{CNN} architecture. This results in a condensed dataset of shape $1200\times512$.\\
 
 To improve the convergence speed and performance for training our MLP model, we normalise the tactile and visual datasets with zero mean and unit variance. This also prevents the initialisation of large weights during back-propagation.
+
 
 \section{Training}
 \label{sec:5.4}
@@ -525,11 +587,14 @@ We trained our MLP model on two versions of our dataset:
     \item tactile and visual data (end effector poses and object geometric features)
 \end{enumerate}
 
+
 \subsection{Training details}
 Split dataset into 80\% training and 20\% validation;
 
+
 \subsection{Loss function}
 simple binary cross-entropy with logits loss (sigmoid + bce loss in a single class)
+
 
 \subsection{Optimizer}
 Adam with lr=1e-3
@@ -554,7 +619,8 @@ Accuracy = 75.83\%
     \caption{Results for MLP with geometric features}%
     \label{fig:4.2}%
 \end{figure}
-Accuracy = 76.39\%
+Accuracy = 76.74\%
+
 
 \section{Interesting experiments}
 * train with data from 2 objects from each category. And test with data from remaining objects. 
