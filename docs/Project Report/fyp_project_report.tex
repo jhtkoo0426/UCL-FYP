@@ -1,4 +1,4 @@
-\documentclass[12pt, a4paper]{report}
+\documentclass[11pt, a4paper]{report}
 
 % Page styling
 \usepackage{amssymb,graphicx,color}
@@ -11,7 +11,7 @@
 
 % Spacing
 \usepackage{setspace}
-\setstretch{1.2}
+\setstretch{1.05}
 
 % Tables
 \usepackage{multirow, multicol}
@@ -263,16 +263,15 @@ A hand (or end effector) configuration describes the joint angles or positions o
 In this project, we use the terms "hand configurations" and "end effector poses" interchangeably.
 
 
-\subsection{Grasp Quality Evaluation}
-\label{sec:2.1.2}
-
-
-\subsection{Sampling High-Quality Grasp Candidates}
-\label{sec:2.1.3}
-
-
-\section{Grasp Planning}
+\section{Tactile Sensing for Robotic Grasping}
 \label{sec:2.2}
+Tactile sensing has been widely used to provide robots with information about target objects, allowing them to grasp and manipulate said objects with greater precision.
+
+\begin{enumerate}
+    \item detect object properties
+    \item monitor grasp stability (Yasemin's thesis)
+    \item provide feedback during manipulation, detect object contact
+\end{enumerate}
 
 
 \section{Common Grasping Approaches}
@@ -282,6 +281,7 @@ In this project, we use the terms "hand configurations" and "end effector poses"
 
 \section{Conclusion}
 \label{sec:2.4}
+% Conclude that not much work has been done on using tactile + visual data for robust grasping systems
 
 
 %----------------------------------------------------------------------------------
@@ -603,9 +603,9 @@ Adam with lr=1e-3
 \section{Validation}
 \begin{figure}[H]%
     \centering
-    \subfloat[\centering Invalid depth data]{{\includegraphics[width=7cm]{docs/Project Report/Media/mlp_no_geo_loss_curve.png}\label{fig:5.2a}}}%
+    \subfloat[\centering ]{{\includegraphics[width=7cm]{docs/Project Report/Media/mlp_no_geo_loss_curve.png}\label{fig:5.2a}}}%
     \qquad
-    \subfloat[\centering Valid depth data]{{\includegraphics[width=7cm]{docs/Project Report/Media/mlp_no_geo_cm.png}\label{fig:5.2b}}}%
+    \subfloat[\centering ]{{\includegraphics[width=7cm]{docs/Project Report/Media/mlp_no_geo_cm.png}\label{fig:5.2b}}}%
     \caption{Results for MLP without geometric features}%
     \label{fig:4.2}%
 \end{figure}
@@ -613,9 +613,9 @@ Accuracy = 75.83\%
 
 \begin{figure}[H]%
     \centering
-    \subfloat[\centering Invalid depth data]{{\includegraphics[width=7cm]{docs/Project Report/Media/mlp_geo_loss_curve.png}\label{fig:5.3a}}}%
+    \subfloat[\centering ]{{\includegraphics[width=7cm]{docs/Project Report/Media/mlp_geo_loss_curve.png}\label{fig:5.3a}}}%
     \qquad
-    \subfloat[\centering Valid depth data]{{\includegraphics[width=7cm]{docs/Project Report/Media/mlp_geo_cm.png}\label{fig:5.3n}}}%
+    \subfloat[\centering ]{{\includegraphics[width=7cm]{docs/Project Report/Media/mlp_geo_cm.png}\label{fig:5.3n}}}%
     \caption{Results for MLP with geometric features}%
     \label{fig:4.2}%
 \end{figure}
@@ -623,18 +623,37 @@ Accuracy = 76.74\%
 
 
 \section{Interesting experiments}
-* train with data from 2 objects from each category. And test with data from remaining objects. 
-* randonly subsample the grasps, repeat the experiemtns 5 times.
-* repeat that for every object. 
+* in data collection, show grasp examples, good and bad grasps before and after lifting - after fingers are closed you completed the grasp - we want to show what is a good grasp, what a good grasp looks like, what a bad grasp looks like before we lift, then after we lift we want to show the reader what it means to be successful or fail.  
+* visulize some examples tactile features from good and bad grasps 
+* for PCA, choosing number of components, you plot the variance vs number of components, tactile feature selection? 
 
-* report using tactile only, vision only (hand poses + geometric features)
-* combine all
 
-* predict the stability label
 \begin{itemize}
-    \item Train with data of 2 blocks, test with data of 1 block
-    \item Train with data of multiple types of objects (e.g. block + cylinder)
+\item train with data from 2 objects from each category. And test with data from remaining objects. 
+ \begin{itemize}
+\item randomly subsample the grasps, repeat the experiemtns 10 times.
+\item repeat that for every object - (test objects:box1, cyl1, bot1, test2: box2, cyl2, bottle2 ...)
+\item report using tactile only, vision only (hand poses + geometric features), all features
+
+ \end{itemize}
+    %\item Train with data of 2 blocks, test with data of 1 block
+    \item Train with randomly chosen data from all types of objects (e.g. block + cylinder + bottles)
+
+\begin{itemize}
+\item randomly subsample the grasps across all objects, repeat the experiemtns 10 times.
+\item report using tactile only, vision only (hand poses + geometric features), all features
+
+\item plot the success rates versus data size - use all the features, all the objects, this is to show if the data size is good enough
+
 \end{itemize}
+    
+\end{itemize}
+
+Friday 14  - results complete (section 5.6), tables entered with the data that we have
+Friday 21 - results complete with the new data, start writing the text, and adding plots, figures 
+Friday 28 - write whole text for results section and method - Yasemin reads, gives feedback - Send Marc as well
+Friday 5 - The rest of the report done - Yasemin reads, gives feedback
+Friday 11 - Final touches
 
 
 
