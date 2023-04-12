@@ -90,10 +90,8 @@ Supervisors: Prof. Marc Deisenroth, Dr. Yasemin Bekiroglu}
 
 
 \begin{document}
-\onehalfspacing
-\maketitle
 \pagenumbering{roman}
-\setcounter{page}{i}
+
 %----------------------------------------------------------------------------------
 % Abstract
 %----------------------------------------------------------------------------------
@@ -625,51 +623,9 @@ Adam with lr=1e-3
     \caption{Results for MLP without geometric features}%
     \label{fig:4.2}%
 \end{figure}
-Accuracy = 75.83\%
-
-\begin{figure}[H]%
-    \centering
-    \subfloat[\centering ]{{\includegraphics[width=7cm]{docs/Project Report/Media/mlp_geo_loss_curve.png}\label{fig:5.3a}}}%
-    \qquad
-    \subfloat[\centering ]{{\includegraphics[width=7cm]{docs/Project Report/Media/mlp_geo_cm.png}\label{fig:5.3n}}}%
-    \caption{Results for MLP with geometric features}%
-    \label{fig:4.2}%
-\end{figure}
-Accuracy = 76.74\%
 
 
 \section{Interesting experiments}
-* in data collection, show grasp examples, good and bad grasps before and after lifting - after fingers are closed you completed the grasp - we want to show what is a good grasp, what a good grasp looks like, what a bad grasp looks like before we lift, then after we lift we want to show the reader what it means to be successful or fail.  
-* visulize some examples tactile features from good and bad grasps 
-* for PCA, choosing number of components, you plot the variance vs number of components, tactile feature selection? 
-
-
-\begin{itemize}
-\item train with data from 2 objects from each category. And test with data from remaining objects. 
- \begin{itemize}
-\item randomly subsample the grasps, repeat the experiemtns 10 times.
-\item repeat that for every object - (test objects:box1, cyl1, bot1, test2: box2, cyl2, bottle2 ...)
-\item report using tactile only, vision only (hand poses + geometric features), all features
-
- \end{itemize}
-    %\item Train with data of 2 blocks, test with data of 1 block
-    \item Train with randomly chosen data from all types of objects (e.g. block + cylinder + bottles)
-
-\begin{itemize}
-\item randomly subsample the grasps across all objects, repeat the experiemtns 10 times.
-\item report using tactile only, vision only (hand poses + geometric features), all features
-
-\item plot the success rates versus data size - use all the features, all the objects, this is to show if the data size is good enough
-
-\end{itemize}
-    
-\end{itemize}
-
-Friday 14  - results complete (section 5.6), tables entered with the data that we have
-Friday 21 - results complete with the new data, start writing the text, and adding plots, figures 
-Friday 28 - write whole text for results section and method - Yasemin reads, gives feedback - Send Marc as well
-Friday 5 - The rest of the report done - Yasemin reads, gives feedback
-Friday 11 - Final touches
 
 
 
