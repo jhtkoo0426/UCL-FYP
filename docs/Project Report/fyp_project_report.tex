@@ -415,6 +415,12 @@ We aim to assess the efficacy of utilising our multi-modal dataset for our grasp
 
 \subsection{Multi-modal Data Combinations}
 \label{sec:4.4.1}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{docs/Project Report/Media/tactile_dataset_creation.png}
+    \caption{Creating the tactile dataset}
+    \label{fig:my_label}
+\end{figure}
 In this project, we segregate our dataset into tactile-only, visual-only and concatenated tactile and visual datasets:
 \begin{table}[H]
     \centering
@@ -615,13 +621,11 @@ Adam with lr=1e-3
 
 
 \section{Validation}
-\begin{figure}[H]%
+\begin{figure}[H]
     \centering
-    \subfloat[\centering ]{{\includegraphics[width=7cm]{docs/Project Report/Media/mlp_no_geo_loss_curve.png}\label{fig:5.2a}}}%
-    \qquad
-    \subfloat[\centering ]{{\includegraphics[width=7cm]{docs/Project Report/Media/mlp_no_geo_cm.png}\label{fig:5.2b}}}%
-    \caption{Results for MLP without geometric features}%
-    \label{fig:4.2}%
+    \includegraphics[scale=0.55]{docs/Project Report/Media/mlp_pca_accuracy_analysis.png}
+    \caption{Effect of dimensionality of PCA-reduced dataset on MLP performance}
+    \label{fig:my_label}
 \end{figure}
 
 
