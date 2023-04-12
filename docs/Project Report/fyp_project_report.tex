@@ -51,6 +51,10 @@
 \usepackage{listings}
 \lstset{basicstyle=\ttfamily, keywordstyle=\bfseries}
 
+% Citations
+\usepackage{biblatex}
+\addbibresource{citations.bib}
+
 % Spacing
 \newcommand{\HRule}[1]{\rule{\linewidth}{#1}}
 \setcounter{tocdepth}{5}
@@ -134,14 +138,14 @@ Recent advancements in machine learning, computer vision, and robotics have led 
 
 Robustness in a robotic grasping system refers to its versatility of accurately recognising and grasping objects with varying geometric features (width, depth, curvature, etc) and its ability to successfully grasp the objects. Robustness is increasingly becoming a vital factor in the study of grasp stability and quality, however, incorporating robustness makes it practically difficult to design a single gripper that can effectively grasp all objects. As a result, researchers and engineers have developed dedicated grippers tailored to specific grasping tasks or types of objects.\\
 
-However, developing a robust and efficient grasping system present several challenges. One major hurdle is the incorporation of touch sensing into robotic grasping, which is hindered by hardware limitations such as sensor sensitivity and cost, as well as difficulties in integrating tactile inputs into standard control schemes \cite{calandra}. Consequently, most robotic grasping research has focused on vision and depth as the primary input modalities \cite{calandra}. However, vision-based grasping approaches have limitations in measuring and reacting to ongoing contact forces, which hinders the full potential benefits of interaction. As a result, these approaches mostly rely on pre-selecting a grasp configuration, such as location, orientation, and forces, before making contact with the object. Addressing these limitations and integrating tactile feedback could significantly improve robotic grasping, leading to more efficient and effective interactions between robots and the physical world.\\
+However, developing a robust and efficient grasping system present several challenges. One major hurdle is the incorporation of touch sensing into robotic grasping, which is hindered by hardware limitations such as sensor sensitivity and cost, as well as difficulties in integrating tactile inputs into standard control schemes \cite{Calandra_2018}. Consequently, most robotic grasping research has focused on vision and depth as the primary input modalities \cite{Calandra_2018}. However, vision-based grasping approaches have limitations in measuring and reacting to ongoing contact forces, which hinders the full potential benefits of interaction. As a result, these approaches mostly rely on pre-selecting a grasp configuration, such as location, orientation, and forces, before making contact with the object. Addressing these limitations and integrating tactile feedback could significantly improve robotic grasping, leading to more efficient and effective interactions between robots and the physical world.\\
 
-Another challenge is developing a concrete strategy for improving grasp quality and planning while conserving efficiency of the overall system. Results from our \hyperref[chap:2]{literature survey} suggest that such strategies can be summarised into three types: (1) choice of object representation, where coarse approximations of the underlying true shape of an object can simplify the generation of new grasps \cite{farias} \cite{geidenstam}; (2) use of local symmetry properties to capture key geometric features of the object to generate promising grasp candidates \cite{farias} \cite{przybylski}; (3) optimising shape modelling where target objects are parameterized using smooth, differentiable functions from point clouds using spectral analysis \cite{farias}.
+Another challenge is developing a concrete strategy for improving grasp quality and planning while conserving efficiency of the overall system. Results from our \hyperref[chap:2]{literature survey} suggest that such strategies can be summarised into three types: (1) choice of object representation, where coarse approximations of the underlying true shape of an object can simplify the generation of new grasps \cite{de_Farias_2021} \cite{geidenstam_2009}; (2) use of local symmetry properties to capture key geometric features of the object to generate promising grasp candidates \cite{de_Farias_2021} \cite{przybylski}; (3) optimising shape modelling where target objects are parameterized using smooth, differentiable functions from point clouds using spectral analysis \cite{de_Farias_2021}.
 
 
 \section{Project Aims}
 \label{sec:1.2}
-Having gained a comprehensive understanding of the previously discussed optimizations and strategies, our research project focuses on the development and testing of a robust robotic system that can learn to pick up an object with simple geometry using a two-finger hand. The project will take a learning-based approach to grasping through, for example, Bayesian optimization \cite{nogueria, frazier}. The learning-based approach should be compared with a baseline approach from the related literature (e.g. \cite{nogueria, danielczuk, breyer}) for evaluation, for example, a simple regression classifier to differentiate between good and bad grasps.
+Having gained a comprehensive understanding of the previously discussed optimizations and strategies, our research project focuses on the development and testing of a robust robotic system that can learn to pick up an object with simple geometry using a two-finger hand. The project will take a learning-based approach to grasping through, for example, Bayesian optimization \cite{nogueira2016unscented, frazier2018tutorial}. The learning-based approach should be compared with a baseline approach from the related literature (e.g. \cite{nogueira2016unscented, danielczuk2020exploratory, breyer2020volumetric1}) for evaluation, for example, a simple regression classifier to differentiate between good and bad grasps.
 
 
 \newpage
@@ -149,10 +153,10 @@ Having gained a comprehensive understanding of the previously discussed optimiza
 \label{sec:1.3}
 This project is concerned with the development of a complete simulation with supporting features for data collection and analysis. Therefore, the aims of this project are split according to our system requirements, which we describe in detail below. These objectives are expected to be completed throughout the academic year:
 \begin{enumerate}
-    \item Set up a simulation environment, e.g. PyBullet or NVIDIA Isaac. 
+    \item Set up a simulation environment, e.g. PyBullet \cite{coumans2021} or NVIDIA Isaac. 
     \item Create a data collection pipeline for sensory data (e.g. visual and force/torque readings) via the simulator.
     \item Apply basic simulation functionalities: position control and vision sensing on the robot.
-    \item Implement and test baseline (e.g. \cite{breyer}, and a basic approach such as executing predefined grasps per object model given object pose).
+    \item Implement and test baseline (e.g. \cite{breyer2020volumetric}, and a basic approach such as executing predefined grasps per object model given object pose).
     \item Build the learning framework:
     \begin{enumerate}
         \item Learning grasps based on Bayesian Optimization, from a chosen scene representations such as signed distance function 
@@ -168,16 +172,16 @@ This section discusses the important phases for the project and the approach tak
 
 \subsection{Planning Phase - Design and Research}
 \label{sec:1.4.1}
-We first conduct a literature survey to explore and categorise research projects related to robotic grasping by data input, grasping method and the problem these projects address. Simultaneously, background research was conducted on grasp learning \cite{platt} and robot manipulation to obtain a general understanding of the project's task.
+We first conduct a literature survey to explore and categorise research projects related to robotic grasping by data input, grasping method and the problem these projects address. Simultaneously, background research was conducted on grasp learning \cite{platt2022grasp} and robot manipulation to obtain a general understanding of the project's task.
 
 
 \subsection{Early Development Phase - Pybullet Simulation}
 \label{sec:1.4.2}
 This project is completely conducted via a simulation environment, including data collection, robot manipulation, experimentation and testing of our approaches. Therefore, the development of a Pybullet simulation was considered a top priority in the early phases of the project. The robot we used for our simulation consists of the following components:
 \begin{enumerate}
-    \item Arm: UR5 Robot Arm Manipulator (see: \cite{ur5})
-    \item Gripper: Robotiq 2-Finger Adaptive Robot Gripper 85 (see: \cite{robotiq})
-    \item Tactile sensors: DIGIT tactile sensors \cite{digit} mounted onto each finger of the gripper
+    \item Arm: UR5 Robot Arm Manipulator
+    \item Gripper: Robotiq 2-Finger Adaptive Robot Gripper 85
+    \item Tactile sensors: DIGIT tactile sensors \cite{Lambeta2020DIGIT} mounted onto each finger of the gripper
 \end{enumerate}
 The Pybullet simulation should support the following features for our project:
 \begin{enumerate}
@@ -227,9 +231,9 @@ Chapter 6 summarises the results and performances of the project, as well as mak
 
 \section{Robotic Grasping}
 \label{sec:2.1}
-In the field of robotics, grasping is a fundamental yet challenging skill of robots which refers to the autonomous ability of a robot to grasp and move objects with its mechanical grippers or other end effectors \cite{zhang}. It demands precise coordination between the visual perception of the surrounding environment and efficient grasp planning, as well as a robot's adaptiveness to unseen object classes (robustness).\\
+In the field of robotics, grasping is a fundamental yet challenging skill of robots which refers to the autonomous ability of a robot to grasp and move objects with its mechanical grippers or other end effectors \cite{zhang2022robotic}. It demands precise coordination between the visual perception of the surrounding environment and efficient grasp planning, as well as a robot's adaptiveness to unseen object classes (robustness).\\
 
-Robotic grasping is far away from developing into an intuitive and instinctive sense as in human beings. There are many unknown factors that enable humans to flawlessly perform grasps when provided with visual and tactile information. However, with the advancements of deep-learning and computer vision, semantic grasping is becoming the main focus and basis for autonomous robotic grasping systems \cite{zhang}, where a robot is trained on monocular images of a user-specified object type \cite{jang}.\\
+Robotic grasping is far away from developing into an intuitive and instinctive sense as in human beings. There are many unknown factors that enable humans to flawlessly perform grasps when provided with visual and tactile information. However, with the advancements of deep-learning and computer vision, semantic grasping is becoming the main focus and basis for autonomous robotic grasping systems \cite{zhang2022robotic}, where a robot is trained on monocular images of a user-specified object type \cite{jang2017endtoend}.\\
 
 To successfully grasp an object, a robot needs to detect the object's location (through, for example, a wrist camera), orientation, and size accurately, estimate the best grasp point and orientation, and then execute the grasp with appropriate force and control to ensure a secure hold. The grasping process can be performed using various types of end effectors, including grippers, suction cups, or specialized tools designed for specific tasks.\\
 
@@ -276,7 +280,7 @@ Tactile sensing has been widely used to provide robots with information about ta
 
 \section{Common Grasping Approaches}
 \label{sec:2.3}
-% Humans rely on rich tactile feedback to grasp objects, however, most of the recent robotic grasping studies only focus on visual input. The authors propose an end-to-end action-conditional model (a multimodal CNN) to learn regrasping policies from visual-tactile data, by predicting outcome of a candidate grasp adjustment, then executing a grasp by iteratively selecting the most promising actions\cite{calandra}.
+Humans rely on rich tactile feedback to grasp objects, however, most of the recent robotic grasping studies only focus on visual input. The authors propose an end-to-end action-conditional model (a multimodal CNN) to learn regrasping policies from visual-tactile data, by predicting outcome of a candidate grasp adjustment, then executing a grasp by iteratively selecting the most promising actions\cite{Calandra_2018}.
 
 
 \section{Conclusion}
@@ -293,7 +297,13 @@ Tactile sensing has been widely used to provide robots with information about ta
 
 
 \section{Implementation of basic functionalities}
-Arm control, grasp control, position control, gripper control, get 6d pose, reset
+Arm control, grasp control, position control, gripper control, get 6d pose, tactile data visualisation
+
+\subsection{TACTO Camera for Live Tactile Data Visualisation}
+\label{sec:}
+The TACTO camera \cite{Wang2022TACTO}
+
+Using self.digits.render() we 
 
 
 \section{Parameters}
@@ -305,8 +315,14 @@ yaml parameters, loading parameters
 %----------------------------------------------------------------------------------
 \chapter{Baseline and Feature Representation \\ Analysis}
 \label{chap:4}
+This chapter proposes a binary logistic regression model for grasp classification based on tactile and visual data. The model is trained on a labelled dataset of grasp outcomes, end effector poses as the visual data and concatenated depth and color tactile sensory readings as the tactile data.\\
+
+[How does binary LR help]
+
 Given different combinations of multi-modal data (tactile and visual) collected from grasping an object, we would like to a) determine whether the outcome (successful or unsuccessful) of the grasp is ascertainable based on this data; and b) determine the best feature representation for said data. Therefore, we conduct our experiments on a fixed object type, i.e., a single smooth rectangular block of dimensions (depth: 0.025, width: 0.05, height: 0.05).
 
+[discuss grasp planning in this project, we simply manually control the robot to get seed poses without
+concerning about planning a grasp to that position.]
 
 \section{Random Grasp Synthesis}
 \label{sec:4.1}
@@ -338,7 +354,7 @@ Prior to executing each randomly-generated pose $X_n$ as a pick-and-place task, 
     \label{fig:4.1}%
 \end{figure}
 
-Before lifting the object, the robot measures the number of contact points between the two fingers and the object to ensure grasp stability. We define a grasp to be stable if there are a non-zero number of contact points, in which the robot records depth and color tactile information using the DIGIT tactile sensors on each finger. We concatenate each pair of depth and color tactile readings into a $(160\times240)$ gray-scale image and a $(160\times240\times3)$ RGB image respectively.\\
+Before lifting the object, the robot measures the number of contact points between the two fingers and the object to ensure the grasp is stable. We define a grasp to be stable if there are a non-zero number of contact points, in which the robot records depth and color tactile information using the DIGIT \cite{Lambeta2020DIGIT} tactile sensors on each finger. The depth read We concatenate each pair of depth and color tactile readings into a $(160\times240)$ gray-scale image and a $(160\times240\times3)$ RGB image respectively.\\
 
 After collecting the tactile readings, the robot performs a sanity check on the recorded depth tactile data. Since the color data is an RGB representation of the depth data, it does not require any additional checks. To facilitate the sanity check, we analyze whether the average pixel value exceeds a particular threshold. This process enables us to remove any erroneous signals (\ref{fig:4.2a}) and preserve the precise depth data (\ref{fig:4.2b}). By utilizing this method, we can enhance the quality of the data and ensure accurate lifting of the object.
 
@@ -363,7 +379,7 @@ After executing each random pose, we append the collected tactile data, end effe
 \newpage
 \section{Visualising Hand Poses}
 \label{sec:4.3}
-Before we train our baseline model, we are interested if a clear decision boundary exists between successful and unsuccessful grasps. We create a visualisation of each hand pose $X_n$ in a 3-dimensional space, using its Cartesian coordinates and the "pitch-row-yaw" rotational matrix representation $R$ of its Euler angles ($\alpha,\beta,\gamma$) \cite{euleranglewolfram}:
+Before we train our baseline model, we are interested if a clear decision boundary exists between successful and unsuccessful grasps. We create a visualisation of each hand pose $X_n$ in a 3-dimensional space, using its Cartesian coordinates and the "pitch-row-yaw" rotational matrix representation $R$ of its Euler angles ($\alpha,\beta,\gamma$) \cite{weisstein}:
 
 \begin{equation}
     R=r_x\cdot(r_y\cdot r_z)
@@ -552,7 +568,7 @@ To this end, we extracted and analysed several geometric features of the 9 objec
 
 \subsubsection{Principal Curvature}
 \label{sec:5.2.3.1}
-The principal curvatures of an object mesh is pair of maximum and minimum values of curvatures at each vertex of the mesh, expressed by the eigenvalues of the shape operator at that vertex \cite{principalcurvature}. We investigate whether the top $k$ principal curvatures are able to categorize the object variations correctly.
+The principal curvatures of an object mesh is pair of maximum and minimum values of curvatures at each vertex of the mesh, expressed by the eigenvalues of the shape operator at that vertex \cite{enwiki:1141654906}. We investigate whether the top $k$ principal curvatures are able to categorize the object variations correctly.
 
 \vspace*{-0.7cm}
 \begin{figure}[H]%
@@ -670,120 +686,7 @@ Since Pybullet is no longer being maintained, consider to move to mujico
 % Appendix section
 %----------------------------------------------------------------------------------
 \appendix
-\begin{thebibliography}{9}
-% Academic papers
-\bibitem{haarnoja}
-    Haarnoja, T., Zhou, A., Abbeel, P. & Levine, S..
-    \textit{Soft Actor-CriticL Off-Policy Maximum Entroy Deep Reinforcement Learning with a Stochastic Actor, \href{https://arxiv.org/abs/1801.01290}{https://arxiv.org/abs/1801.01290}},
-    ICML,
-    2018 roboti
-
-\bibitem{nogueria}
-    Nogueria et al,
-    \textit{Unscented Bayesian Optimization for Safe Robot Grasping},
-    IROS,
-    2016
-
-\bibitem{danielczuk}
-    Danielczuk et al,
-    \textit{Exploratory Grasping: Asymptotically Optimal Algorithms for Grasping Challenging Polyhedral Objects},
-    2020
-
-\bibitem{bekiroglu}
-    Bekiroglu et al,
-    \textit{Assessing Grasp Stability from Haptic Data},
-    IEEE TRO,
-    2011
-
-\bibitem{frazier}
-    Frazier,
-    \textit{A Tutorial on Bayesian Optimization},
-    2018
-
-\bibitem{breyer}
-    Breyer,
-    \textit{\href{https://github.com/ethz-asl/vgn}{https://github.com/ethz-asl/vgn}}
-    CORL,
-    2020
-
-% Academic papers for survey
-\bibitem{calandra}
-    Calandra et al,
-    \textit{More Than a Feeling: Learning to Grasp and Regrasp using Vision and Touch},
-    2018
-
-\bibitem{hausman}
-    Hausman et al,
-    \textit{Generalizing Regrasping with Supervised Policy Learning},
-    2017
-
-\bibitem{farias}
-    Farias et al,
-    \textit{Simultaneous Tactile Exploration and Grasp Refinement for Unknown Objects},
-    2021
-
-\bibitem{geidenstam}
-    S. Geidenstam et al.,
-    \textit{Learning of 2d grasping strategies from box-based 3d object approximations}, in Robotics: Science and Systems, vol.
-    2008, 2009.
-
-\bibitem{przybylski}
-    M. Przybylski, T. Asfour, and R. Dillmann,
-    \textit{Unions of balls for shape approximation in robot grasping}, in IEEE/RSJ Int. Conf. Intell. Rob. Sys. IEEE, 2010, pp. 1592–1599
-
-\bibitem{platt}
-    Robert Platt,
-    \textit{Grasp Learning: Models, Methods and Performance},
-    2022
-
-\bibitem{zhang}
-    Hanbo Zhang et al.,
-    \textit{Robotic Grasping from Classical to Modern: A Survey},
-    2022
-    
-\bibitem{jang}
-    Jang et al.,
-    \textit{End-to-End Learning of Semantic Grasping},
-    
-
-% Other references
-\bibitem{euleranglewolfram}
-    \href{https://mathworld.wolfram.com/EulerAngles.html}{Weisstein, Eric W. "Euler Angles." From MathWorld--A Wolfram Web Resource.}
-
-% Terms
-\bibitem{principalcurvature}
-    Principal curvature, \href{https://en.wikipedia.org/wiki/Principal_curvature}{https://en.wikipedia.org/wiki/Principal_curvature}
-
-% References for technologies used
-\bibitem{digit}
-    \href{https://digit.ml/}{DIGIT tactile sensors, 2020 @ Facebook}
-
-\bibitem{pybullet}
-    \href{https://pybullet.org/wordpress/}{Pybullet}
-
-@article{Wang2022TACTO,
-  author   = {Wang, Shaoxiong and Lambeta, Mike and Chou, Po-Wei and Calandra, Roberto},
-  title    = {{TACTO}: A Fast, Flexible, and Open-source Simulator for High-resolution Vision-based Tactile Sensors},
-  journal  = {IEEE Robotics and Automation Letters (RA-L)},
-  year     = {2022},
-  volume   = {7},
-  number   = {2},
-  pages    = {3930--3937},
-  issn     = {2377-3766},
-  doi      = {10.1109/LRA.2022.3146945},
-  url      = {https://arxiv.org/abs/2012.08456},
-}
-
-\bibitem{franka}
-    Franka Emika, \href{https://www.franka.de}{https://www.franka.de}
-
-\bibitem{robotiq}
-    Robotiq, \href{https://robotiq.com/products/2f85-140-adaptive-robot-gripper}{https://robotiq.com/products/2f85-140-adaptive-robot-gripper}
-
-\bibitem{ur5}
-    UR5 (Universal Robots), \href{https://www.universal-robots.com/products/ur5-robot/}{https://www.universal-robots.com/products/ur5-robot/}
-
-\end{thebibliography}
+\printbibliography
 
 \chapter{Other appendices, e.g., code listing}
 Put your appendix sections here
