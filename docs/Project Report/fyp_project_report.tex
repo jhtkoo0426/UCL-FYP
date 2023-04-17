@@ -17,9 +17,11 @@
 % Links
 \usepackage{hyperref}
 
-% Positioning figures
+% Figures
 \usepackage{float}
 \usepackage{subfig}
+\usepackage{caption}
+\captionsetup[figure]{font=small,labelfont=Small}
 
 % Equations% Equations & Theorems
 \usepackage{amssymb}
@@ -413,9 +415,11 @@ Before we train our baseline model, we are interested if a clear decision bounda
 \noindent Using this information, we annotate 20 random hand poses from our dataset in a 3-dimensional plot. Each 6D hand pose is represented using a skeleton 2-finger model, where green and red poses denote successful and unsuccessful grasps respectively:
 \begin{figure}[H]%
     \centering
-    \subfloat[\centering Orientation 1]{{\includegraphics[width=6.5cm]{docs/Project Report/Media/4_3_2_all_ee_pose_visualise.png} }}%
+    \subfloat[\centering Box without poses]{{\includegraphics[width=0.29\textwidth]{docs/Project Report/Media/4_3_2_box_3d_plot.png} }}%
     \qquad
-    \subfloat[\centering Orientation 2]{{\includegraphics[width=6.5cm]{docs/Project Report/Media/4_3_2_all_ee_pose_visualise_angle2.png} }}%
+    \subfloat[\centering Orientation 1]{{\includegraphics[width=0.29\textwidth]{docs/Project Report/Media/4_3_2_all_ee_pose_visualise.png} }}%
+    \qquad
+    \subfloat[\centering Orientation 2]{{\includegraphics[width=0.29\textwidth]{docs/Project Report/Media/4_3_2_all_ee_pose_visualise2.png} }}%
     \caption{Visualisation of 200 random end effector poses}%
     \label{fig:4.4}%
 \end{figure}
