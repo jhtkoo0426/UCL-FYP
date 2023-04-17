@@ -1,74 +1,44 @@
 \documentclass[11pt, a4paper]{report}
 
 % Page styling
-\usepackage{amssymb,graphicx,color}
-\usepackage{amsfonts}
 \usepackage{extsizes}
 \usepackage{latexsym}
 \usepackage[a4paper,margin=3cm]{geometry}
 \usepackage{changepage}
-\usepackage{mathptmx}
 
 % Spacing
 \usepackage{setspace}
 \setstretch{1.05}
 
 % Tables
-\usepackage{multirow, multicol}
 \usepackage{booktabs}
 \setlength{\columnsep}{1cm}
 
-% Custom theorems
-\usepackage[font=small, labelfont=bf]{caption}
-\usepackage[protrusion=true, expansion=true]{microtype}
-\usepackage{sectsty}
-\usepackage{url, lipsum}
-\usepackage{amsthm}
-
+% Links
 \usepackage{hyperref}
-
-\theoremstyle{definition}
-\newtheorem{theorem}{THEOREM}
-\newtheorem{lemma}[theorem]{LEMMA}
-\newtheorem{corollary}[theorem]{COROLLARY}
-\newtheorem{proposition}[theorem]{PROPOSITION}
-\newtheorem{remark}[theorem]{REMARK}
-\newtheorem{definition}[theorem]{DEFINITION}
-\newtheorem{fact}[theorem]{FACT}
-\newtheorem{example}[theorem]{EXAMPLE}
-\newtheorem{property}[theorem]{PROPERTY}
 
 % Positioning figures
 \usepackage{float}
-\usepackage[demo]{graphicx}
 \usepackage{subfig}
 
-% Equations
+% Equations% Equations & Theorems
+\usepackage{amssymb}
 \usepackage{amsmath}
-
-% Code
-\usepackage{fancyvrb}
-\usepackage{listings}
-\lstset{basicstyle=\ttfamily, keywordstyle=\bfseries}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{thmtools}
+\usepackage{graphicx,color}
 
 % Citations
 \usepackage{biblatex}
 \addbibresource{citations.bib}
 
-% Spacing
-\newcommand{\HRule}[1]{\rule{\linewidth}{#1}}
-\setcounter{tocdepth}{5}
-\setcounter{secnumdepth}{5}
-\usepackage{titlesec}
-\titleformat{\chapter}[display]
-{\normalfont\huge\bfseries}{\chaptertitlename\ \thechapter}{20pt}{\Huge}
-\titlespacing*{\chapter}{0pt}{0pt}{20pt}
 
 
 %----------------------------------------------------------------------------------
 % Title Page
 %----------------------------------------------------------------------------------
-\title{{\vspace{-2in}\includegraphics[scale=0.4]{docs/Project Report/Media/ucl_logo.png}}\\
+\title{{\vspace{-2in}\includegraphics[width=\textwidth]{docs/Project Report/Media/ucl_logo.png}}\\
 \vspace{2cm}
 \begin{adjustwidth}{1cm}{1cm}
     \centering
@@ -81,7 +51,7 @@
 This report is submitted as part requirement for the BSc degree in Computer Science at UCL. It is
 substantially the result of my own work except where explicitly indicated in the text.
 \emph{Either:} The report may be freely copied and distributed provided the source is explicitly acknowledged
-\newline  %% \\ messes it up
+\newline
 \emph{Or:}\newline
 The report will be distributed to the internal and external examiners, but thereafter may not be copied or distributed except with permission from the author.}
 \\ \\
@@ -89,16 +59,19 @@ BSc Computer Science\\ \\
 Supervisors: Prof. Marc Deisenroth, Dr. Yasemin Bekiroglu}
 
 
+
 \begin{document}
+\onehalfspacing
+\maketitle
 \pagenumbering{roman}
 
 %----------------------------------------------------------------------------------
 % Abstract
 %----------------------------------------------------------------------------------
 \begin{abstract}
-Robotic grasp synthesis has been studied extensively as robotic grasping skills have a significant impact on the success of subsequent manipulation tasks. Various approaches have been proposed for robotic grasp planning, with different assumptions regarding the available information about the type of objects in question (known, unknown, familiar). These approaches range from heuristic rules, designing simplifying hand models, to completely end-to-end systems inferring grasp parameters from raw data.\\
+Robotic grasp synthesis has been studied extensively as robotic grasping skills have a significant impact on the success of subsequent manipulation tasks. Various approaches have been proposed for robotic grasp planning, with different assumptions regarding the available information about the type of objects in question (known, unknown, familiar). These approaches range from heuristic rules, and designing simplifying hand models, to complete end-to-end systems inferring grasp parameters from raw data.\\
 
-However, the majority of these approaches do not address robustness in grasping, which refers to the ability of a robot to perform a grasping task consistently and accurately even in the case of unexpected disturbances or large degree of errors in perception. There are several fundamental problems that need to be addressed for achieving better robustness in grasping tasks. These include mainly dealing with uncertainties in sensing, actuation and the perceptual data.\\
+However, most of these approaches do not address robustness in grasping, which refers to the ability of a robot to perform a grasping task consistently and accurately even in the case of unexpected disturbances or large degrees of errors in perception. There are several fundamental problems that need to be addressed to achieve better robustness in grasping tasks. These include mainly dealing with uncertainties in sensing, actuation and perceptual data.\\
 
 In this project, we study how to build a robust learning framework that can be employed to construct robust grasp configurations using multi-modal data, e.g. tactile, and visual. The project addresses the following main issues with the robotic grasping systems: a) balancing the trade-off between data representation and data dimensionality; b) analyzing the modelling effects of different modalities, e.g. tactile and visual, and features to capture the underlying characteristics of the overall grasping process; c) a correction policy that relies on assessing grasp success before further manipulation using perceptual data, to choose the right grasping configuration.
 \end{abstract}
@@ -130,15 +103,15 @@ In this project, we study how to build a robust learning framework that can be e
 
 \section{Outline of Problem}
 \label{sec:1.1}
-Humans are able to grasp objects seemingly intuitively. We can efficiently identify and reach for objects, adjust our finger placements and optimally balance contact forces through the coordination of our wrists, arms, and shoulders when we approach and lift objects. Our sense of touch plays a major role, providing us with information about the object's size, shape, texture, weight, and other physical properties. This information is processed by our brains, giving us instructions on how to adjust our grasp pose and apply the appropriate amount of force needed to pick up the object. Without the sense of touch, grasping objects would be much more difficult and less efficient. Therefore, incorporating touch sensing into robotic grasping can help robots better identify and adjust to objects, making them more effective in interacting with the physical world.\\
+Humans are able to grasp objects seemingly intuitively. We can efficiently identify and reach for objects, adjust our finger placements and optimally balance contact forces by coordinating our wrists, arms, and shoulders when we approach and lift objects. Our sense of touch plays a major role, providing us with information about the object's size, shape, texture, weight, and other physical properties. This information is processed by our brains, giving us instructions on how to adjust our grasp pose and apply the appropriate amount of force needed to pick up the object. Without the sense of touch, grasping objects would be much more difficult and less efficient. Therefore, incorporating touch sensing into robotic grasping can help robots better identify and adjust to objects, making them more effective in interacting with the physical world.\\
 
 Recent advancements in machine learning, computer vision, and robotics have led to remarkable progress in the field of robotic grasping. This technology holds great promise for a range of applications, including manufacturing, warehouse automation, and household robotics. However, little work has been done on increasing robustness in grasping systems that utilise multi-modal (tactile and visual) data.\\
 
 Robustness in a robotic grasping system refers to its versatility of accurately recognising and grasping objects with varying geometric features (width, depth, curvature, etc) and its ability to successfully grasp the objects. Robustness is increasingly becoming a vital factor in the study of grasp stability and quality, however, incorporating robustness makes it practically difficult to design a single gripper that can effectively grasp all objects. As a result, researchers and engineers have developed dedicated grippers tailored to specific grasping tasks or types of objects.\\
 
-However, developing a robust and efficient grasping system present several challenges. One major hurdle is the incorporation of touch sensing into robotic grasping, which is hindered by hardware limitations such as sensor sensitivity and cost, as well as difficulties in integrating tactile inputs into standard control schemes \cite{Calandra_2018}. Consequently, most robotic grasping research has focused on vision and depth as the primary input modalities \cite{Calandra_2018}. However, vision-based grasping approaches have limitations in measuring and reacting to ongoing contact forces, which hinders the full potential benefits of interaction. As a result, these approaches mostly rely on pre-selecting a grasp configuration, such as location, orientation, and forces, before making contact with the object. Addressing these limitations and integrating tactile feedback could significantly improve robotic grasping, leading to more efficient and effective interactions between robots and the physical world.\\
+However, developing a robust and efficient grasping system presents several challenges. One major hurdle is the incorporation of touch sensing into robotic grasping, which is hindered by hardware limitations such as sensor sensitivity and cost, as well as difficulties in integrating tactile inputs into standard control schemes \cite{Calandra_2018}. Consequently, most robotic grasping research has focused on vision and depth as the primary input modalities \cite{Calandra_2018}. However, vision-based grasping approaches have limitations in measuring and reacting to ongoing contact forces, which hinders the full potential benefits of interaction. As a result, these approaches mostly rely on pre-selecting a grasp configuration, such as location, orientation, and forces, before making contact with the object. Addressing these limitations and integrating tactile feedback could significantly improve robotic grasping, leading to more efficient and effective interactions between robots and the physical world.\\
 
-Another challenge is developing a concrete strategy for improving grasp quality and planning while conserving efficiency of the overall system. Results from our \hyperref[chap:2]{literature survey} suggest that such strategies can be summarised into three types: (1) choice of object representation, where coarse approximations of the underlying true shape of an object can simplify the generation of new grasps \cite{de_Farias_2021} \cite{geidenstam_2009}; (2) use of local symmetry properties to capture key geometric features of the object to generate promising grasp candidates \cite{de_Farias_2021} \cite{przybylski}; (3) optimising shape modelling where target objects are parameterized using smooth, differentiable functions from point clouds using spectral analysis \cite{de_Farias_2021}.
+Another challenge is developing a concrete strategy for improving grasp quality and planning while conserving the efficiency of the overall system. Results from our \hyperref[chap:2]{literature survey} suggest that such strategies can be summarised into three types: (1) choice of object representation, where coarse approximations of the underlying true shape of an object can simplify the generation of new grasps \cite{de_Farias_2021} \cite{geidenstam_2009}; (2) use of local symmetry properties to capture key geometric features of the object to generate promising grasp candidates \cite{de_Farias_2021} \cite{przybylski}; (3) optimising shape modelling where target objects are parameterized using smooth, differentiable functions from point clouds using spectral analysis \cite{de_Farias_2021}.
 
 
 \section{Project Aims}
@@ -165,7 +138,7 @@ This project is concerned with the development of a complete simulation with sup
 
 \section{Project Approach}
 \label{sec:1.4}
-This section discusses the important phases for the project and the approach taken at each phase. Technologies required for completing a particular phase will be documented and justified.
+This section discusses the important phases of the project and the approach taken at each phase. Technologies required for completing a particular phase will be documented and justified.
 
 
 \subsection{Planning Phase - Design and Research}
@@ -184,31 +157,32 @@ This project is completely conducted via a simulation environment, including dat
 The Pybullet simulation should support the following features for our project:
 \begin{enumerate}
     \item manual robot (end effector) manipulation
-    \item real-time display of tactile data (depth and color cameras)
+    \item real-time display of tactile data (depth and colour cameras)
     \item a grasp planner using inverse kinematics
     \item a random end effector pose generator for creating varying grasp poses
     \item a tactile data collection pipeline using randomly-generated end effector grasp poses
 \end{enumerate}
+\noindent This will be further discussed in \hyperref[sec:3.1]{Section 3.1}.
 
 
 \subsection{Baseline Development Phase}
 \label{sec:1.4.3}
-This phase focuses on determining the optimal dataset representation for our collected multi-modal data, consisting of tactile sensor readings, visual end effector poses relative to the arm, and the respective grasp outcomes of each end effector pose. In addition, we experiment with several feature engineering techniques, for example dimensionality reduction using ConvNets and Principal Component Analysis (PCA).
+This phase focuses on determining the optimal dataset representation for our collected multi-modal data, consisting of tactile sensor readings, visual end effector poses relative to the arm, and the respective grasp outcomes of each end effector pose. In addition, we experiment with several feature engineering techniques, for example, dimensionality reduction using ConvNets and Principal Component Analysis (PCA).
 
 
 \subsection{Execution Phase - Learning Approach Implementation}
 \label{sec:1.4.4}
-Following the outcomes of our baseline approach where we identified the optimal feature representation of our dataset, we move on to develop our learning-based approach which is trained on three primitive object types. In addition to tactile sensor readings and visual data (randomly-generated end effector poses), we include the object features for each object class in our dataset, and train this dataset on a multilayer perceptron (MLP). Finally, we conduct several interesting experiments, including (1) training our MLP using various segmentations of our dataset; and (2) validate our MLP on unseen objects that comprise of similar geometric features to that of the primitive objects that our MLP was trained on.
+Following the outcomes of our baseline approach where we identified the optimal feature representation of our dataset, we move on to develop our learning-based approach which is trained on three primitive object types. In addition to tactile sensor readings and visual data (randomly-generated end effector poses), we include the object features for each object class in our dataset, and train this dataset on a multilayer perceptron (MLP). Finally, we conduct several interesting experiments, including (1) training our MLP using various segmentations of our dataset; and (2) validating our MLP on unseen objects that comprise similar geometric features to that of the primitive objects that our MLP was trained on.
 
 
 \subsection{Documentation Phase}
 \label{sec:1.4.5}
-The final phase of the project involves the completion of the project report, writing documentation on setting up and using the simulation, as well as including a brief description on the methodology behind our baseline and learning-based approaches which are implemented in Jupyter Notebook.
+The final phase of the project involves the completion of the project report, writing documentation on setting up and using the simulation, as well as including a brief description of the methodology behind our baseline and learning-based approaches which are implemented in Jupyter Notebook.
 
 
 \section{Report Structure}
 \label{sec:1.5}
-Chapter 2 gives a brief overview of the background of robotic grasping and relevant literature the project. We investigate common grasp representations and grasp quality evaluation techniques, and analyse various data representations of multi-modal data (tactile, sensory, temporal) and policy-learning approaches.\\
+Chapter 2 gives a brief overview of the background of robotic grasping and relevant literature on the project. We investigate common grasp representations and grasp quality evaluation techniques, and analyse various data representations of multi-modal data (tactile, sensory, temporal) and policy-learning approaches.\\
 
 Chapter 3 documents the system architecture for the project and the development of a Pybullet simulation, including input components to enable data collection and simulation of our robot setup.\\
 
@@ -216,7 +190,7 @@ Chapter 4 documents the development and testing of our baseline approach using a
 
 Chapter 5 documents the development and testing of our proposed approach using a multilayer perceptron (MLP) model that attempts to infer good grasp configurations on three primitive object classes from random hand poses, trained on data collected from the Pybullet simulation. The dataset includes tactile sensor readings, random hand poses and geometric features of the target objects.\\
 
-Chapter 6 summarises the results and performances of the project, as well as making suggestions for future work and improvement based on these findings.
+Chapter 6 summarises the results and performances of the project, as well as makes suggestions for future work and improvement based on these findings.
 
 
 
@@ -231,7 +205,7 @@ Chapter 6 summarises the results and performances of the project, as well as mak
 \label{sec:2.1}
 In the field of robotics, grasping is a fundamental yet challenging skill of robots which refers to the autonomous ability of a robot to grasp and move objects with its mechanical grippers or other end effectors \cite{zhang2022robotic}. It demands precise coordination between the visual perception of the surrounding environment and efficient grasp planning, as well as a robot's adaptiveness to unseen object classes (robustness).\\
 
-Robotic grasping is far away from developing into an intuitive and instinctive sense as in human beings. There are many unknown factors that enable humans to flawlessly perform grasps when provided with visual and tactile information. However, with the advancements of deep-learning and computer vision, semantic grasping is becoming the main focus and basis for autonomous robotic grasping systems \cite{zhang2022robotic}, where a robot is trained on monocular images of a user-specified object type \cite{jang2017endtoend}.\\
+Robotic grasping is far away from developing into an intuitive and instinctive sense as in human beings. There are many unknown factors that enable humans to flawlessly perform grasps when provided with visual and tactile information. However, with the advancements of deep learning and computer vision, semantic grasping is becoming the main focus and basis for autonomous robotic grasping systems \cite{zhang2022robotic}, where a robot is trained on monocular images of a user-specified object type \cite{jang2017endtoend}.\\
 
 To successfully grasp an object, a robot needs to detect the object's location (through, for example, a wrist camera), orientation, and size accurately, estimate the best grasp point and orientation, and then execute the grasp with appropriate force and control to ensure a secure hold. The grasping process can be performed using various types of end effectors, including grippers, suction cups, or specialized tools designed for specific tasks.\\
 
@@ -246,7 +220,7 @@ A grasp in robotic grasping is a specific configuration of a robotic hand or gri
 
 \subsubsection{Meshes}
 \label{sec:2.1.1.1}
-In computer graphics and object modelling, a (polygon) mesh is a 3-dimensional representation or rigid reconstruction of the surface of an object. Typically, the representation is a collection of vertices, edges and faces that defines the object shape. Faces usually consist of triangles an object's surface that is composed of vertices, edges, and faces. Grasps can be represented as a set of vertices on the mesh that correspond to the location of the gripper's fingertips and palm.
+In computer graphics and object modelling, a (polygon) mesh is a 3-dimensional representation or rigid reconstruction of the surface of an object. Typically, the representation is a collection of vertices, edges and faces that define the object's shape. Faces usually consist of triangles an object's surface that is composed of vertices, edges, and faces. Grasps can be represented as a set of vertices on the mesh that corresponds to the location of the gripper's fingertips and palm.
 
 
 \subsubsection{Point Clouds}
@@ -278,7 +252,7 @@ Tactile sensing has been widely used to provide robots with information about ta
 
 \section{Common Grasping Approaches}
 \label{sec:2.3}
-Humans rely on rich tactile feedback to grasp objects, however, most of the recent robotic grasping studies only focus on visual input. The authors propose an end-to-end action-conditional model (a multimodal CNN) to learn regrasping policies from visual-tactile data, by predicting outcome of a candidate grasp adjustment, then executing a grasp by iteratively selecting the most promising actions\cite{Calandra_2018}.
+Humans rely on rich tactile feedback to grasp objects, however, most of the recent robotic grasping studies only focus on visual input. The authors propose an end-to-end action-conditional model (a multimodal CNN) to learn regrasping policies from visual-tactile data, by predicting the outcome of a candidate grasp adjustment, then executing a grasp by iteratively selecting the most promising actions\cite{Calandra_2018}.
 
 
 \section{Conclusion}
@@ -287,80 +261,102 @@ Humans rely on rich tactile feedback to grasp objects, however, most of the rece
 
 
 %----------------------------------------------------------------------------------
-% Section 3: Developing a Pybullet simulation
+% Section 3: Preliminaries
 % Describes the detailed process of developing the simulation for the project
 %----------------------------------------------------------------------------------
-\chapter{Experimentation and Development of Pybullet Simulation}
+\chapter{Preliminaries}
 \label{chap:3}
 
 
-\section{Implementation of basic functionalities}
+\section{Pybullet overview & project simulation functionalities}
 Arm control, grasp control, position control, gripper control, get 6d pose, tactile data visualisation
 
-\subsection{TACTO Camera for Live Tactile Data Visualisation}
-\label{sec:}
-The TACTO camera \cite{Wang2022TACTO}
-
-Using self.digits.render() we 
-
-
-\section{Parameters}
+\subsection{Parameters}
 yaml parameters, loading parameters
 
 
+\section{Describe data (depth colour, ee pose), how to extract (via camera)}
+
+
+\subsection{Tactile data}
+- visualise some tactile data (depth, colour pairs)
+
+
+\subsection{Visual data}
+- "Visual" as in relative of hand to object
+- Each ee pose is a 6-tuple consisting of 3 Cartesian coordinates representing the spatial position of the end effector relative to the robot, as well as 3 Euler angles representing the orientation of the end effector
+
+\subsection{}
+\subsection{TACTO Camera for Live Tactile Data Visualisation}
+\label{sec:}
+- TACTO camera \cite{Wang2022TACTO}
+- self.digits.render()
+
+
+
 %----------------------------------------------------------------------------------
-% Section 4: Designing a Baseline Model and Deciding on Feature Representation of Tactile and Visual Data
+% Section 4: Baseline and Feature Representation Analysis
 %----------------------------------------------------------------------------------
-\chapter{Baseline and Feature Representation \\ Analysis}
+\chapter{Baseline and Feature Representation Analysis}
 \label{chap:4}
-This chapter proposes a binary logistic regression model for grasp classification based on tactile and visual data. The model is trained on a labelled dataset of grasp outcomes, end effector poses as the visual data and concatenated depth and color tactile sensory readings as the tactile data.\\
+This chapter proposes a binary logistic regression model (commonly known as binary logit) for the classification of grasps. The fundamental assumption of this approach is that grasps can be dichotomously categorized as either successful or unsuccessful outcomes. In addition, we seek an optimal feature representation for the tactile and/or visual data generated from randomly-synthesised grasps in our simulation.
 
-[How does binary LR help]
 
-Given different combinations of multi-modal data (tactile and visual) collected from grasping an object, we would like to a) determine whether the outcome (successful or unsuccessful) of the grasp is ascertainable based on this data; and b) determine the best feature representation for said data. Therefore, we conduct our experiments on a fixed object type, i.e., a single smooth rectangular block of dimensions (depth: 0.025, width: 0.05, height: 0.05).
-
-[discuss grasp planning in this project, we simply manually control the robot to get seed poses without
-concerning about planning a grasp to that position.]
-
-\section{Random Grasp Synthesis}
+\section{Intuition of the Logit Model}
 \label{sec:4.1}
-Using our Pybullet simulation, we manually manipulate the end effector to varying positions in the proximity of the block, and record three different end effector poses ($i=0,1,2$) to guarantee some variation in the orientation and position of the grasps. In this work, we refer to such manually-selected end effector poses as seed poses, denoted as $S_i$. Each seed pose is a 6-tuple consisting of 3 Cartesian coordinates representing the spatial position of the end effector relative to the robot, as well as 3 Euler angles representing the orientation of the end effector:
+Assume that we have selected some representation of tactile and/or visual features for each grasp, denoted $x_i$. Our logit model attempts to classify the grasp with a binary label $y_i$. To achieve this, the weights $w$ of the model are fitted through a maximum likelihood estimation where the distribution of the features $x_i$. Assuming the grasp outcomes as a Bernoulli random variable, we can construct and minimise the following cross-entropy loss function and treat it as an optimisation problem:
+\begin{equation}
+    ln(L(w))=\sum^n_{i=1}y_i\cdot ln(\rho_y(y_i=1|x_i))+(1-y_i)\cdot ln(\rho_y(y_i=0|x_i))
+\end{equation}
+where $\rho_y(y_i=1|x_i)$ and $\rho_y(y_0=1|x_i)$ represent the probability of a grasp $x_i$ being successful $y_i=1$ or unsuccessful $y_i=0$ respectively.\\
+
+Therefore using our learned logit model (with an optimised weights vector), we can determine whether the outcome (successful or unsuccessful) of an unseen grasp is ascertainable based on its feature representation.
+
+
+\section{Dataset Generation}
+\label{sec:4.2}
+To generate a dataset for training our proposed logit model, we collect tactile and visual data by randomly generating grasps on a smooth rectangular box of dimensions (depth: 0.025, width: 0.05, height: 0.05) in our Pybullet simulation.
+
+
+\subsection{Random Grasp Synthesis}
+\label{sec:4.2.1}
+To generate random grasps on the box, we first manipulate the robot's end effector manually into diverse positions within the box's vicinity and collect three distinct end effector poses $S_i:i=1,2,3$ to ensure some variability in grasping orientation, position and efficacy. The selected end effector poses are subsequently referred to as seed poses, denoted as a 6-tuple $S_i$:
 \begin{equation}
     S_i=(x,y,z,r_x,r_y,r_z)
 \end{equation}
-For each independent seed pose, we generate a pre-determined number $N$ of random poses $X_n$ from the seed by adding a small amount of Gaussian noise $K_n$ ($\mu=0$ and $\sigma=0.01$) to each dimension of $S_i$. Mathematically, the randomly generated grasps are denoted as:
+For each seed pose, we generate a fixed number $n$ of random poses from the seed by adding a small amount of Gaussian noise $K_n$ with zero mean and unit variance to each dimension of $S_i$. We denote the generated grasp poses $X_v$ as follows:
 \begin{equation}
-    X_n=S_i+K_n
+    X_v=\Big\{S_i+K_i:K_i\sim\mathcal{N}(0,1),\;i=1,2,3,...,n\Big\}
 \end{equation}
-The variance of the Gaussian noise can be adjusted for a more/less sparse distribution of the random poses. To prevent collision between the gripper and the object when initializing the end effector pose, we add some padding to the z-dimension, denoted as $p_z$.
+The variance of the Gaussian noise can be adjusted for a more/less sparse distribution of the random grasp poses.\\
+ 
 
-
-\section{Data Collection}
-\label{sec:4.2}
-Prior to executing each randomly-generated pose $X_n$ as a pick-and-place task, we first reset the position and orientation of our robot to an initial, predefined configuration (\ref{fig:4.1a}). Next, we utilise Pybullet's built-in inverse kinematics method to manipulate the robot's end effector to $X_n$. To avoid collision with the object, we include a vertical padding distance $p_z$ above the object (\ref{fig:4.1b}). Then, the robot lowers the end effector by removing the padding $p_z$ to reach the target object and closes its gripper (\ref{fig:4.1c}).
+\subsection{Data Collection Pipeline}
+\label{sec:4.2.2}
+Prior to executing each randomly generated pose $X_{v,i}$ as a pick-and-place task, we first reset the position and orientation of our robot to an initial, predefined configuration (\ref{fig:4.1a}). Next, we utilise Pybullet's built-in inverse kinematics method to manipulate the robot's end effector to $X_{v,i}$. To avoid collision with the object, we include a vertical padding distance $p_z$ above the object (\ref{fig:4.1b}). Then, the robot lowers the end effector by removing the padding $p_z$ to reach the target object and closes its gripper (\ref{fig:4.1c}).
 
 \begin{figure}[H]%
     \centering
-    \subfloat[\centering Reset robot to initial configuration]{{\includegraphics[width=7cm]{docs/Project Report/Media/4_1_2_init_config.png}\label{fig:4.1a}}}%
+    \subfloat[\centering Reset robot to initial configuration]{{\includegraphics[width=0.47\textwidth]{docs/Project Report/Media/4_2_2_init_config.png}\label{fig:4.1a}}}%
     \qquad
-    \subfloat[\centering Move end effector to specific pose (with vertical padding)]{{\includegraphics[width=7cm]{docs/Project Report/Media/4_1_2_ee_pose_with_pad.png}\label{fig:4.1b}}}%
+    \subfloat[\centering Move end effector to specific pose (with vertical padding)]{{\includegraphics[width=0.47\textwidth]{docs/Project Report/Media/4_2_2_ee_pose_with_pad.png}\label{fig:4.1b}}}%
     \qquad
-    \subfloat[\centering Remove vertical padding and close gripper]{{\includegraphics[width=7cm]{docs/Project Report/Media/4_1_2_ee_pose_no_pad.png}\label{fig:4.1c}}}%
+    \subfloat[\centering Remove vertical padding and close gripper]{{\includegraphics[width=0.47\textwidth]{docs/Project Report/Media/4_2_2_ee_pose_no_pad.png}\label{fig:4.1c}}}%
     \qquad
-    \subfloat[\centering Lift object]{{\includegraphics[width=7cm]{docs/Project Report/Media/4_1_2_pick_obj.png}\label{fig:4.1d}}}%
+    \subfloat[\centering Lift object]{{\includegraphics[width=0.47\textwidth]{docs/Project Report/Media/4_2_2_pick_obj.png}\label{fig:4.1d}}}%
     \caption{Tactile and visual data collection procedure on a single generated hand pose}%
     \label{fig:4.1}%
 \end{figure}
 
-Before lifting the object, the robot measures the number of contact points between the two fingers and the object to ensure the grasp is stable. We define a grasp to be stable if there are a non-zero number of contact points, in which the robot records depth and color tactile information using the DIGIT \cite{Lambeta2020DIGIT} tactile sensors on each finger. The depth read We concatenate each pair of depth and color tactile readings into a $(160\times240)$ gray-scale image and a $(160\times240\times3)$ RGB image respectively.\\
+Before lifting the object, the robot measures the number of contact points between the two fingers and the object to ensure the grasp is stable. We define a grasp to be stable if there are a non-zero number of contact points, in which the robot records depth and colour tactile information using the DIGIT \cite{Lambeta2020DIGIT} tactile sensors on each finger. The depth read We concatenate each pair of depth and colour tactile readings into a $(160\times240)$ grey-scale image and a $(160\times240\times3)$ RGB image respectively.\\
 
-After collecting the tactile readings, the robot performs a sanity check on the recorded depth tactile data. Since the color data is an RGB representation of the depth data, it does not require any additional checks. To facilitate the sanity check, we analyze whether the average pixel value exceeds a particular threshold. This process enables us to remove any erroneous signals (\ref{fig:4.2a}) and preserve the precise depth data (\ref{fig:4.2b}). By utilizing this method, we can enhance the quality of the data and ensure accurate lifting of the object.
+After collecting the tactile readings, the robot performs a sanity check on the recorded depth tactile data. Since the colour data is an RGB representation of the depth data, it does not require any additional checks. To facilitate the sanity check, we analyze whether the average pixel value exceeds a particular threshold. This process enables us to remove any erroneous signals (\ref{fig:4.2a}) and preserve the precise depth data (\ref{fig:4.2b}). By utilizing this method, we can enhance the quality of the data and ensure the accurate lifting of the object.
 
 \begin{figure}[H]%
     \centering
-    \subfloat[\centering Invalid depth data]{{\includegraphics[width=7cm]{docs/Project Report/Media/4_1_2_failure_depth_data.png}\label{fig:4.2a}}}%
+    \subfloat[\centering Invalid depth data]{{\includegraphics[width=7cm]{docs/Project Report/Media/4_2_2_invalid_tactile_data.png}\label{fig:4.2a}}}%
     \qquad
-    \subfloat[\centering Valid depth data]{{\includegraphics[width=7cm]{docs/Project Report/Media/4_1_2_valid_depth_data.png}\label{fig:4.2b}}}%
+    \subfloat[\centering Valid depth data]{{\includegraphics[width=7cm]{docs/Project Report/Media/4_2_2_valid_tactile_data.png}\label{fig:4.2b}}}%
     \caption{Concatenated depth data for each finger}%
     \label{fig:4.2}%
 \end{figure}
@@ -371,12 +367,30 @@ Once the robot verifies that the object is stably held (i.e. the tactile data is
     outcome=\begin{cases}1 & \Delta z\geq p_z \\ 0 & \Delta z<p_z\end{cases}
 \end{equation}
 
-After executing each random pose, we append the collected tactile data, end effector pose and grasp outcome to individual arrays. Once the required data for our $N$ random end effector poses has been collected, these arrays are saved to separate files which can be loaded for further analysis. Specifically, we create one .npy file each for the depth, color, grasp outcomes, and random pose data.
+After executing each random pose, we append the collected tactile data, end effector pose and grasp outcome to individual arrays. Once the required data for our $n$ random end effector poses has been collected, these arrays are saved to separate files which can be loaded for further analysis. Specifically, we create one .npy file each for the depth, colour, grasp outcomes, and random pose data.
 
 
-\newpage
-\section{Visualising Hand Poses}
+\section{Visualising Tactile Data}
 \label{sec:4.3}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{docs/Project Report/Media/4_3_successful_grasp_data.png}
+    \caption{Depth, colour and end effector pose of a successful grasp}
+    \label{fig:4.3}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{docs/Project Report/Media/4_3_unsuccessful_grasp_data.png}
+    \caption{Depth, colour and end effector pose of an unsuccessful grasp}
+    \label{fig:4.4}
+\end{figure}
+
+\subsection{Visualising Tactile Data}
+\label{sec:4.3.1}
+
+
+\subsection{Visualising Hand Poses}
+\label{sec:4.3.2}
 Before we train our baseline model, we are interested if a clear decision boundary exists between successful and unsuccessful grasps. We create a visualisation of each hand pose $X_n$ in a 3-dimensional space, using its Cartesian coordinates and the "pitch-row-yaw" rotational matrix representation $R$ of its Euler angles ($\alpha,\beta,\gamma$) \cite{weisstein}:
 
 \begin{equation}
@@ -399,13 +413,12 @@ Before we train our baseline model, we are interested if a clear decision bounda
 \noindent Using this information, we annotate 20 random hand poses from our dataset in a 3-dimensional plot. Each 6D hand pose is represented using a skeleton 2-finger model, where green and red poses denote successful and unsuccessful grasps respectively:
 \begin{figure}[H]%
     \centering
-    \subfloat[\centering Orientation 1]{{\includegraphics[width=6.5cm]{docs/Project Report/Media/hand_pose1.png} }}%
+    \subfloat[\centering Orientation 1]{{\includegraphics[width=6.5cm]{docs/Project Report/Media/4_3_2_all_ee_pose_visualise.png} }}%
     \qquad
-    \subfloat[\centering Orientation 2]{{\includegraphics[width=6.5cm]{docs/Project Report/Media/hand_pose2.png} }}%
-    \caption{Visualisation of 20 end effector poses}%
+    \subfloat[\centering Orientation 2]{{\includegraphics[width=6.5cm]{docs/Project Report/Media/4_3_2_all_ee_pose_visualise_angle2.png} }}%
+    \caption{Visualisation of 200 random end effector poses}%
     \label{fig:4.4}%
 \end{figure}
-\noindent From the above figures, we are able to visually determine a rough decision boundary between successful (green) and unsuccessful (red) grasps. Therefore, we believe that it is feasible to fit this dataset using a simple binary classifier as our baseline approach.
 
 
 \section{Feature Engineering \& Data Pre-processing}
@@ -545,7 +558,7 @@ To enhance the robustness of our model, we have trained it on three primitive ob
             \toprule
             & \includegraphics[width=0.1\textwidth]{docs/Project Report/Media/block1.png} & \includegraphics[width=0.1\textwidth]{docs/Project Report/Media/block2.png} & \includegraphics[width=0.1\textwidth]{docs/Project Report/Media/block3.png} &
             \includegraphics[width=0.1\textwidth]{docs/Project Report/Media/cylinder1.png} & \includegraphics[width=0.1\textwidth]{docs/Project Report/Media/cylinder2.png} & \includegraphics[width=0.1\textwidth]{docs/Project Report/Media/cylinder3.png} & \includegraphics[width=0.1\textwidth]{docs/Project Report/Media/mustard_bottle1.png} & \includegraphics[width=0.1\textwidth]{docs/Project Report/Media/mustard_bottle2.png} &  \includegraphics[width=0.1\textwidth]{docs/Project Report/Media/mustard_bottle3.png} \\
-            & Block 1 & Block 2 & Block 3 & Cylinder 1 & Cylinder 2 & Cylinder 3 & Bottle 1 & Bottle 2 & Bottle 3 \\
+            & Box 1 & Box 2 & Box 3 & Cylinder 1 & Cylinder 2 & Cylinder 3 & Bottle 1 & Bottle 2 & Bottle 3 \\
             \midrule
             Depth  & 0.025 & 0.03  & 0.05  & 0.04 & 0.045  & 0.05  & 0.06 & 0.04 & 0.04 \\
             Width  & 0.05  & 0.025 & 0.025 & 0.04 & 0.045  & 0.05  & 0.04 & 0.06 & 0.06 \\
@@ -565,7 +578,7 @@ Utilising our Pybullet data collection pipeline from \hyperref[sec:4.2]{Section 
 
 \subsection{Geometric Features of an Object}
 \label{sec:5.2.3}
-Each primitive object category in our dataset possesses unique characteristics. For instance, the curvature of an object's surface can differentiate cylinders and bottles from blocks with ease. As objects within a primitive class often share similar geometric features (such as the curvature of cylinders), our model could potentially generalize successful and unsuccessful grasp poses within each object category by establishing a connection between those poses and the object's properties.\\
+Each primitive object category in our dataset possesses unique characteristics. For instance, the curvature of an object's surface can differentiate cylinders and bottles from boxes with ease. As objects within a primitive class often share similar geometric features (such as the curvature of cylinders), our model could potentially generalize successful and unsuccessful grasp poses within each object category by establishing a connection between those poses and the object's properties.\\
 
 To this end, we extracted and analysed several geometric features of the 9 object variations in order to determine which of them can effectively differentiate between the object categories.
 
@@ -630,7 +643,7 @@ Adam with lr=1e-3
 
 
 \section{Interesting experiments}
-\subsection{Train on 2 blocks, test on remaining block}
+\subsection{Train on 2 boxes, test on remaining box}
 Test for accuracy of individual object categories
 
 
