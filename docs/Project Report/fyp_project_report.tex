@@ -113,12 +113,12 @@ Robustness in a robotic grasping system refers to its versatility of accurately 
 
 However, developing a robust and efficient grasping system presents several challenges. One major hurdle is the incorporation of touch sensing into robotic grasping, which is hindered by hardware limitations such as sensor sensitivity and cost, as well as difficulties in integrating tactile inputs into standard control schemes \cite{Calandra_2018}. Consequently, most robotic grasping research has focused on vision and depth as the primary input modalities \cite{Calandra_2018}. However, vision-based grasping approaches have limitations in measuring and reacting to ongoing contact forces, which hinders the full potential benefits of interaction. As a result, these approaches mostly rely on pre-selecting a grasp configuration, such as location, orientation, and forces, before making contact with the object. Addressing these limitations and integrating tactile feedback could significantly improve robotic grasping, leading to more efficient and effective interactions between robots and the physical world.\\
 
-Another challenge is developing a concrete strategy for improving grasp quality and planning while conserving the efficiency of the overall system. Results from our \hyperref[chap:2]{literature survey} suggest that such strategies can be summarised into three types: (1) choice of object representation, where coarse approximations of the underlying true shape of an object can simplify the generation of new grasps \cite{de_Farias_2021} \cite{geidenstam_2009}; (2) use of local symmetry properties to capture key geometric features of the object to generate promising grasp candidates \cite{de_Farias_2021} \cite{przybylski}; (3) optimising shape modelling where target objects are parameterized using smooth, differentiable functions from point clouds using spectral analysis \cite{de_Farias_2021}.
+Another challenge is developing a concrete strategy for improving grasp quality and planning while conserving the efficiency of the overall system. Results from our \hyperref[chap:2]{literature survey} suggest that such strategies can be summarised into three types: (1) choice of object representation, where coarse approximations of the underlying true shape of an object can simplify the generation of new grasps \cite{de_Farias_2021} \cite{geidenstam_2009}; (2) use of local symmetry properties to capture key geometric features of the object to generate promising grasp candidates \cite{de_Farias_2021}; (3) optimising shape modelling where target objects are parameterized using smooth, differentiable functions from point clouds using spectral analysis \cite{de_Farias_2021}.
 
 
 \section{Project Aims}
 \label{sec:1.2}
-Having gained a comprehensive understanding of the previously discussed optimizations and strategies, our research project focuses on the development and testing of a robust robotic system that can learn to pick up an object with simple geometry using a two-finger hand. The project will take a learning-based approach to grasping through, for example, Bayesian optimization \cite{nogueira2016unscented, frazier2018tutorial}. The learning-based approach should be compared with a baseline approach from the related literature (e.g. \cite{nogueira2016unscented, danielczuk2020exploratory, breyer2020volumetric1}) for evaluation, for example, a simple regression classifier to differentiate between good and bad grasps.
+Having gained a comprehensive understanding of the previously discussed optimizations and strategies, our research project focuses on the development and testing of a robust robotic system that can learn to pick up an object with simple geometry using a two-finger hand. The project will take a learning-based approach to grasping through, for example, Bayesian optimization \cite{nogueira2016unscented, frazier2018tutorial}. The learning-based approach should be compared with a baseline approach from the related literature (e.g. \cite{nogueira2016unscented, danielczuk2020exploratory, breyer2020volumetric}) for evaluation, for example, a simple regression classifier to differentiate between good and bad grasps.
 
 
 \newpage
@@ -328,11 +328,12 @@ To generate random grasps on the box, we first manipulate the robot's end effect
 \end{equation}
 For each seed pose, we generate a fixed number $n$ of random poses from the seed by adding a small amount of Gaussian noise $K_n$ with zero mean and unit variance to each dimension of $S_i$. We denote the generated grasp poses $X_v$ as follows:
 \begin{equation}
-    X_v=\Big\{S_i+K_i:K_i\sim\mathcal{N}(0,1),\;i=1,2,3,...,n\Big\}
+    X_v=\Big\{S_i+K_i:K_i\sim\mathcal{N}(0,0.01),\;i=1,2,3,...,n\Big\}
 \end{equation}
-The variance of the Gaussian noise can be adjusted for a more/less sparse distribution of the random grasp poses.\\
+The variance of the Gaussian noise can be adjusted for a more/less dispersed distribution of the random grasp poses. It is essential to balance the trade-off between generating diverse grasp poses (and their corresponding data) and ensuring that the poses are likely to succeed. Notably, the impact of the variance of the Gaussian noise will be contingent on the characteristics of the object being grasped, which may necessitate modifying the variance according to the object's properties. This will be discussed in Section 5 where we introduce geometric features of objects into our classifier approach.
  
 
+\newpage
 \subsection{Data Collection Pipeline}
 \label{sec:4.2.2}
 Prior to executing each randomly generated pose $X_{v,i}$ as a pick-and-place task, we first reset the position and orientation of our robot to an initial, predefined configuration (\ref{fig:4.1a}). Next, we utilise Pybullet's built-in inverse kinematics method to manipulate the robot's end effector to $X_{v,i}$. To avoid collision with the object, we include a vertical padding distance $p_z$ above the object (\ref{fig:4.1b}). Then, the robot lowers the end effector by removing the padding $p_z$ to reach the target object and closes its gripper (\ref{fig:4.1c}).
@@ -372,28 +373,28 @@ Once the robot verifies that the object is stably held (i.e. the tactile data is
 After executing each random pose, we append the collected tactile data, end effector pose and grasp outcome to individual arrays. Once the required data for our $n$ random end effector poses has been collected, these arrays are saved to separate files which can be loaded for further analysis. Specifically, we create one .npy file each for the depth, colour, grasp outcomes, and random pose data.
 
 
-\section{Visualising Tactile Data}
+\newpage
+\section{Visualising the Dataset}
 \label{sec:4.3}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{docs/Project Report/Media/4_3_successful_grasp_data.png}
-    \caption{Depth, colour and end effector pose of a successful grasp}
-    \label{fig:4.3}
-\end{figure}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=\textwidth]{docs/Project Report/Media/4_3_unsuccessful_grasp_data.png}
-    \caption{Depth, colour and end effector pose of an unsuccessful grasp}
-    \label{fig:4.4}
-\end{figure}
+In this section, we explore our data to understand any underlying patterns or characteristics and prevent the generation of abnormal grasp data (as in \ref{fig:4.2}).
+
 
 \subsection{Visualising Tactile Data}
 \label{sec:4.3.1}
 
+\begin{figure}[H]%
+    \centering
+    \subfloat[\centering Successful grasp data]{{\includegraphics[width=\textwidth]{docs/Project Report/Media/4_3_successful_grasp_data.png} }}%
+    \qquad
+    \subfloat[\centering Unsuccessful grasp data]{{\includegraphics[width=\textwidth]{docs/Project Report/Media/4_3_unsuccessful_grasp_data.png} }}%
+    \caption{Left to right by column: Depth readings, Colour (RGB) readings, Skeleton 2-finger model to represent a hand pose}
+    \label{fig:4.3}%
+\end{figure}
+
 
 \subsection{Visualising Hand Poses}
 \label{sec:4.3.2}
-Before we train our baseline model, we are interested if a clear decision boundary exists between successful and unsuccessful grasps. We create a visualisation of each hand pose $X_n$ in a 3-dimensional space, using its Cartesian coordinates and the "pitch-row-yaw" rotational matrix representation $R$ of its Euler angles ($\alpha,\beta,\gamma$) \cite{weisstein}:
+We create a visualisation of each hand pose $X_n$ in a 3-dimensional space, using its Cartesian coordinates and the "pitch-row-yaw" rotational matrix representation $R$ of its Euler angles ($\alpha,\beta,\gamma$) \cite{weisstein}:
 
 \begin{equation}
     R=r_x\cdot(r_y\cdot r_z)
@@ -412,7 +413,8 @@ Before we train our baseline model, we are interested if a clear decision bounda
     \label{fig:4.3}
 \end{figure}
 
-\noindent Using this information, we annotate 20 random hand poses from our dataset in a 3-dimensional plot. Each 6D hand pose is represented using a skeleton 2-finger model, where green and red poses denote successful and unsuccessful grasps respectively:
+\noindent Using this information, we annotate all randomly-generated hand poses from our dataset in 3 dimensions. Each 6D hand pose is represented using a skeleton 2-finger model in a similar manner to \cite{Bekiroglu2012LearningTA}, where green and red poses denote successful and unsuccessful grasps respectively:
+
 \begin{figure}[H]%
     \centering
     \subfloat[\centering Box without poses]{{\includegraphics[width=0.29\textwidth]{docs/Project Report/Media/4_3_2_box_3d_plot.png} }}%
@@ -432,61 +434,81 @@ We aim to assess the efficacy of utilising our multi-modal dataset for our grasp
 
 \subsection{Multi-modal Data Combinations}
 \label{sec:4.4.1}
+In this project, we segregate our dataset into tactile-only, visual-only and concatenated tactile and visual datasets:
+\begin{table}[H]
+    \centering
+    \resizebox{\textwidth}{!}{%
+        \begin{tabular}{ll p{10cm}}
+            \toprule
+            Data Combination & Dimensions & Creation \\
+            \midrule
+            Tactile only & $N\times160\times240\times4$ & Concatenating the depth ($N\times160\times240$) and color ($N\times160\times240\times3$) data \\
+            Visual only & $N\times6$ & Random 6D end effector poses \\
+            Tactile + Visual & $N\times(160\times240\times4+6)$ & Concatenating the flattened tactile-only and visual-only datasets \\
+            \bottomrule
+        \end{tabular}
+    }
+    \caption{Dataset combinations}
+    \label{tab:4.1}
+\end{table}
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{docs/Project Report/Media/tactile_dataset_creation.png}
     \caption{Creating the tactile dataset}
     \label{fig:my_label}
 \end{figure}
-In this project, we segregate our dataset into tactile-only, visual-only and concatenated tactile and visual datasets:
-\begin{table}[H]
-    \centering
-    \begin{tabular}{|p{3cm}|p{4cm}|p{6cm}|}
-        \hline
-        Data Combination & Dimensions & Creation \\
-        \hline
-        Tactile only & $N\times160\times240\times4$ & Concatenating the depth ($N\times160\times240$) and color ($N\times160\times240\times3$) data \\
-        \hline
-        Visual only & $N\times6$ & Random 6D end effector poses \\
-        \hline
-        Tactile + Visual & $N\times(160\times240\times4+6)$ & Concatenating the flattened tactile-only and visual-only datasets \\
-        \hline
-    \end{tabular}
-    \caption{Various segregated datasets}
-    \label{tbl:4.1}
-\end{table}
 
 
 \subsection{Dimensionality Reduction}
 \label{sec:4.4.2}
-Due to the high dimensionality nature of our tactile and visual datasets, we experimented with two widely-used dimensionality reduction techniques, PCA and CNN feature extraction, to retain as much information as possible from the dataset.
+In this project, we represent tactile sensory readings as images, specifically, grayscale for depth data and RGB for colour data. As the dimensionality of this data has a significant impact on computational costs, we have employed dimensionality reduction techniques to alleviate this issue, including principal component analysis (PCA) and convolutional neural networks (CNN) for feature extraction.
 
 
 \subsubsection{Principal Component Analysis (PCA)}
 \label{sec:4.4.2.1}
-For each image in the tactile and visual datasets, we select the top 2 eigenvectors that correspond to the largest eigenvalues as the principal components for the data.
+{\color{red} [CHATGPT was used here for better phrasing - change later]}\\
+PCA is a widely used linear technique that projects the high-dimensional input data onto a lower-dimensional space, capturing the maximum amount of variance in the data with fewer dimensions. By reducing the dimensionality of the data, PCA can facilitate more efficient computation and enable the extraction of meaningful patterns and features from the data.\\
+
+PCA is particularly useful for concatenated tactile and visual data, as it can extract relevant features from both modalities and combine them to form a lower-dimensional representation of the data. For example, PCA can be used to extract principal components that represent the most significant tactile and visual features, which can then be combined to form a lower-dimensional representation of the data. The resulting representation can be used as input to machine learning algorithms for classification or regression tasks.\\
+
+It is worth noting that the effectiveness of PCA for dimensionality reduction depends on several factors, such as the number of input dimensions, the amount of variance in the data, and the distribution of the data. Additionally, the choice of the number of principal components to retain can also impact the performance of the method. Hence, a careful evaluation of the effectiveness of PCA for the given task is necessary, including the selection of an appropriate number of principal components to retain, and any trade-offs between computation time and performance.
 
 
 \subsubsection{Convolution Neural Network (CNN) Feature Extraction}
 \label{sec:4.4.2.2}
-We create a 3-layer convolution neural network to extract the important features from our data combinations. Each convolution layer is interwined with a MaxPool2D layer with a $2\times2$ kernel. \hyperref[fig:4.5]{Fig 4.5} illustrates the architecture for the CNN we used:
+{\color{red} [CHATGPT was used here for better phrasing - change later]}\\
+In the context of multi-modal sensor data, feature extraction using convolutional neural networks (CNNs) has gained popularity due to their ability to capture spatial and temporal patterns in the data. The CNN architecture, as described with interleaved convolution and pooling layers, is well-suited for detecting local features in the input data. The convolution layers extract low-level features, such as edges or textures, while the pooling layers help reduce the dimensionality of the feature maps and provide translational invariance to the learned features. The combination of these layers can create a hierarchy of feature representations, with higher-level features capturing more complex and abstract patterns in the data.
+
 \begin{figure}[H]
     \includegraphics[scale=0.7]{docs/Project Report/Media/nn.png}
     \caption{Architecture for feature extraction CNN}
     \label{fig:4.5}
 \end{figure}
 
+\ref{fig:4.5} visualises the specific CNN architecture used in the baseline, consisting of three convolutional layers interleaved with MaxPool2D layers with a 2 × 2 kernel, which is effective in capturing features from concatenated tactile and visual sensory data. 
+
 
 \subsection{Data Pre-processing}
 \label{sec:4.4.3}
+{\color{red} [CHATGPT was used here for better phrasing - change later]}\\
+Normalization of data prior to model training is a well-established practice in machine learning, known to improve the accuracy and efficiency of the learning process. In the context of tactile sensor readings and end effector poses, normalization is particularly relevant due to the large differences in the scale of the data. For instance, RGB pixel values for the colour dataset vary between 0 to 255, while Euler angles in the hand pose dataset vary between $-\pi$ and $\pi$.\\
+
+Failure to normalize the data can result in numerical instability, as differences in scale can cause the weights of the model to become disproportionately small or large, thereby hampering effective learning. Moreover, normalization can improve model generalization by reducing the impact of outliers and mitigating the effects of varying ranges of feature values in the data. Finally, normalization facilitates comparison of the relative importance of different features, thereby enabling the identification of the most significant ones and elimination of redundant or less important ones.
 
 
-
-\section{Baseline Model \& Training}
+\section{Logit Model Training, Evaluation and Model Selection}
 \label{sec:4.5}
 Based on our findings (\hyperref[sec:4.3]{Section 4.3}), we propose a simple binary logistic regression (LR) classifier to predict the grasp outcome for a given random end effector pose. Ideally, this LR model is able to determine a decision boundary for segregating successful and unsuccessful grasp poses.\\
 
-We train the classifier using the three discussed dataset combinations (\hyperref[sec:4.4.1]{Section 4.4.1}). Additionally, we apply a combination of dimensionality reduction techniques to these datasets discussed in (\hyperref[sec:4.4.2]{Section 4.4.2}), including ConvNet only and ConvNet with PCA (top $k=5$ principal components).
+We train the classifier using the three discussed dataset combinations (\hyperref[sec:4.4.1]{Section 4.4.1}). Additionally, we apply a combination of dimensionality reduction techniques to these datasets discussed in (\hyperref[sec:4.4.2]{Section 4.4.2}), including ConvNet only and ConvNet with PCA (top $k$ principal components).\\
+
+\hyperref[fig:4.8]{Figure 4.8} visualises the change in the amount of variance captured by $k$ components. We select $k=5$ components which captures $79.7\%$ variance of the dataset.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{docs/Project Report/Media/4_5_k_against_variance.png}
+    \caption{Change in variance captured by $k$ components}
+    \label{fig:4.8}
+\end{figure}
 
 
 \subsection{Summary of training results}
@@ -502,13 +524,19 @@ Table 4.2 shows the accuracy for each LR model trained based on the dataset type
         Preprocessing & Visual only & Tactile only & Both & Shape & Dimensionality \\
         \midrule
         Raw & 51.25\% & 85.00\% & 85.00\% & 160x240x4 & 153600 \\
-        CNN & -- & 83.75\% & 81.25\% & 64x10x15  & 9600 \\
-        CNN + PCA ($k=5$) & -- & 78.75\% & 80.00\% & 5 & 5\\
+        CNN & -- & 83.33\% & 81.25\% & 64x10x15  & 9600 \\
+        CNN + PCA ($k=5$) & -- & 81.25\% & 79.17\% & 5 & 5\\
         \bottomrule
     \end{tabular}
     \caption{Accuracy of LR model on dataset variations}
     \label{tbl:4.2}
 \end{table}
+
+
+\subsection{PCA vs CNN}
+\label{sec:4.5.2}
+{\color{red} [CHATGPT was used here for better phrasing - change later]}\\
+Compared to traditional techniques like PCA, CNNs can learn complex, non-linear relationships between the input features and the target variable. This is particularly useful when dealing with high-dimensional data, where PCA may not capture the underlying patterns in the data. Moreover, the ability of CNNs to learn hierarchical feature representations can make them more interpretable, as each layer captures increasingly complex and abstract features, leading to a better understanding of the underlying mechanisms of the problem.
 
 
 \subsection{Balancing trade-off between accuracy and dimensionality}
@@ -522,12 +550,9 @@ Based on the results presented in \hyperref[tbl:4.2]{Table 4.2}, we have determi
 
 \subsection{Feature Representation}
 \label{sec:4.6.1}
-Select the most promising representation and use it for actual generative model in Sec 4.
+We use tactile + visual data, with CNN for feature extraction and PCA for further dimensionality reduction to $N\times 5$ dimensions to represent the sensory data.
 
-
-\subsection{Analysis of Results}
-\label{sec:4.6.2}
-Mention dimensionality constraints on computability costs!
+[Evaluate more]
 
 
 
