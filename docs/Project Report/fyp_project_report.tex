@@ -82,7 +82,7 @@ In this project, we study how to build a robust learning framework that can be e
 %----------------------------------------------------------------------------------
 % Acknowledgements
 %----------------------------------------------------------------------------------
-\renewcommand\abstractname{Acknowledgments}
+\renewcommand\abstractname{Acknowledgements}
 \begin{abstract}
     
 \end{abstract}
@@ -147,7 +147,7 @@ This project is concerned with the development of a complete simulation with sup
     \item Implement and test baseline (e.g. \cite{breyer2020volumetric}, and a basic approach such as executing predefined grasps per object model given object pose).
     \item Build the learning framework:
     \begin{enumerate}
-        \item Learning grasps based on Bayesian Optimization, from a chosen scene representations such as signed distance function 
+        \item Learning grasps based on Bayesian Optimisation, from a chosen scene representations such as signed distance function 
         \item Picking with two fingers given object model (primitive shapes such as box, sphere, cylinder) and pose, all learned by trial and error
     \end{enumerate}
 \end{enumerate}
@@ -189,7 +189,7 @@ This phase focuses on determining the optimal dataset representation for our col
 
 \subsection{Execution Phase - Learning Approach Implementation}
 \label{sec:1.4.4}
-Following the outcomes of our baseline approach where we identified the optimal feature representation of our dataset, we move on to develop our learning-based approach which is trained on three primitive object types. In addition to tactile sensor readings and visual data (randomly-generated end effector poses), we include the object features for each object class in our dataset, and train this dataset on a multilayer perceptron (MLP). Finally, we conduct several interesting experiments, including (1) training our MLP using various segmentations of our dataset; and (2) validating our MLP on unseen objects that comprise similar geometric features to that of the primitive objects that our MLP was trained on.
+Following the outcomes of our baseline approach where we identified the optimal feature representation of our dataset, we move on to develop our learning-based approach which is trained on three primitive object types. In addition to tactile sensor readings and visual data (randomly-generated end effector poses), we include the object features for each object class in our dataset, and train this dataset on a multi-layer perceptron (MLP). Finally, we conduct several interesting experiments, including (1) training our MLP using various dataset segmentations; and (2) validating our MLP on unseen objects that comprise similar geometric features to that of the primitive objects that our MLP was trained on.
 
 
 \subsection{Documentation Phase}
@@ -205,7 +205,7 @@ Chapter 3 documents the system architecture for the project and the development 
 
 Chapter 4 documents the development and testing of our baseline approach using a binary logistic regression classifier.\\
 
-Chapter 5 documents the development and testing of our proposed approach using a multilayer perceptron (MLP) model that attempts to infer good grasp configurations on three primitive object classes from random hand poses, trained on data collected from the Pybullet simulation. The dataset includes tactile sensor readings, random hand poses and geometric features of the target objects.\\
+Chapter 5 documents the development and testing of our proposed approach using a multi-layer perceptron (MLP) model that attempts to infer good grasp configurations on three primitive object classes from random hand poses, trained on data collected from the Pybullet simulation. The dataset includes tactile sensor readings, random hand poses and geometric features of the target objects.\\
 
 Chapter 6 summarises the results and performances of the project, as well as makes suggestions for future work and improvement based on these findings.
 
@@ -224,7 +224,7 @@ In the field of robotics, grasping is a fundamental yet challenging skill of rob
 
 Robotic grasping is far away from developing into an intuitive and instinctive sense as in human beings. There are many unknown factors that enable humans to flawlessly perform grasps when provided with visual and tactile information. However, with the advancements of deep learning and computer vision, semantic grasping is becoming the main focus and basis for autonomous robotic grasping systems \cite{zhang2022robotic}, where a robot is trained on monocular images of a user-specified object type \cite{jang2017endtoend}.\\
 
-To successfully grasp an object, a robot needs to detect the object's location (through, for example, a wrist camera), orientation, and size accurately, estimate the best grasp point and orientation, and then execute the grasp with appropriate force and control to ensure a secure hold. The grasping process can be performed using various types of end effectors, including grippers, suction cups, or specialized tools designed for specific tasks.\\
+To successfully grasp an object, a robot needs to detect the object's location (through, for example, a wrist camera), orientation, and size accurately, estimate the best grasp point and orientation, and then execute the grasp with appropriate force and control to ensure a secure hold. The grasping process can be performed using various types of end effectors, including grippers, suction cups, or specialised tools designed for specific tasks.\\
 
 Therefore, accurate and efficient grasp representation and planning are paramount to ensure a smooth grasping process when performing grasping tasks.
 
@@ -316,7 +316,7 @@ yaml parameters, loading parameters
 %----------------------------------------------------------------------------------
 \chapter{Learning Feature Representations}
 \label{chap:4}
-This chapter introduces a baseline approach to grasp stability prediction using a binary logistic regression model. In a previous study conducted by Alkhatib et al. \cite{9091340}, logistic regression was utilized to evaluate the quality of grasps. Specifically, a regularized logistic regression model was utilized to determine the robustness of grasps and predict their stability. The model's inputs were derived from a set of features measured at each joint of a robotic hand, which were subsequently utilized for training the logistic regression model. In our approach, we use tactile and visual data instead of joint data to classify binary grasp stability labels.\\
+This chapter introduces a baseline approach to grasp stability prediction using a binary logistic regression model. In a previous study conducted by Alkhatib et al. \cite{9091340}, a regularised logistic regression model was used to determine the robustness and quality of grasps and predict their stability. The model's inputs were derived from a set of features measured at each joint of a robotic hand, which were subsequently utilized for training the logistic regression model. In our approach, we use tactile and visual data instead of joint data to classify binary grasp stability labels.\\
 
 In addition, we address a pressing issue of the project - high dimensionality data collected from our simulations. In the previous chapter, we highlighted that a significant portion of the data collected from our simulation is high-dimensional. High-dimensional data poses a significant challenge in terms of computational processing and feature identification. The risk of overfitting also increases as the dimensionality of the data grows, leading to suboptimal performance of the grasping policy. To mitigate these challenges and effectively train the grasping policy, it is imperative to reduce the data's dimensionality and represent it more concisely.\\
 
@@ -327,7 +327,7 @@ To determine an appropriate feature representation, we adopt a binary logistic r
 
 \section{Logit Model for Grasp Classification}
 \label{sec:4.1}
-The fundamental assumption of this approach is that grasps can be classified as either successful or unsuccessful outcomes.  In this study, we classify successful hand configurations as those that result in a stable grasp of the object in question. However, there are more sophisticated methods for categorizing grasps, which we refer the reader to \cite{Bekiroglu2012LearningTA, si2022grasp}.\\
+The fundamental assumption of this approach is that grasps can be classified as either successful or unsuccessful outcomes.  In this study, we classify successful hand configurations as those that result in a stable grasp of the object in question. However, there are more sophisticated methods for categorising grasps, which we refer the reader to \cite{Bekiroglu2012LearningTA, si2022grasp}.\\
 
 Assume that we have selected some representation of tactile and/or visual features for each grasp candidate, denoted $x_i$. Our logit model attempts to classify the grasp with a binary label $y_i$. To achieve this, the weights $w$ of the model are fitted through a maximum likelihood estimation where the distribution of the features $x_i$ sits. Assuming the grasp outcomes as a Bernoulli random variable, we can construct and minimise the following cross-entropy loss function and treat it as an optimisation problem:
 \begin{equation}
@@ -338,6 +338,7 @@ where $\rho_y(y_i=1|x_i)$ and $\rho_y(y_0=1|x_i)$ represent the probability of a
 Therefore using our learned logit model (with an optimised weights vector), we can determine whether the outcome (successful or unsuccessful) of an unseen grasp is ascertainable based on its feature representation.
 
 
+\newpage
 \section{Dataset Generation}
 \label{sec:4.2}
 To generate a dataset for training our proposed logit model, we collect tactile and visual data by randomly generating grasps on a smooth rectangular box of dimensions (depth: 0.025, width: 0.05, height: 0.05) in our Pybullet simulation.
@@ -345,13 +346,13 @@ To generate a dataset for training our proposed logit model, we collect tactile 
 
 \subsection{Random Grasp Synthesis}
 \label{sec:4.2.1}
-To generate random grasps on the box, we first manipulate the robot's end effector manually into diverse positions within the box's vicinity and collect three distinct end effector poses $S_i:i=1,2,3$ to ensure some variability in grasping orientation, position and efficacy. The selected end effector poses are subsequently referred to as seed poses, denoted as a 6-tuple $S_i$:
+To generate random grasps on the box, we first manipulate the robot's end effector manually into diverse positions within the box's vicinity and collect three distinct end effector poses $S_i:i=1,2,3$ to ensure some variability in grasping orientation, position and efficacy. The selected end effector poses are subsequently referred to as seed poses, denoted as 6-tuples $S_i$:
 \begin{equation}
     S_i=(x,y,z,r_x,r_y,r_z)
 \end{equation}
-For each seed pose, we generate a fixed number $n$ of random poses from the seed by adding a small amount of Gaussian noise $K_n$ with zero mean and unit variance to each dimension of $S_i$. We then scale down the applied noise by a factor of 0.01 to match the relative scales of objects and coordinate values in our Pybullet simulation. We denote the generated grasp poses $X_v$ as follows:
+A fixed number $n$ of random poses are generated from each seed pose. This is accomplished by adding a small amount of Gaussian noise $K_n$, with a mean of zero and a unit variance, to each dimension of $S_i$. Taking into consideration the range of variation in Cartesian coordinates, object and robot dimensions of the Pybullet simulation, the applied noise is scaled down by a factor of 0.01. The resulting grasp poses are denoted as $X_v$ as follows:
 \begin{equation}
-    X_v=\Big\{S_i+K_i:K_i\sim\mathcal{N}(0,1),\;i=1,2,3,...,n\Big\}
+    X_{v,i}=\Big\{S_i+K_i:K_i\sim\mathcal{N}(0,1),\;i=1,2,3,...,n\Big\}
 \end{equation}
 The variance of the Gaussian noise can be adjusted for a more/less dispersed distribution of the random grasp poses. It is essential to balance the trade-off between generating diverse grasp poses (and their corresponding data) and ensuring that the poses are likely to succeed. Notably, the impact of the variance of the Gaussian noise will be contingent on the characteristics of the object being grasped, which may necessitate modifying the variance according to the object's properties. This will be discussed in Section 5 where we introduce geometric features of objects into our classifier approach.
  
@@ -395,21 +396,19 @@ Once the robot verifies that the object is stably held (i.e. the tactile data is
 After executing each random pose, we append the collected tactile data, end effector pose and grasp outcome to individual arrays. Once the required data for our $n$ random end effector poses has been collected, these arrays are saved to separate files which can be loaded for further analysis. Specifically, we create one .npy file each for the depth, colour, grasp outcomes, and random pose data.
 
 
-\newpage
 \section{Dataset Validation and Visualisation}
 \label{sec:4.3}
-In this section, we explore our data to understand any underlying patterns or characteristics and prevent the generation of abnormal grasp data (as in \ref{fig:4.2}).
+Before using the generated tactile and visual data for random hand configurations for analysis or modelling, it is important to validate and visualise it to ensure its quality and reliability. In this context, this article will explore the process of visualising and validating a dataset of tactile sensor readings and end-effector poses. We will discuss various techniques and tools that can be used to explore the data, identify patterns and anomalies, and ensure that it meets the requirements of the analysis or model being built. In this section, we explore our data to understand any underlying patterns or characteristics and prevent the generation of abnormal grasp data (as in \ref{fig:4.2}).
 
 
 \subsection{Visualising Tactile Data}
 \label{sec:4.3.1}
-
 \begin{figure}[H]%
     \centering
     \subfloat[\centering Successful grasp data]{{\includegraphics[width=\textwidth]{docs/Project Report/Media/4_3_successful_grasp_data.png} }}%
     \qquad
     \subfloat[\centering Unsuccessful grasp data]{{\includegraphics[width=\textwidth]{docs/Project Report/Media/4_3_unsuccessful_grasp_data.png} }}%
-    \caption{Left to right by column: Depth readings, Colour (RGB) readings, Skeleton 2-finger model to represent a hand pose}
+    \caption{Left to right: Depth readings, Colour (RGB) readings, Skeleton 2-finger model to represent a hand pose}
     \label{fig:4.3}%
 \end{figure}
 
@@ -515,22 +514,15 @@ Normalization of data prior to model training is a well-established practice in 
 Failure to normalize the data can result in numerical instability, as differences in scale can cause the weights of the model to become disproportionately small or large, thereby hampering effective learning. Moreover, normalization can improve model generalization by reducing the impact of outliers and mitigating the effects of varying ranges of feature values in the data. Finally, normalization facilitates comparison of the relative importance of different features, thereby enabling the identification of the most significant ones and elimination of redundant or less important ones.
 
 
-\section{Logit Model Training, Evaluation and Model Selection}
+\section{Model Training}
 \label{sec:4.5}
-We train the classifier using the three discussed dataset combinations (\hyperref[sec:4.4.1]{Section 4.4.1}). Additionally, we apply a combination of dimensionality reduction techniques to these datasets discussed in (\hyperref[sec:4.4.2]{Section 4.4.2}), including ConvNet only and ConvNet with PCA (top $k$ principal components).\\
+To train the binary logistic regression classifier on the tactile sensory data and end effector poses, an 80-20 split was used with the \verb|train_test_split()| function provided by the \verb|sklearn| library. The training set consisted of 80\% of the data, while the remaining 20\% was utilised for validation. The model was trained using the \verb|sklearn| logistic regression implementation, which provided flexibility in setting the hyper-parameters such as the solver type and regularisation method. However, regularisation was not applied in this training process considering the high dimensionality of the dataset.\\
 
-\hyperref[fig:4.8]{Figure 4.8} visualises the change in the amount of variance captured by $k$ components. We select $k=5$ components which captures $79.7\%$ variance of the dataset.
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.7\textwidth]{docs/Project Report/Media/4_5_k_against_variance.png}
-    \caption{Change in variance captured by $k$ components}
-    \label{fig:4.8}
-\end{figure}
+After preparing the datasets, the logistic regression (logit) classifier was trained using the three dataset combinations that were previously discussed in \hyperref[sec:4.4.1]{Section 4.4.1}. To further explore the dataset characteristics, a combination of dimensionality reduction techniques was applied to these datasets, as discussed in \hyperref[sec:4.4.2]{Section 4.4.2}. Specifically, the techniques used were ConvNet only and ConvNet with PCA (top $k$ principal components). The logit model was then trained on these variations of the datasets with the aim of selecting the model and dataset combination that achieves the best accuracy. This approach allowed us to thoroughly explore the impact of different dataset combinations and dimensionality reduction techniques on the performance of the logit classifier.
 
 
 \subsection{Summary of training results}
 \label{sec:4.5.1}
-Table 4.2 shows the accuracy for each LR model trained based on the dataset type and preprocessing method
 \begin{table}[H]
     \centering
     \small
@@ -540,36 +532,25 @@ Table 4.2 shows the accuracy for each LR model trained based on the dataset type
         \cmidrule{2-4}\cmidrule{5-6}
         Preprocessing & Visual only & Tactile only & Both & Shape & Dimensionality \\
         \midrule
-        Raw & 51.25\% & 85.00\% & 85.00\% & 160x240x4 & 153600 \\
-        CNN & -- & 83.33\% & 81.25\% & 64x10x15  & 9600 \\
-        CNN + PCA ($k=5$) & -- & 81.25\% & 79.17\% & 5 & 5\\
+        Raw & 70.83\% & 83.33\% & 83.33\% & 160x240x4 & 153600 \\
+        CNN & -- & 83.33\% & 87.50\% & 64x10x15  & 9600 \\
+        CNN + PCA ($k=5$) & -- & 77.08\% & 77.08\% & 5 & 5\\
         \bottomrule
     \end{tabular}
     \caption{Accuracy of LR model on dataset variations}
     \label{tbl:4.2}
 \end{table}
-
-
-\subsection{PCA vs CNN}
-\label{sec:4.5.2}
-Compared to traditional techniques like PCA, CNNs can learn complex, non-linear relationships between the input features and the target variable. This is particularly useful when dealing with high-dimensional data, where PCA may not capture the underlying patterns in the data. Moreover, the ability of CNNs to learn hierarchical feature representations can make them more interpretable, as each layer captures increasingly complex and abstract features, leading to a better understanding of the underlying mechanisms of the problem.
+As previously discussed, the logistic regression model was trained on three different dataset segmentations and three pre-processing methods were applied. The results, as presented in \hyperref[tbl:4.2]{Table 4.2}, indicate that although utilising ConvNets and/or PCA techniques did not have a significant impact on the accuracy of the logit model, it is noteworthy that the dimensionality of the datasets was significantly reduced by more than 90\% when dimensionality-reducing techniques were used.\\
 
 
 \subsection{Balancing trade-off between accuracy and dimensionality}
-\label{sec:4.5.2}
-Based on the results presented in \hyperref[tbl:4.2]{Table 4.2}, we have determined that using both tactile and visual data together produces the highest accuracy for our LR models. While raw data performed better than other pre-processing techniques, we recognize that the dimensionality of the data must also be considered. Therefore, we have found that extracting features from our dataset using a ConvNet and selecting only the top $k=5$ components provides comparable accuracy with significantly lower dimensionality.
+\label{sec:4.5.1}
+Compared to traditional techniques like PCA, CNNs can learn complex, non-linear relationships between the tactile and visual features and the grasp outcome. This is particularly useful when dealing with high-dimensional data, where PCA may not capture the underlying patterns in the data. Moreover, the ability of CNNs to learn hierarchical feature representations can make them more interpretable, as each layer captures increasingly complex and abstract features, leading to a better understanding of the underlying mechanisms of the problem.
 
 
 \section{Conclusion}
 \label{sec:4.6}
-
-
-\subsection{Feature Representation}
-\label{sec:4.6.1}
-We use tactile + visual data, with CNN for feature extraction and PCA for further dimensionality reduction to $N\times 5$ dimensions to represent the sensory data.
-
-[Evaluate more]
-
+Based on the results presented in \hyperref[tbl:4.2]{Table 4.2}, we have determined that using both tactile and visual data together produces the highest accuracy for our LR models. While raw data performed better than other pre-processing techniques, we recognize that the dimensionality of the data must also be considered. Therefore, we have found that extracting features from our dataset using a ConvNet and selecting only the top $k=5$ components provides comparable accuracy with significantly lower dimensionality.
 
 
 %----------------------------------------------------------------------------------
@@ -578,17 +559,18 @@ We use tactile + visual data, with CNN for feature extraction and PCA for furthe
 \chapter{Multilayer Perceptron Artificial Neural Network for Grasp Stability Prediction}
 \label{chap:5}
 
-\section{Mutlilayer Perceptrons and Motivation}
+\section{Motivation}
 \label{sec:5.1}
-A multilayer perceptron (MLP) as a feedforward neural network consisting of a minimum of three fully-connected layers of perceptrons (neurons). Every MLP contains an input layer that receives input data, an output layer that produces a prediction based on patterns within the data, and at least one hidden layer that enable the MLP to learn complex representations of the data.\\
+A multilayer perceptron (MLP) as a feed-forward neural network consisting of a minimum of three fully-connected layers of perceptrons (neurons). Every MLP contains an input layer that receives input data, an output layer that produces a prediction based on patterns within the data, and at least one hidden layer that enables the MLP to learn complex representations of the data.\\
 
-For robotic grasping on a specific object, there may exist certain grasp configurations that yield a high grasp stability and success rate. For instance, grasping an object around its center of gravity can minimise rotational forces on the object that could cause it to tilt, hence increasing the probability of a successful grasp. MLPs excel at learning non-linear relationships between input and output data. Therefore, intuitively, a MLP is a good candidate to learn such patterned configurations from the complex dataset and generalise them into a simple grasping strategy based on different object types.\\
+For robotic grasping on a specific object, there may exist certain grasp configurations that yield a high grasp stability and success rate. For instance, grasping an object around its centre of gravity can minimise rotational forces on the object that could cause it to tilt, hence increasing the probability of a successful grasp. MLPs excel at learning non-linear relationships between input and output data. Therefore, intuitively, a MLP is a good candidate to learn such patterned configurations from the complex dataset and generalise them into a simple grasping strategy based on different object types.\\
 
 To introduce robustness in robotic grasping for various object types, we trained our MLP model on three primitive object categories, namely rectangular boxes, cylinders, and bottle-shaped objects (which are more rigid than typical cylinders). Our intention is to explore the potential influence of an object's geometric characteristics, such as its width and height, on the model's accuracy.
 
 
 \section{Dataset Collection and Representation}
 \label{sec:5.2}
+Utilising our Pybullet data collection pipeline from \hyperref[sec:4.2]{Section 4.2}, we collect multi-modal data for every object variation. Then, for each variation, we manually select $i=4$ seed poses and record the data of 20 successful and 20 unsuccessful grasps with Gaussian noise applied to the seed pose. This creates a dataset of 9x160=1440 grasps in total (720 stable and 720 unstable grasps) consisting of tactile sensor readings and hand poses.
 
 
 \subsection{Object Variations}
@@ -616,13 +598,8 @@ To enhance the robustness of our model, we have trained it on three primitive ob
 \end{table}
 
 
-\subsection{Data Collection}
-\label{sec:5.2.2}
-Utilising our Pybullet data collection pipeline from \hyperref[sec:4.2]{Section 4.2}, we collect multi-modal data for every object variation. Then, for each variation, we manually select $i=4$ seed poses and record the data of 20 successful and 20 unsuccessful grasps with Gaussian noise applied to the seed pose. This creates a dataset of 9x160=1440 grasps in total (720 stable and 720 unstable grasps) consisting of tactile sensor readings and hand poses.
-
-
 \subsection{Geometric Features of an Object}
-\label{sec:5.2.3}
+\label{sec:5.2.2}
 Each primitive object category in our dataset possesses unique characteristics. For instance, the curvature of an object's surface can differentiate cylinders and bottles from boxes with ease. As objects within a primitive class often share similar geometric features (such as the curvature of cylinders), our model could potentially generalize successful and unsuccessful grasp poses within each object category by establishing a connection between those poses and the object's properties.\\
 
 To this end, we extracted and analysed several geometric features of the 9 object variations in order to determine which of them can effectively differentiate between the object categories.
