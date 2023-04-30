@@ -1,4 +1,4 @@
-\documentclass[11pt, a4paper]{report}
+\documentclass[12pt, a4paper]{report}
 
 % Page styling
 \usepackage{extsizes}
@@ -556,16 +556,34 @@ Based on the results presented in \hyperref[tbl:4.2]{Table 4.2}, we have determi
 %----------------------------------------------------------------------------------
 % Section 5: Proposed Approach
 %----------------------------------------------------------------------------------
-\chapter{Multilayer Perceptron Artificial Neural Network for Grasp Stability Prediction}
-\label{chap:5}
+\chapter{Multilayer Perceptron for Grasp Stability Prediction}\label{chap:5}
+Successful grasping of objects requires accurate perception, planning, and control, which are difficult tasks due to the high-dimensional, noisy, and uncertain nature of the robotic environment. This chapter proposes a multilayer perceptron (MLP) neural network for predicting the grasp stability label of an end effector pose. Following our conclusions from our baseline approach, our model is trained using tactile and visual data and uses an identical Convolutional Neural Network architecture to extract important features from the tactile and visual data, from which we select the top five principal components to represent the extracted features.\\
 
-\section{Motivation}
-\label{sec:5.1}
-A multilayer perceptron (MLP) as a feed-forward neural network consisting of a minimum of three fully-connected layers of perceptrons (neurons). Every MLP contains an input layer that receives input data, an output layer that produces a prediction based on patterns within the data, and at least one hidden layer that enables the MLP to learn complex representations of the data.\\
+To evaluate the performance of our model, we conducted several experiments to assess the robustness of the model towards different primitive object types, as well as determine whether the model is able to generalise simple grasping strategies \cite{Chebotar_2017} per object type. We compare the performance of our model with state-of-the-art methods for predicting grasp stability, including baseline methods on hand-engineered features and other neural network-based models \cite{mahler2017dexnet, 7487517}. We also analysed the learned representations in our model and found that they are semantically meaningful and generalise well to new objects.\\
 
-For robotic grasping on a specific object, there may exist certain grasp configurations that yield a high grasp stability and success rate. For instance, grasping an object around its centre of gravity can minimise rotational forces on the object that could cause it to tilt, hence increasing the probability of a successful grasp. MLPs excel at learning non-linear relationships between input and output data. Therefore, intuitively, a MLP is a good candidate to learn such patterned configurations from the complex dataset and generalise them into a simple grasping strategy based on different object types.\\
+In the following sections, we will provide a detailed description of our approach, experimental setup, and results, and discuss the implications of our work.\\
 
-To introduce robustness in robotic grasping for various object types, we trained our MLP model on three primitive object categories, namely rectangular boxes, cylinders, and bottle-shaped objects (which are more rigid than typical cylinders). Our intention is to explore the potential influence of an object's geometric characteristics, such as its width and height, on the model's accuracy.
+
+\section{Related Work}\label{sec:5.1}
+There have been several academic studies addressing the problem of grasp stability classification using neural networks. In this section, we will briefly review some of these works. Kumra and Kana (2017) \cite{8202237} presented a novel approach to grasp detection that predicts an optimal grasping pose using RGB images of a scene. Their method considers the robotic grasp detection problem as finding a successful grasp configuration for a given object image. To address this, they proposed a single-step prediction technique, which is faster and less computationally expensive compared to previous methods that rely on running a simple classifier multiple times on small image patches. To solve the grasp detection problem, the authors used ResNet-50, a 50-layer deep residual model (see \ref{fig:5.1}) that incorporates residual layers to reformulate the mapping function between layers and overcome the challenge of learning an identity mapping. The authors introduced two different architectures for robotic grasp prediction: a uni-modal grasp predictor that uses only single-modality information such as RGB, and a multi-modal grasp predictor that uses multi-modal information such as RGB and depth.\\
+\begin{figure}[ht]
+    \centering
+    \includegraphics{docs/Project Report/Media/kumra_kana_2017_residual_block.png}
+    \caption{Kumra and Kanan: Robotic Grasp Detection using Deep Convolutional Neural Networks: Example of an residual block in ResNet}
+    \label{fig:5.1}
+\end{figure}
+
+Mahler et al. have proposed a method for evaluating grasp quality using a CNN trained on RGB-D images and force measurements. RGB-D refers to a type of sensor that captures both colour (RGB) and depth (D) information about a scene. RGB-D sensors typically consist of a regular colour camera to capture RGB images and an additional depth sensor, such as a time-of-flight or structured light sensor, which provides a depth image. The combination of RGB and depth information can be particularly useful for robotics applications, as it allows the robot to perceive and reason about the 3D structure of the environment, and to distinguish between objects that are close together but at different depths.\\
+
+In this paper, the authors propose a method for evaluating grasp quality using a CNN trained on RGB-D images and force/torque measurements. The network takes as input an RGB-D image of the scene, along with the 6-dimensional force/torque measurements recorded during a grasp attempt. It then predicts a scalar value for each grasp, indicating its expected success rate. The CNN was trained on a dataset of over 10000 grasps on a variety of objects. However, a limitation of this approach is that it requires accurate force sensing during the grasp attempt, which may not be always feasible in practice. Additionally, the scalar success rate predicted by the network may not be as interpretable as other grasp stability metrics, such as the wrench space analysis or the friction cone model. Nonetheless, this paper represents an important step towards using neural networks to evaluate grasp quality in robotics applications.
+
+
+\section{Methodology}\label{sec:5.2}
+The multilayer perceptron (MLP) is a feed-forward neural network consisting of a minimum of three fully-connected layers of perceptrons (neurons), including an input layer for receiving input data, an output layer for producing a prediction based on patterns within the data, and at least one hidden layer that enables the MLP to learn complex representations of the data.\\
+
+In the context of robotic grasping, identifying grasp configurations that yield high stability and success rates for specific objects is of great importance. For example, grasping an object around its centre of gravity can minimise rotational forces that could cause it to tilt and increase the likelihood of a successful grasp. MLPs are known for their ability to learn non-linear relationships between input and output data, making them suitable for learning such patterned configurations from complex datasets and generalising them into simple grasping strategies for different object types.\\
+
+To improve the robustness of robotic grasping for various object types, we trained our MLP model on three primitive object categories: rectangular boxes, cylinders, and bottle-shaped objects (which are more rigid than typical cylinders). This section will investigate the potential influence of an object's geometric characteristics, such as its width and height, on the accuracy of the model.
 
 
 \section{Dataset Collection and Representation}
@@ -579,7 +597,6 @@ To enhance the robustness of our model, we have trained it on three primitive ob
 
 \begin{table}[H]
     \centering
-    \caption{3D meshes of all experimental object variations}
     \resizebox{\textwidth}{!}{%
         \begin{tabular}{lccccccccc}
             \toprule
@@ -594,6 +611,7 @@ To enhance the robustness of our model, we have trained it on three primitive ob
             \bottomrule
         \end{tabular}
     }
+    \caption{3D meshes of all experimental object variations}
     \label{tbl:5.1}
 \end{table}
 
@@ -616,10 +634,10 @@ The principal curvatures of an object mesh are pair of maximum and minimum value
     \qquad
     \subfloat[\centering Top $k=3$ components; Variance captured: 97.34\%]{{\includegraphics[width=0.4\textwidth]{docs/Project Report/Media/principal_curvature_3d.png} }}%
     \caption{Clustering using PCA-extracted components based on principal curvatures of objects}%
-    \label{fig:5.1}%
+    \label{fig:5.2}%
 \end{figure}
 
-\hyperref[fig:5.1]{Figure 5.1} visualises the top $k=2$ and $k=3$ principal curvatures for all the object variations in our dataset. We found that the principal curvatures were able to:
+\hyperref[fig:5.2]{Figure 5.2} visualises the top $k=2$ and $k=3$ principal curvatures for all the object variations in our dataset. We found that the principal curvatures were able to:
 \begin{enumerate}
     \item capture a high amount of variance of the curvatures for all objects
     \item successfully cluster the object variations for each category
@@ -679,7 +697,7 @@ Using all data (tactile + visual + geometric) and then CNN for feature extractio
     \centering
     \includegraphics[scale=0.55]{docs/Project Report/Media/mlp_pca_accuracy_analysis.png}
     \caption{Effect of dimensionality of PCA-reduced dataset on MLP performance}
-    \label{fig:my_label}
+    \label{fig:5.3}
 \end{figure}
 
 
@@ -694,7 +712,7 @@ Test for the influence of sample size on MLP accuracy
     \centering
     \includegraphics[width=0.5\textwidth]{docs/Project Report/Media/5_5_2_size_vs_accuracy.png}
     \caption{Impact of sample size of randomised dataset on MLP accuracy}
-    \label{fig:my_label}
+    \label{fig:5.4}
 \end{figure}
 
 
