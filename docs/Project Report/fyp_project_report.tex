@@ -117,7 +117,10 @@ In recent years, the combination of physical simulators and machine learning has
     \label{fig:1.1}
 \end{figure}
 
-However, little work has been done on increasing robustness in grasping systems that utilise multi-modal (tactile and visual) data. We aim to take the best of both analytic (24) and data-driven methods \cite{berscheid2020selfsupervised, pinto2015supersizing} to develop robust and scalable grasping methods. Robustness in a robotic grasping system refers to its versatility of accurately recognising and grasping objects with varying geometric features (width, depth, curvature, etc) and its ability to successfully grasp the objects. Robustness is increasingly becoming a vital factor in the study of grasp stability and quality, however, incorporating robustness makes it practically difficult to design a single gripper that can effectively grasp all objects. As a result, researchers and engineers have developed dedicated grippers tailored to specific grasping tasks or types of objects.\\
+However, little work has been done on increasing robustness in grasping systems that utilise multi-modal (tactile and visual) data. Robustness in robotic grasping is a crucial property for ensuring effective and reliable manipulation of objects in a wide range of scenarios. It refers to the ability of a robotic grasping system to perform successful grasps despite uncertainties and variations in the environment and object properties (geometric, physical). One of the primary challenges in robotic grasping is the wide variety of shapes and sizes that objects can come in. This can make it difficult for a robotic grasping system to determine the best approach for grasping, as well as to adjust its grasp strategy based on the object's properties. A robust system should be able to handle these variations and adjust its grasp strategy accordingly to ensure that the object is firmly held during manipulation. Another challenge is posed by uncertainties in the object's pose. Objects can be placed in various orientations and positions, making it challenging for a robot to determine the optimal grasping location. A robust system should be able to estimate the object's pose accurately and choose an appropriate grasp location to ensure that the object is grasped correctly. Furthermore, the environment in which a robot operates can change unpredictably, with variations in lighting conditions, surface textures, and other factors affecting the ability of a robotic grasping system to perform well. A robust system should be able to adapt to these changes and adjust its grasping strategy accordingly.\\
+
+
+We aim to take the best of both analytic (24) and data-driven methods \cite{berscheid2020selfsupervised, pinto2015supersizing} to develop robust and scalable grasping methods. Robustness in a robotic grasping system refers to its versatility of accurately recognising and grasping objects with varying geometric features (width, depth, curvature, etc) and its ability to successfully grasp the objects. Robustness is increasingly becoming a vital factor in the study of grasp stability and quality, however, incorporating robustness makes it practically difficult to design a single gripper that can effectively grasp all objects. As a result, researchers and engineers have developed dedicated grippers tailored to specific grasping tasks or types of objects.\\
 
 However, developing a robust and efficient grasping system presents several challenges. One major hurdle is the incorporation of touch sensing into robotic grasping, which is hindered by hardware limitations such as sensor sensitivity and cost, as well as difficulties in integrating tactile inputs into standard control schemes \cite{Calandra_2018}. Consequently, most robotic grasping research has focused on vision and depth as the primary input modalities \cite{Calandra_2018, de_Farias_2021}.
 \begin{figure}[ht]
@@ -577,7 +580,7 @@ There have been several academic studies addressing the problem of grasp stabili
 \begin{figure}[ht]
     \centering
     \includegraphics{docs/Project Report/Media/kumra_kana_2017_residual_block.png}
-    \caption{Kumra and Kanan \cite{8202237}: Robotic Grasp Detection using Deep Convolutional Neural Networks: Example of an residual block in ResNet}
+    \caption{Kumra and Kanan \cite{8202237}: Robotic Grasp Detection using Deep Convolutional Neural Networks: Example of a residual block in ResNet}
     \label{fig:5.1}
 \end{figure}
 
@@ -595,12 +598,8 @@ In this section, we describe the methodology used to train and evaluate our prop
 Utilising our Pybullet data collection pipeline from \hyperref[sec:4.2]{Section 4.2}, we collect multi-modal data for every object variation. Then, for each variation, we manually select $i=4$ seed poses and record the data of 20 successful and 20 unsuccessful grasps with Gaussian noise applied to the seed pose. This creates a dataset of 9x160=1440 grasps in total (720 stable and 720 unstable grasps) consisting of tactile sensor readings and hand poses.
 
 
-\subsection{Dataset Representation}\label{sec:5.2.2}
-
-
-
-\subsection{Primitive Objects and Variations}\label{sec:5.2.3}
-To enhance the robustness of our model, we have trained it on three primitive object categories that collectively represent a sizable proportion of daily-life objects: rectangular boxes, cylinders and bottles. For each object category, we generate three instances with slightly different dimensions. The 3D meshes of these object variations and their dimensions are listed in \hyperref[tbl:5.1]{Table 5.1}.
+\subsection{Primitive Objects and Variations}\label{sec:5.2.2}
+To enhance the robustness of our model, we have trained it on three primitive object categories that collectively represent a sizeable proportion of daily-life objects: rectangular boxes, cylinders and bottles. For each object category, we generate three instances with slightly different dimensions. The 3D meshes of these object variations and their dimensions are listed in \hyperref[tbl:5.1]{Table 5.1}.
 
 \begin{table}[H]
     \centering
@@ -621,14 +620,15 @@ To enhance the robustness of our model, we have trained it on three primitive ob
     \caption{3D meshes of all experimental object variations}
     \label{tbl:5.1}
 \end{table}
+
+
 \subsection{Collecting and Analysing Object Geometric Features}\label{sec:5.2.4}
-Each primitive object category in our dataset possesses unique characteristics. For instance, the curvature of an object's surface can differentiate cylinders and bottles from boxes with ease. As objects within a primitive class often share similar geometric features (such as the curvature of cylinders), our model could potentially generalize successful and unsuccessful grasp poses within each object category by establishing a connection between those poses and the object's properties.\\
+Each primitive object category in our dataset possesses unique characteristics. For instance, the curvature of an object's surface can differentiate cylinders and bottles from boxes with ease. As objects within a primitive class often share similar geometric features (such as the curvature of cylinders), our model could potentially generalise successful and unsuccessful grasp poses within each object category by establishing a connection between those poses and the object's properties.\\
 
 To this end, we extracted and analysed several geometric features of the 9 object variations in order to determine which of them can effectively differentiate between the object categories.
 
 
-\subsubsection{Principal Curvature}
-\label{sec:5.2.3.1}
+\subsubsection{Principal Curvature}\label{sec:5.2.4.1}
 The principal curvatures of an object mesh are pair of maximum and minimum values of curvatures at each vertex of the mesh, expressed by the eigenvalues of the shape operator at that vertex \cite{enwiki:1141654906}. We investigate whether the top $k$ principal curvatures are able to categorize the object variations correctly.
 
 \vspace*{-0.7cm}
@@ -646,11 +646,11 @@ The principal curvatures of an object mesh are pair of maximum and minimum value
     \item capture a high amount of variance of the curvatures for all objects
     \item successfully cluster the object variations for each category
 \end{enumerate}
-\noindent Thus, we conclude that principal curvatures is a valid representation of geometric features for our dataset of objects.
+\noindent Thus, we conclude that the principal curvatures are a valid representation of geometric features for our dataset of objects.
 
 
-\subsection{Dataset Preprocessing}\label{sec:5.2.5}
-Based on the analysis results of our baseline approach in \hyperref[sec:4.7]{Section 4.7}, we concluded that under limited dimensionality circumstances, the Logistic Regression model fits the dataset with the highest accuracy using a convolutional neural network as a dimensionality reduction technique. Therefore, before training our MLP, we extract important features from our dataset using the same \hyperref[fig:4.5]{CNN} architecture. This results in a condensed dataset of shape $1200\times512$.\\
+\subsection{Dataset Pre-processing}\label{sec:5.2.5}
+Based on the analysis results of our baseline approach in \hyperref[sec:4.7]{Section 4.7}, we concluded that under limited dimensionality circumstances, the Logistic Regression model fits the dataset with the highest accuracy using a convolutional neural network as a dimensionality reduction technique. Therefore, before training our MLP, we extract important features from our dataset using the same \hyperref[fig:4.5]{CNN architecture}. This results in a condensed dataset of shape $1200\times512$.\\
 
 To improve the convergence speed and performance for training our MLP model, we normalise the tactile and visual datasets with zero mean and unit variance. This also prevents the initialisation of large weights during back-propagation.
 
