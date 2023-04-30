@@ -557,11 +557,13 @@ Based on the results presented in \hyperref[tbl:4.2]{Table 4.2}, we have determi
 % Section 5: Proposed Approach
 %----------------------------------------------------------------------------------
 \chapter{Multilayer Perceptron for Grasp Stability Prediction}\label{chap:5}
-Successful grasping of objects requires accurate perception, planning, and control, which are difficult tasks due to the high-dimensional, noisy, and uncertain nature of the robotic environment. This chapter proposes a multilayer perceptron (MLP) neural network for predicting the grasp stability label of an end effector pose. Following our conclusions from our baseline approach, our model is trained using tactile and visual data and uses an identical Convolutional Neural Network architecture to extract important features from the tactile and visual data, from which we select the top five principal components to represent the extracted features.\\
+Achieving successful grasping of objects in a robotic environment is challenging due to the high-dimensional, noisy, and uncertain nature of the task, which requires accurate perception, planning, and control. To address this issue, we propose a multilayer perceptron (MLP) neural network that predicts the grasp stability label of an end effector pose. MLPs are feed-forward neural networks consisting of at least three fully-connected layers of perceptrons, including an input layer for receiving input data, an output layer for producing a prediction, and at least one hidden layer that enables the MLP to learn complex representations of the data. Our proposed approach is specifically designed to identify grasp configurations that yield high stability and success rates for specific objects, a critical task in robotic grasping.\\
 
-To evaluate the performance of our model, we conducted several experiments to assess the robustness of the model towards different primitive object types, as well as determine whether the model is able to generalise simple grasping strategies \cite{Chebotar_2017} per object type. We compare the performance of our model with state-of-the-art methods for predicting grasp stability, including baseline methods on hand-engineered features and other neural network-based models \cite{mahler2017dexnet, 7487517}. We also analysed the learned representations in our model and found that they are semantically meaningful and generalise well to new objects.\\
+MLPs are well-suited to learn non-linear relationships between input and output data, making them suitable for identifying patterned configurations from complex datasets and generalising simple grasping strategies for different object types. For example, grasping an object around its centre of gravity can minimise rotational forces that could cause it to tilt and increase the likelihood of a successful grasp. In this context, our MLP-based approach extracts important features from tactile and visual data using an identical Convolutional Neural Network architecture, from which we select the top five principal components to represent the extracted features.\\
 
-In the following sections, we will provide a detailed description of our approach, experimental setup, and results, and discuss the implications of our work.\\
+To evaluate the performance of our model, we conducted several experiments on different primitive object types, including rectangular boxes, cylinders, and bottle-shaped objects (which are more rigid than typical cylinders), to assess the robustness of the model towards various objects. Additionally, we tested whether the model is able to generalise simple grasping strategies per object type. We compared the performance of our model with state-of-the-art methods for predicting grasp stability, including baseline methods on hand-engineered features and other neural network-based models \cite{mahler2017dexnet, 7487517}.\\
+
+In the following sections, we provide a detailed description of our approach, experimental setup, and results, and discuss the implications of our work in the field of robotic grasping.
 
 
 \section{Related Work}\label{sec:5.1}
@@ -569,7 +571,7 @@ There have been several academic studies addressing the problem of grasp stabili
 \begin{figure}[ht]
     \centering
     \includegraphics{docs/Project Report/Media/kumra_kana_2017_residual_block.png}
-    \caption{Kumra and Kanan: Robotic Grasp Detection using Deep Convolutional Neural Networks: Example of an residual block in ResNet}
+    \caption{Kumra and Kanan \cite{8202237}: Robotic Grasp Detection using Deep Convolutional Neural Networks: Example of an residual block in ResNet}
     \label{fig:5.1}
 \end{figure}
 
@@ -578,21 +580,20 @@ Mahler et al. have proposed a method for evaluating grasp quality using a CNN tr
 In this paper, the authors propose a method for evaluating grasp quality using a CNN trained on RGB-D images and force/torque measurements. The network takes as input an RGB-D image of the scene, along with the 6-dimensional force/torque measurements recorded during a grasp attempt. It then predicts a scalar value for each grasp, indicating its expected success rate. The CNN was trained on a dataset of over 10000 grasps on a variety of objects. However, a limitation of this approach is that it requires accurate force sensing during the grasp attempt, which may not be always feasible in practice. Additionally, the scalar success rate predicted by the network may not be as interpretable as other grasp stability metrics, such as the wrench space analysis or the friction cone model. Nonetheless, this paper represents an important step towards using neural networks to evaluate grasp quality in robotics applications.
 
 
+\newpage
 \section{Methodology}\label{sec:5.2}
-The multilayer perceptron (MLP) is a feed-forward neural network consisting of a minimum of three fully-connected layers of perceptrons (neurons), including an input layer for receiving input data, an output layer for producing a prediction based on patterns within the data, and at least one hidden layer that enables the MLP to learn complex representations of the data.\\
-
-In the context of robotic grasping, identifying grasp configurations that yield high stability and success rates for specific objects is of great importance. For example, grasping an object around its centre of gravity can minimise rotational forces that could cause it to tilt and increase the likelihood of a successful grasp. MLPs are known for their ability to learn non-linear relationships between input and output data, making them suitable for learning such patterned configurations from complex datasets and generalising them into simple grasping strategies for different object types.\\
-
-To improve the robustness of robotic grasping for various object types, we trained our MLP model on three primitive object categories: rectangular boxes, cylinders, and bottle-shaped objects (which are more rigid than typical cylinders). This section will investigate the potential influence of an object's geometric characteristics, such as its width and height, on the accuracy of the model.
+In this section, we describe the methodology used to train and evaluate our proposed approach for predicting grasp stability using a multilayer perceptron (MLP) neural network. We begin by presenting the dataset we used, which consists of tactile and visual data collected from a variety of objects, along with ground-truth labels indicating whether each grasp was successful or not. We then describe the architecture of our MLP model, including the number and size of the layers, the activation functions used, and any regularisation techniques employed. Next, we explain the training procedure used to optimise the model's weights, including the optimisation algorithm used, the learning rate schedule, the batch size, and the number of epochs. We then describe the evaluation metrics used to assess the performance of our model, along with the baseline methods against which we compared it. Finally, we present the results of our experiments and discuss their implications for the field of robotic grasping.
 
 
-\section{Dataset Collection and Representation}
-\label{sec:5.2}
+\subsection{Dataset Collection}\label{sec:5.2.1}
 Utilising our Pybullet data collection pipeline from \hyperref[sec:4.2]{Section 4.2}, we collect multi-modal data for every object variation. Then, for each variation, we manually select $i=4$ seed poses and record the data of 20 successful and 20 unsuccessful grasps with Gaussian noise applied to the seed pose. This creates a dataset of 9x160=1440 grasps in total (720 stable and 720 unstable grasps) consisting of tactile sensor readings and hand poses.
 
 
-\subsection{Object Variations}
-\label{sec:5.2.1}
+\subsection{Dataset Representation}\label{sec:5.2.2}
+
+
+
+\subsection{Primitive Objects and Variations}\label{sec:5.2.3}
 To enhance the robustness of our model, we have trained it on three primitive object categories that collectively represent a sizable proportion of daily-life objects: rectangular boxes, cylinders and bottles. For each object category, we generate three instances with slightly different dimensions. The 3D meshes of these object variations and their dimensions are listed in \hyperref[tbl:5.1]{Table 5.1}.
 
 \begin{table}[H]
@@ -614,10 +615,7 @@ To enhance the robustness of our model, we have trained it on three primitive ob
     \caption{3D meshes of all experimental object variations}
     \label{tbl:5.1}
 \end{table}
-
-
-\subsection{Geometric Features of an Object}
-\label{sec:5.2.2}
+\subsection{Collecting and Analysing Object Geometric Features}\label{sec:5.2.4}
 Each primitive object category in our dataset possesses unique characteristics. For instance, the curvature of an object's surface can differentiate cylinders and bottles from boxes with ease. As objects within a primitive class often share similar geometric features (such as the curvature of cylinders), our model could potentially generalize successful and unsuccessful grasp poses within each object category by establishing a connection between those poses and the object's properties.\\
 
 To this end, we extracted and analysed several geometric features of the 9 object variations in order to determine which of them can effectively differentiate between the object categories.
@@ -645,15 +643,18 @@ The principal curvatures of an object mesh are pair of maximum and minimum value
 \noindent Thus, we conclude that principal curvatures is a valid representation of geometric features for our dataset of objects.
 
 
-\section{Preprocessing}
-\label{sec:5.3}
-Based on our analysis results of our baseline approach in \hyperref[sec:4.7]{Section 4.7}, we concluded that under limited dimensionality circumstances, the Logistic Regression model fits the dataset with the highest accuracy using a convolutional neural network as a dimensionality reduction technique. Therefore, before training our MLP, we extract important features from our dataset using the same \hyperref[fig:4.5]{CNN} architecture. This results in a condensed dataset of shape $1200\times512$.\\
+\subsection{Dataset Preprocessing}\label{sec:5.2.5}
+Based on the analysis results of our baseline approach in \hyperref[sec:4.7]{Section 4.7}, we concluded that under limited dimensionality circumstances, the Logistic Regression model fits the dataset with the highest accuracy using a convolutional neural network as a dimensionality reduction technique. Therefore, before training our MLP, we extract important features from our dataset using the same \hyperref[fig:4.5]{CNN} architecture. This results in a condensed dataset of shape $1200\times512$.\\
 
 To improve the convergence speed and performance for training our MLP model, we normalise the tactile and visual datasets with zero mean and unit variance. This also prevents the initialisation of large weights during back-propagation.
 
 
-\section{Training}
-\label{sec:5.4}
+
+\subsection{MLP Architecture}\label{sec:5.2.6}
+
+
+
+\section{Training}\label{sec:5.3}
 We trained our MLP model on two versions of our dataset:
 \begin{enumerate}
     \item tactile and visual data (end effector poses only)
@@ -669,7 +670,9 @@ We trained our MLP model on two versions of our dataset:
 \end{itemize}
 
 
-\subsection{Evaluation of Results}
+
+
+\section{Evaluation of Results}\label{sec:5.4}
 \begin{table}[ht]
     \centering
     \begin{tabular}{l*{4}{>{\centering\arraybackslash}p{.15\linewidth}}}
@@ -721,16 +724,17 @@ Test for the influence of sample size on MLP accuracy
 %----------------------------------------------------------------------------------
 \chapter{Future Work}
 \label{chap:6}
-things to mention
-\begin{itemize}
-    \item Since Pybullet is no longer being maintained, consider moving to mujico
-    \item using real data may be better because it is proven that tactile data collected from pybullet may not be accurate enough
-    \item use better object representations
-    \item more analysis on different NNs
-\end{itemize}
+The grasp stability predictions have shown promising results in the previous chapter, indicating the potential for further development. However, the current project relies on the Pybullet simulation platform, which is no longer actively maintained and may lose support over time. To ensure compatibility with the latest technologies and continued support and updates, it is recommended to upgrade to the more stable and actively maintained MuJoCo and ROS (Robot Operating System), both of which are widely used in robotics research. MuJoCo is known for its stability and accuracy in physics simulation, while ROS provides a comprehensive set of tools and libraries for robotics research. Upgrading to these platforms will allow the project to benefit from the latest advancements in robotics research and explore new features and functionalities that were not previously available in Pybullet.\\
 
+To evaluate the performance of the MLP neural network model in real-world scenarios, it is crucial to test the model on real data collected from a physical robot setup. Therefore, it is recommended to gather real-world data and assess the MLP's performance on it. This will provide a better understanding of the model's performance, identify potential issues when deploying the model in the real world, and determine its robustness and reliability in different environments and conditions.\\
 
+Although principal curvatures are a powerful tool for feature extraction in object recognition and segmentation, the current implementation may not be the best approach for clustering primitive object types. To achieve better clustering results for these types of objects, it is recommended to explore alternative methods of principal curvature implementation, such as alternative feature extraction techniques like deep learning-based methods.\\
 
+While the MLP neural network model used in the project has demonstrated its effectiveness, it is essential to compare its performance with other neural network architectures, such as Convolutional Neural Networks (CNNs) and Recurrent Neural Networks (RNNs), to determine whether other architectures can achieve better accuracy, training time, or model complexity.\\
+
+Given that neural networks can predict other grasping properties, such as force distribution, grasp robustness, and grasp efficiency, it is recommended to explore the possibility of developing a multi-task learning framework that can predict multiple grasping properties simultaneously. A multi-task learning framework can provide a more comprehensive understanding of the grasping process by predicting multiple grasping properties, improving overall prediction accuracy, and reducing the need for extensive data labelling for individual tasks. Careful consideration of different architectures for multi-task learning is necessary to evaluate their performance against single-task learning models and understand the benefits and drawbacks of multi-task learning.
+
+ 
 
 %----------------------------------------------------------------------------------
 % Appendix section
