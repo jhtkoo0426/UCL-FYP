@@ -1,4 +1,4 @@
-\documentclass[12pt, a4paper]{report}
+\documentclass[11pt, a4paper]{report}
 
 % Page styling
 \usepackage{extsizes}
@@ -325,8 +325,7 @@ Dimensionality reduction and feature representation techniques can be employed t
 To determine an appropriate feature representation, we adopt a binary logistic regression model (commonly known as binary logit) for the classification of grasps and evaluation of the accuracy of the model on various feature representations. Logistic regression is a widely used binary classification algorithm that can be effectively applied to datasets with non-linear relationships, as may exist between the multi-modal features and grasp stability label in our project. It serves as a strong baseline for our investigation, as it provides interpretable results that facilitate the understanding of the effectiveness of the chosen feature representations.\\
 
 
-\section{Logit Model for Grasp Classification}
-\label{sec:4.1}
+\section{Logit Model for Grasp Classification}\label{sec:4.1}
 The fundamental assumption of this approach is that grasps can be classified as either successful or unsuccessful outcomes.  In this study, we classify successful hand configurations as those that result in a stable grasp of the object in question. However, there are more sophisticated methods for categorising grasps, which we refer the reader to \cite{Bekiroglu2012LearningTA, si2022grasp}.\\
 
 Assume that we have selected some representation of tactile and/or visual features for each grasp candidate, denoted $x_i$. Our logit model attempts to classify the grasp with a binary label $y_i$. To achieve this, the weights $w$ of the model are fitted through a maximum likelihood estimation where the distribution of the features $x_i$ sits. Assuming the grasp outcomes as a Bernoulli random variable, we can construct and minimise the following cross-entropy loss function and treat it as an optimisation problem:
@@ -339,13 +338,11 @@ Therefore using our learned logit model (with an optimised weights vector), we c
 
 
 \newpage
-\section{Dataset Generation}
-\label{sec:4.2}
+\section{Dataset Generation}\label{sec:4.2}
 To generate a dataset for training our proposed logit model, we collect tactile and visual data by randomly generating grasps on a smooth rectangular box of dimensions (depth: 0.025, width: 0.05, height: 0.05) in our Pybullet simulation.
 
 
-\subsection{Random Grasp Synthesis}
-\label{sec:4.2.1}
+\subsection{Random Grasp Synthesis}\label{sec:4.2.1}
 To generate random grasps on the box, we first manipulate the robot's end effector manually into diverse positions within the box's vicinity and collect three distinct end effector poses $S_i:i=1,2,3$ to ensure some variability in grasping orientation, position and efficacy. The selected end effector poses are subsequently referred to as seed poses, denoted as 6-tuples $S_i$:
 \begin{equation}
     S_i=(x,y,z,r_x,r_y,r_z)
@@ -357,8 +354,8 @@ A fixed number $n$ of random poses are generated from each seed pose. This is ac
 The variance of the Gaussian noise can be adjusted for a more/less dispersed distribution of the random grasp poses. It is essential to balance the trade-off between generating diverse grasp poses (and their corresponding data) and ensuring that the poses are likely to succeed. Notably, the impact of the variance of the Gaussian noise will be contingent on the characteristics of the object being grasped, which may necessitate modifying the variance according to the object's properties. This will be discussed in Section 5 where we introduce geometric features of objects into our classifier approach.
  
 
-\subsection{Data Collection Pipeline}
-\label{sec:4.2.2}
+\newpage
+\subsection{Data Collection Pipeline}\label{sec:4.2.2}
 Prior to executing each randomly generated pose $X_{v,i}$ as a pick-and-place task, we first reset the position and orientation of our robot to an initial, predefined configuration (\ref{fig:4.1a}). Next, we utilise Pybullet's built-in inverse kinematics method to manipulate the robot's end effector to $X_{v,i}$. To avoid collision with the object, we include a vertical padding distance $p_z$ above the object (\ref{fig:4.1b}). Then, the robot lowers the end effector by removing the padding $p_z$ to reach the target object and closes its gripper (\ref{fig:4.1c}).
 
 \begin{figure}[H]%
@@ -396,13 +393,13 @@ Once the robot verifies that the object is stably held (i.e. the tactile data is
 After executing each random pose, we append the collected tactile data, end effector pose and grasp outcome to individual arrays. Once the required data for our $n$ random end effector poses has been collected, these arrays are saved to separate files which can be loaded for further analysis. Specifically, we create one .npy file each for the depth, colour, grasp outcomes, and random pose data.
 
 
-\section{Dataset Validation and Visualisation}
-\label{sec:4.3}
+\newpage
+\section{Dataset Validation and Visualisation}\label{sec:4.3}
 Before using the generated tactile and visual data for random hand configurations for analysis or modelling, it is important to validate and visualise it to ensure its quality and reliability. In this context, this article will explore the process of visualising and validating a dataset of tactile sensor readings and end-effector poses. We will discuss various techniques and tools that can be used to explore the data, identify patterns and anomalies, and ensure that it meets the requirements of the analysis or model being built. In this section, we explore our data to understand any underlying patterns or characteristics and prevent the generation of abnormal grasp data (as in \ref{fig:4.2}).
 
 
-\subsection{Visualising Tactile Data}
-\label{sec:4.3.1}
+\subsection{Visualising Tactile Data}\label{sec:4.3.1}
+The tactile readings collected from our simulation are represented in the depth and colour images, as depicted in the figures below. These figures display the data for two grasp attempts - one successful (Figure 4.3a) and one unsuccessful (Figure 4.3b) - which were based on end effector poses randomly generated by the system. Furthermore, we present a 3D visualisation of the hand pose and the object, with the target object shown as a blue box and the gripper represented as a staple-like object consisting of two fingers.
 \begin{figure}[H]%
     \centering
     \subfloat[\centering Successful grasp data]{{\includegraphics[width=\textwidth]{docs/Project Report/Media/4_3_successful_grasp_data.png} }}%
@@ -413,8 +410,9 @@ Before using the generated tactile and visual data for random hand configuration
 \end{figure}
 
 
-\subsection{Visualising Hand Poses}
-\label{sec:4.3.2}
+
+\newpage
+\subsection{Visualising Hand Poses}\label{sec:4.3.2}
 We create a visualisation of each hand pose $X_n$ in a 3-dimensional space, using its Cartesian coordinates and the "pitch-roll-yaw" rotational matrix representation $R$ of its Euler angles ($\alpha,\beta,\gamma$) \cite{weisstein}:
 
 \begin{equation}
@@ -448,14 +446,13 @@ We create a visualisation of each hand pose $X_n$ in a 3-dimensional space, usin
 \end{figure}
 
 
-\section{Feature Engineering \& Data Pre-processing}
-\label{sec:4.4}
+\newpage
+\section{Feature Engineering \& Data Pre-processing}\label{sec:4.4}
 We aim to assess the efficacy of utilising our multi-modal dataset for our grasping task through experimenting with various combinations of the tactile and visual (random end effector poses) data.
 
 
-\subsection{Multi-modal Data Combinations}
-\label{sec:4.4.1}
-In this project, we segregate our dataset into tactile-only, visual-only and concatenated tactile and visual datasets:
+\subsection{Multi-modal Data Combinations}\label{sec:4.4.1}
+Based on the tactile and visual data collected in section 4.2, we created different combinations of the dataset to determine the best representation for our analysis. The table below presents a summary of the various data combinations we tested and their corresponding creation methods.
 \begin{table}[H]
     \centering
     \resizebox{\textwidth}{!}{%
@@ -472,6 +469,7 @@ In this project, we segregate our dataset into tactile-only, visual-only and con
     \caption{Dataset combinations}
     \label{tab:4.1}
 \end{table}
+The first dataset consists of tactile sensor readings collected from a robotic gripper during grasping tasks. The dataset has a shape of $N\times160\times240\times4$, with $N$ distinct concatenated colour and depth tactile sensory readings per finger collected from the simulation data collection pipeline (\ref{sec:4.2.2}). The following flowchart illustrates how the tactile dataset was created:
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{docs/Project Report/Media/tactile_dataset_creation.png}
@@ -479,14 +477,18 @@ In this project, we segregate our dataset into tactile-only, visual-only and con
     \label{fig:4.6}
 \end{figure}
 
+The second dataset consists of end effector poses relative to the robot arm during grasping tasks. The dataset has a shape of $N\times6$, where $6$ represents the 6 degrees of freedom (DOF) of the simulation robot. We leave this dataset as it is.\\
 
-\subsection{Dimensionality Reduction}
-\label{sec:4.4.2}
+The third dataset is a combination of tactile and visual data and consists of both tactile sensor readings and end effector poses collected during grasping tasks, concatenated together as NumPy arrays along the second dimension, creating a dataset of the shape $N\times(160\times240\times4+6)$.\\
+
+Concatenation approaches involving the combination of sensory data for robotic grasping analysis have been explored in several related works. Calandra et al. (2018) \cite{Calandra_2018} used a combination of tactile and visual data to train a deep neural network for predicting grasp outcomes. The authors concatenated the tactile sensor readings and end effector poses into a single input vector for the neural network.
+
+
+\subsection{Dimensionality Reduction}\label{sec:4.4.2}
 In this project, we represent tactile sensory readings as images, specifically, grayscale for depth data and RGB for colour data. As the dimensionality of this data has a significant impact on computational costs, we have employed dimensionality reduction techniques to alleviate this issue, including principal component analysis (PCA) and convolutional neural networks (CNN) for feature extraction.
 
 
-\subsubsection{Principal Component Analysis (PCA)}
-\label{sec:4.4.2.1}
+\subsubsection{Principal Component Analysis (PCA)}\label{sec:4.4.2.1}
 PCA is a widely used linear technique that projects the high-dimensional input data onto a lower-dimensional space, capturing the maximum amount of variance in the data with fewer dimensions. By reducing the dimensionality of the data, PCA can facilitate more efficient computation and enable the extraction of meaningful patterns and features from the data.\\
 
 PCA is particularly useful for concatenated tactile and visual data, as it can extract relevant features from both modalities and combine them to form a lower-dimensional representation of the data. For example, PCA can be used to extract principal components that represent the most significant tactile and visual features, which can then be combined to form a lower-dimensional representation of the data. The resulting representation can be used as input to machine learning algorithms for classification or regression tasks.\\
@@ -494,8 +496,7 @@ PCA is particularly useful for concatenated tactile and visual data, as it can e
 It is worth noting that the effectiveness of PCA for dimensionality reduction depends on several factors, such as the number of input dimensions, the amount of variance in the data, and the distribution of the data. Additionally, the choice of the number of principal components to retain can also impact the performance of the method. Hence, a careful evaluation of the effectiveness of PCA for the given task is necessary, including the selection of an appropriate number of principal components to retain, and any trade-offs between computation time and performance.
 
 
-\subsubsection{Convolution Neural Network (CNN) Feature Extraction}
-\label{sec:4.4.2.2}
+\subsubsection{Convolution Neural Network (CNN) Feature Extraction}\label{sec:4.4.2.2}
 In the context of multi-modal sensor data, feature extraction using convolutional neural networks (CNNs) has gained popularity due to their ability to capture spatial and temporal patterns in the data. The CNN architecture, as described with interleaved convolution and pooling layers, is well-suited for detecting local features in the input data. The convolution layers extract low-level features, such as edges or textures, while the pooling layers help reduce the dimensionality of the feature maps and provide translational invariance to the learned features. The combination of these layers can create a hierarchy of feature representations, with higher-level features capturing more complex and abstract patterns in the data.
 
 \begin{figure}[H]
@@ -507,21 +508,19 @@ In the context of multi-modal sensor data, feature extraction using convolutiona
 \hyperref[fig:4.7]{Figure 4.7} visualises the specific CNN architecture used in the baseline, consisting of three convolutional layers interleaved with MaxPool2D layers with a 2 × 2 kernel, which is effective in capturing features from concatenated tactile and visual sensory data. 
 
 
-\subsection{Data Pre-processing}
-\label{sec:4.4.3}
+\subsection{Data Pre-processing}\label{sec:4.4.3}
 Normalization of data prior to model training is a well-established practice in machine learning, known to improve the accuracy and efficiency of the learning process. In the context of tactile sensor readings and end effector poses, normalization is particularly relevant due to the large differences in the scale of the data. For instance, RGB pixel values for the colour dataset vary between 0 to 255, while Euler angles in the hand pose dataset vary between $-\pi$ and $\pi$.\\
 
 Failure to normalize the data can result in numerical instability, as differences in scale can cause the weights of the model to become disproportionately small or large, thereby hampering effective learning. Moreover, normalization can improve model generalization by reducing the impact of outliers and mitigating the effects of varying ranges of feature values in the data. Finally, normalization facilitates comparison of the relative importance of different features, thereby enabling the identification of the most significant ones and elimination of redundant or less important ones.
 
 
-\section{Model Training}
-\label{sec:4.5}
+\section{Model Training}\label{sec:4.5}
 To train the binary logistic regression classifier on the tactile sensory data and end effector poses, an 80-20 split was used with the \verb|train_test_split()| function provided by the \verb|sklearn| library. The training set consisted of 80\% of the data, while the remaining 20\% was utilised for validation. The model was trained using the \verb|sklearn| logistic regression implementation, which provided flexibility in setting the hyper-parameters such as the solver type and regularisation method. However, regularisation was not applied in this training process considering the high dimensionality of the dataset.\\
 
 After preparing the datasets, the logistic regression (logit) classifier was trained using the three dataset combinations that were previously discussed in \hyperref[sec:4.4.1]{Section 4.4.1}. To further explore the dataset characteristics, a combination of dimensionality reduction techniques was applied to these datasets, as discussed in \hyperref[sec:4.4.2]{Section 4.4.2}. Specifically, the techniques used were ConvNet only and ConvNet with PCA (top $k$ principal components). The logit model was then trained on these variations of the datasets with the aim of selecting the model and dataset combination that achieves the best accuracy. This approach allowed us to thoroughly explore the impact of different dataset combinations and dimensionality reduction techniques on the performance of the logit classifier.
 
 
-\subsection{Summary of training results}
+\subsection{Summary of training results}\label{sec:4.5.1}
 \label{sec:4.5.1}
 \begin{table}[H]
     \centering
@@ -540,16 +539,14 @@ After preparing the datasets, the logistic regression (logit) classifier was tra
     \caption{Accuracy of LR model on dataset variations}
     \label{tbl:4.2}
 \end{table}
-As previously discussed, the logistic regression model was trained on three different dataset segmentations and three pre-processing methods were applied. The results, as presented in \hyperref[tbl:4.2]{Table 4.2}, indicate that although utilising ConvNets and/or PCA techniques did not have a significant impact on the accuracy of the logit model, it is noteworthy that the dimensionality of the datasets was significantly reduced by more than 90\% when dimensionality-reducing techniques were used.\\
+As previously discussed, the logistic regression model was trained on three different dataset segmentations and three pre-processing methods were applied. The results, as presented in \hyperref[tbl:4.2]{Table 4.2}, indicate that although utilising ConvNets and/or PCA techniques did not have a significant impact on the accuracy of the logit model, it is noteworthy that the dimensionality of the datasets was significantly reduced by more than 90\% when dimensionality-reducing techniques were used.
 
 
-\subsection{Balancing trade-off between accuracy and dimensionality}
-\label{sec:4.5.1}
+\subsection{Trade-off between accuracy and dimensionality}\label{sec:4.5.2}
 Compared to traditional techniques like PCA, CNNs can learn complex, non-linear relationships between the tactile and visual features and the grasp outcome. This is particularly useful when dealing with high-dimensional data, where PCA may not capture the underlying patterns in the data. Moreover, the ability of CNNs to learn hierarchical feature representations can make them more interpretable, as each layer captures increasingly complex and abstract features, leading to a better understanding of the underlying mechanisms of the problem.
 
 
-\section{Conclusion}
-\label{sec:4.6}
+\section{Conclusion}\label{sec:4.6}
 Based on the results presented in \hyperref[tbl:4.2]{Table 4.2}, we have determined that using both tactile and visual data together produces the highest accuracy for our LR models. While raw data performed better than other pre-processing techniques, we recognize that the dimensionality of the data must also be considered. Therefore, we have found that extracting features from our dataset using a ConvNet and selecting only the top $k=5$ components provides comparable accuracy with significantly lower dimensionality.
 
 
