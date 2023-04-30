@@ -316,9 +316,9 @@ yaml parameters, loading parameters
 %----------------------------------------------------------------------------------
 \chapter{Learning Feature Representations}
 \label{chap:4}
-This chapter introduces a baseline approach to grasp stability prediction using a binary logistic regression model. In a previous study conducted by Alkhatib et al. \cite{9091340}, a regularised logistic regression model was used to determine the robustness and quality of grasps and predict their stability. The model's inputs were derived from a set of features measured at each joint of a robotic hand, which were subsequently utilized for training the logistic regression model. In our approach, we use tactile and visual data instead of joint data to classify binary grasp stability labels.\\
+This chapter introduces a baseline approach to grasp stability prediction using a binary logistic regression model. In a previous study conducted by Alkhatib et al. \cite{9091340}, a regularised logistic regression model was used to determine the robustness and quality of grasps and predict their stability. The model's inputs were derived from a set of features measured at each joint of a robotic hand, which were subsequently utilised for training the logistic regression model. In our approach, we use tactile and visual data instead of joint data to classify binary grasp stability labels.\\
 
-In addition, we address a pressing issue of the project - high dimensionality data collected from our simulations. In the previous chapter, we highlighted that a significant portion of the data collected from our simulation is high-dimensional. High-dimensional data poses a significant challenge in terms of computational processing and feature identification. The risk of overfitting also increases as the dimensionality of the data grows, leading to suboptimal performance of the grasping policy. To mitigate these challenges and effectively train the grasping policy, it is imperative to reduce the data's dimensionality and represent it more concisely.\\
+In addition, we address a pressing issue of the project - high dimensionality data collected from our simulations. In the previous chapter, we highlighted that a significant portion of the data collected from our simulation is high-dimensional. High-dimensional data poses a significant challenge in terms of computational processing and feature identification. The risk of overfitting also increases as the dimensionality of the data grows, leading to sub-optimal performance of the grasping policy. To mitigate these challenges and effectively train the grasping policy, it is imperative to reduce the data's dimensionality and represent it more concisely.\\
 
 Dimensionality reduction and feature representation techniques can be employed to reduce the data's dimensionality and represent it in a more meaningful way. By doing so, we can identify the most relevant features for the grasping task and reduce the risk of overfitting. Techniques such as Principal Component Analysis (PCA) can be used to determine the most important features in the data. Alternatively, Convolutional Neural Networks (CNNs) can automatically learn features from images or depth maps. A previous study \cite{Calandra_2018} has demonstrated the effectiveness of CNNs in extracting features from high-dimensional data for grasping tasks.\\
 
@@ -339,7 +339,7 @@ Therefore using our learned logit model (with an optimised weights vector), we c
 
 \newpage
 \section{Dataset Generation}\label{sec:4.2}
-To generate a dataset for training our proposed logit model, we collect tactile and visual data by randomly generating grasps on a smooth rectangular box of dimensions (depth: 0.025, width: 0.05, height: 0.05) in our Pybullet simulation.
+To generate a dataset for training our proposed logit model, we collect tactile and visual data by randomly generating grasps on a smooth rectangular box of dimensions (depth: 0.025, width: 0.05, height: 0.05) in our Pybullet simulation. These dimensions are re-scaled to be compatible with the dimensions of the robot setup, which are defined in its URDF (Unified Robot Description Format) file.
 
 
 \subsection{Random Grasp Synthesis}\label{sec:4.2.1}
@@ -356,7 +356,7 @@ The variance of the Gaussian noise can be adjusted for a more/less dispersed dis
 
 \newpage
 \subsection{Data Collection Pipeline}\label{sec:4.2.2}
-Prior to executing each randomly generated pose $X_{v,i}$ as a pick-and-place task, we first reset the position and orientation of our robot to an initial, predefined configuration (\ref{fig:4.1a}). Next, we utilise Pybullet's built-in inverse kinematics method to manipulate the robot's end effector to $X_{v,i}$. To avoid collision with the object, we include a vertical padding distance $p_z$ above the object (\ref{fig:4.1b}). Then, the robot lowers the end effector by removing the padding $p_z$ to reach the target object and closes its gripper (\ref{fig:4.1c}).
+Prior to executing each randomly generated pose $X_{v,i}$ as a pick-and-place task, we first reset the position and orientation of our robot to an initial, predefined configuration (\hyperref[fig:4.1a]{Figure 4.1a}). Next, we utilise Pybullet's built-in inverse kinematics method to manipulate the robot's end effector to $X_{v,i}$. To avoid collision with the object, we include a vertical padding distance $p_z$ above the object (\hyperref[fig:4.1b]{Figure 4.1b}). Then, the robot lowers the end effector by removing the padding $p_z$ to reach the target object and closes its gripper (\hyperref[fig:4.1c]{Figure 4.1c}).
 
 \begin{figure}[H]%
     \centering
@@ -373,18 +373,28 @@ Prior to executing each randomly generated pose $X_{v,i}$ as a pick-and-place ta
 
 Before lifting the object, the robot measures the number of contact points between the two fingers and the object to ensure the grasp is stable. We define a grasp to be stable if there are a non-zero number of contact points, in which the robot records depth and colour tactile information using the DIGIT \cite{Lambeta2020DIGIT} tactile sensors on each finger. We concatenate each pair of depth and colour tactile readings into a $(160\times240)$ grey-scale image and a $(160\times240\times3)$ RGB image respectively.\\
 
-Upon acquiring tactile readings, the robot executes a sanity check on the recorded tactile data from DIGIT cameras. Specifically, the robot analyzes the depth data exclusively, as the colour data is a mere RGB representation of the depth data, and thus does not require any additional scrutiny. This process involves assessing whether the average pixel value surpasses a predetermined threshold, thereby enabling the elimination of spurious signals (\ref{fig:4.2a}) and preserving the integrity of the precise depth data (\ref{fig:4.2b}). By implementing this approach, the quality of the data is significantly improved, thus ensuring the accurate lifting of the object.
+\newpage
+Upon acquiring tactile readings, the robot executes a sanity check on the recorded tactile data from DIGIT cameras. The DIGIT cameras use a combination of depth sensing and colour imaging technologies to produce tactile readings. These cameras have a structured light system that projects a pattern of infrared light onto the object being touched. The camera then captures the reflected light and uses it to calculate the depth of the object at each pixel location. To produce colour tactile readings, the camera also includes a traditional RGB colour camera. This camera captures the colour information of the object at each pixel location. The depth and colour information is then combined to produce a textured 3D representation of the object's surface, which can be used to extract tactile features such as roughness, curvature, and shape. The following figure describes a set of depth-colour tactile readings collected from the DIGIT cameras via our simulation:
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{docs/Project Report/Media/4_2_tactile_data_visualisation.png}
+    \caption{Example depth and colour tactile readings collected from a DIGIT camera}
+    \label{fig:4.2}
+\end{figure}
+
+
+After running the sanity check, we analyse the depth data exclusively, as the colour data is a mere RGB representation of the depth data, and thus does not require any additional scrutiny. This process involves assessing whether the average pixel value surpasses a predetermined threshold, thereby enabling the elimination of spurious signals (\hyperref[fig:4.3a]{Figure 4.3a}) and preserving the integrity of the precise depth data (\hyperref[fig:4.3b]{Figure 4.3b}). By implementing this approach, the quality of the data is significantly improved, thus ensuring the accurate lifting of the object.
 
 \begin{figure}[H]%
     \centering
-    \subfloat[\centering Invalid depth data]{{\includegraphics[width=7cm]{docs/Project Report/Media/4_2_2_invalid_tactile_data.png}\label{fig:4.2a}}}%
+    \subfloat[\centering Invalid depth data]{{\includegraphics[width=0.45\textwidth]{docs/Project Report/Media/4_2_2_invalid_tactile_data.png}\label{fig:4.3a}}}%
     \qquad
-    \subfloat[\centering Valid depth data]{{\includegraphics[width=7cm]{docs/Project Report/Media/4_2_2_valid_tactile_data.png}\label{fig:4.2b}}}%
+    \subfloat[\centering Valid depth data]{{\includegraphics[width=0.45\textwidth]{docs/Project Report/Media/4_2_2_valid_tactile_data.png}\label{fig:4.3b}}}%
     \caption{Concatenated depth data for each finger}%
-    \label{fig:4.2}%
+    \label{fig:4.3}%
 \end{figure}
 
-Once the robot verifies that the object is stably held (i.e. the tactile data is valid), it lifts the object vertically upwards by an offset of $p_z$ and holds the object for 750 steps (\ref{fig:4.1d}). Finally, the robot records a binary outcome of the grasp by determining if the change in the object's z-position $\Delta z$ is greater or equal to the vertical padding $p_z$:
+Once the robot verifies that the object is stably held (i.e. the tactile data is valid), it lifts the object vertically upwards by an offset of $p_z$ and holds the object for 750 steps (\hyperref[fig:4.1d]{Figure 4.1d}). Finally, the robot records a binary outcome of the grasp by determining if the change in the object's z-position $\Delta z$ is greater or equal to the vertical padding $p_z$:
 
 \begin{equation}
     outcome=\begin{cases}1 & \Delta z\geq p_z \\ 0 & \Delta z<p_z\end{cases}
@@ -395,18 +405,18 @@ After executing each random pose, we append the collected tactile data, end effe
 
 \newpage
 \section{Dataset Validation and Visualisation}\label{sec:4.3}
-Before using the generated tactile and visual data for random hand configurations for analysis or modelling, it is important to validate and visualise it to ensure its quality and reliability. In this context, this article will explore the process of visualising and validating a dataset of tactile sensor readings and end-effector poses. We will discuss various techniques and tools that can be used to explore the data, identify patterns and anomalies, and ensure that it meets the requirements of the analysis or model being built. In this section, we explore our data to understand any underlying patterns or characteristics and prevent the generation of abnormal grasp data (as in \ref{fig:4.2}).
+Before using the generated tactile and visual data for random hand configurations for analysis or modelling, it is important to validate and visualise it to ensure its quality and reliability. In this context, this article will explore the process of visualising and validating a dataset of tactile sensor readings and end-effector poses. We will discuss various techniques and tools that can be used to explore the data, identify patterns and anomalies, and ensure that it meets the requirements of the analysis or model being built. In this section, we explore our data to understand any underlying patterns or characteristics and prevent the generation of abnormal grasp data (as in \hyperref[fig:4.3]{Figure 4.3}).
 
 
 \subsection{Visualising Tactile Data}\label{sec:4.3.1}
-The tactile readings collected from our simulation are represented in the depth and colour images, as depicted in the figures below. These figures display the data for two grasp attempts - one successful (Figure 4.3a) and one unsuccessful (Figure 4.3b) - which were based on end effector poses randomly generated by the system. Furthermore, we present a 3D visualisation of the hand pose and the object, with the target object shown as a blue box and the gripper represented as a staple-like object consisting of two fingers.
+The tactile readings collected from our simulation are represented in the depth and colour images, as depicted in the figures below. These figures display the data for two grasp attempts - one successful (\hyperref[fig:4.4a]{Figure 4.4a}) and one unsuccessful (\hyperref[fig:4.4b]{Figure 4.4b}) - which were based on end effector poses randomly generated by the system. Furthermore, we present a 3D visualisation of the hand pose and the object, with the target object shown as a blue box and the gripper represented as a staple-like object consisting of two fingers.
 \begin{figure}[H]%
     \centering
-    \subfloat[\centering Successful grasp data]{{\includegraphics[width=\textwidth]{docs/Project Report/Media/4_3_successful_grasp_data.png} }}%
+    \subfloat[\centering Successful grasp data]{{\includegraphics[width=\textwidth]{docs/Project Report/Media/4_3_successful_grasp_data.png}\label{fig:4.4a}}}%
     \qquad
-    \subfloat[\centering Unsuccessful grasp data]{{\includegraphics[width=\textwidth]{docs/Project Report/Media/4_3_unsuccessful_grasp_data.png} }}%
+    \subfloat[\centering Unsuccessful grasp data]{{\includegraphics[width=\textwidth]{docs/Project Report/Media/4_3_unsuccessful_grasp_data.png}\label{fig:4.4b}}}%
     \caption{Left to right: Depth readings, Colour (RGB) readings, Skeleton 2-finger model to represent a hand pose}
-    \label{fig:4.3}%
+    \label{fig:4.4}%
 \end{figure}
 
 
@@ -429,11 +439,10 @@ We create a visualisation of each hand pose $X_n$ in a 3-dimensional space, usin
         r_z = \begin{pmatrix}cos(\gamma)&sin(\gamma)&0 \\ -sin(\gamma)&cos(\gamma)&0 \\ 0&0&1 \end{pmatrix}
     \end{equation*}
     \caption{Rotational matrices for each axis in the rotational matrix representation of Euler angles}
-    \label{fig:4.4}
+    \label{fig:4.5}
 \end{figure}
 
-\noindent Using this information, we annotate all randomly-generated hand poses from our dataset in 3 dimensions. Each 6D hand pose is represented using a skeleton 2-finger model in a similar manner to \cite{Bekiroglu2012LearningTA}, where green and red poses denote successful and unsuccessful grasps respectively:
-
+\noindent Using this information, we annotate all randomly-generated hand poses from our dataset in 3 dimensions using \verb|matplotlib|. Each 6D hand pose is represented using a skeleton 2-finger model in a similar manner to \cite{Bekiroglu2012LearningTA}, where green and red poses denote successful and unsuccessful grasps respectively:
 \begin{figure}[H]%
     \centering
     \subfloat[\centering Box without poses]{{\includegraphics[width=0.29\textwidth]{docs/Project Report/Media/4_3_2_box_3d_plot.png} }}%
@@ -442,13 +451,13 @@ We create a visualisation of each hand pose $X_n$ in a 3-dimensional space, usin
     \qquad
     \subfloat[\centering Orientation 2]{{\includegraphics[width=0.29\textwidth]{docs/Project Report/Media/4_3_2_all_ee_pose_visualise2.png} }}%
     \caption{Visualisation of 200 random end effector poses}%
-    \label{fig:4.5}%
+    \label{fig:4.6}%
 \end{figure}
 
 
 \newpage
 \section{Feature Engineering \& Data Pre-processing}\label{sec:4.4}
-We aim to assess the efficacy of utilising our multi-modal dataset for our grasping task through experimenting with various combinations of the tactile and visual (random end effector poses) data.
+We aim to assess the efficacy of utilising our multi-modal dataset for our grasping task by experimenting with various combinations of the tactile and visual (random end effector poses) data.
 
 
 \subsection{Multi-modal Data Combinations}\label{sec:4.4.1}
@@ -460,7 +469,7 @@ Based on the tactile and visual data collected in section 4.2, we created differ
             \toprule
             Data Combination & Dimensions & Creation \\
             \midrule
-            Tactile only & $N\times160\times240\times4$ & Concatenating the depth ($N\times160\times240$) and color ($N\times160\times240\times3$) data \\
+            Tactile only & $N\times160\times240\times4$ & Concatenating the depth ($N\times160\times240$) and colour ($N\times160\times240\times3$) data \\
             Visual only & $N\times6$ & Random 6D end effector poses \\
             Tactile + Visual & $N\times(160\times240\times4+6)$ & Concatenating the flattened tactile-only and visual-only datasets \\
             \bottomrule
@@ -474,7 +483,7 @@ The first dataset consists of tactile sensor readings collected from a robotic g
     \centering
     \includegraphics[width=\textwidth]{docs/Project Report/Media/tactile_dataset_creation.png}
     \caption{Creating the tactile dataset}
-    \label{fig:4.6}
+    \label{fig:4.7}
 \end{figure}
 
 The second dataset consists of end effector poses relative to the robot arm during grasping tasks. The dataset has a shape of $N\times6$, where $6$ represents the 6 degrees of freedom (DOF) of the simulation robot. We leave this dataset as it is.\\
@@ -502,16 +511,16 @@ In the context of multi-modal sensor data, feature extraction using convolutiona
 \begin{figure}[H]
     \includegraphics[scale=0.7]{docs/Project Report/Media/nn.png}
     \caption{Architecture for feature extraction CNN}
-    \label{fig:4.7}
+    \label{fig:4.8}
 \end{figure}
 
-\hyperref[fig:4.7]{Figure 4.7} visualises the specific CNN architecture used in the baseline, consisting of three convolutional layers interleaved with MaxPool2D layers with a 2 × 2 kernel, which is effective in capturing features from concatenated tactile and visual sensory data. 
+\hyperref[fig:4.8]{Figure 4.8} visualises the specific CNN architecture used in the baseline, consisting of three convolutional layers interleaved with MaxPool2D layers with a 2 × 2 kernel, which is effective in capturing features from concatenated tactile and visual sensory data. 
 
 
 \subsection{Data Pre-processing}\label{sec:4.4.3}
-Normalization of data prior to model training is a well-established practice in machine learning, known to improve the accuracy and efficiency of the learning process. In the context of tactile sensor readings and end effector poses, normalization is particularly relevant due to the large differences in the scale of the data. For instance, RGB pixel values for the colour dataset vary between 0 to 255, while Euler angles in the hand pose dataset vary between $-\pi$ and $\pi$.\\
+Normalisation of data prior to model training is a well-established practice in machine learning, known to improve the accuracy and efficiency of the learning process. In the context of tactile sensor readings and end effector poses, normalisation is particularly relevant due to the large differences in the scale of the data. For instance, RGB pixel values for the colour dataset vary between 0 to 255, while Euler angles in the hand pose dataset vary between $-\pi$ and $\pi$.\\
 
-Failure to normalize the data can result in numerical instability, as differences in scale can cause the weights of the model to become disproportionately small or large, thereby hampering effective learning. Moreover, normalization can improve model generalization by reducing the impact of outliers and mitigating the effects of varying ranges of feature values in the data. Finally, normalization facilitates comparison of the relative importance of different features, thereby enabling the identification of the most significant ones and elimination of redundant or less important ones.
+Failure to normalise the data can result in numerical instability, as differences in scale can cause the weights of the model to become disproportionately small or large, thereby hampering effective learning. Moreover, normalisation can improve model generalisation by reducing the impact of outliers and mitigating the effects of varying ranges of feature values in the data. Finally, normalisation facilitates comparison of the relative importance of different features, thereby enabling the identification of the most significant ones and elimination of redundant or less important ones.
 
 
 \section{Model Training}\label{sec:4.5}
@@ -529,7 +538,7 @@ After preparing the datasets, the logistic regression (logit) classifier was tra
         \toprule
         & \multicolumn{3}{c}{Dataset} & \multicolumn{2}{c}{Property of sample} \\
         \cmidrule{2-4}\cmidrule{5-6}
-        Preprocessing & Visual only & Tactile only & Both & Shape & Dimensionality \\
+        Pre-processing & Visual only & Tactile only & Both & Shape & Dimensionality \\
         \midrule
         Raw & 70.83\% & 83.33\% & 83.33\% & 160x240x4 & 153600 \\
         CNN & -- & 83.33\% & 87.50\% & 64x10x15  & 9600 \\
@@ -547,7 +556,7 @@ Compared to traditional techniques like PCA, CNNs can learn complex, non-linear 
 
 
 \section{Conclusion}\label{sec:4.6}
-Based on the results presented in \hyperref[tbl:4.2]{Table 4.2}, we have determined that using both tactile and visual data together produces the highest accuracy for our LR models. While raw data performed better than other pre-processing techniques, we recognize that the dimensionality of the data must also be considered. Therefore, we have found that extracting features from our dataset using a ConvNet and selecting only the top $k=5$ components provides comparable accuracy with significantly lower dimensionality.
+Based on the results presented in \hyperref[tbl:4.2]{Table 4.2}, we have determined that using both tactile and visual data together produces the highest accuracy for our LR models. While raw data performed better than other pre-processing techniques, we recognise that the dimensionality of the data must also be considered. Therefore, we have found that extracting features from our dataset using a ConvNet and selecting only the top $k=5$ components provides comparable accuracy with significantly lower dimensionality.
 
 
 %----------------------------------------------------------------------------------
