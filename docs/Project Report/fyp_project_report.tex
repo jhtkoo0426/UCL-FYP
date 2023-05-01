@@ -132,7 +132,7 @@ However, developing a robust and efficient grasping system presents several chal
 
 However, vision-based grasping approaches have limitations in measuring and reacting to ongoing contact forces, which hinders the full potential benefits of interaction. As a result, these approaches mostly rely on pre-selecting a grasp configuration, such as location, orientation, and forces, before making contact with the object. Addressing these limitations and integrating tactile feedback could significantly improve robotic grasping, leading to more efficient and effective interactions between robots and the physical world.\\
 
-Another challenge is developing a concrete strategy for improving grasp quality and planning while conserving the efficiency of the overall system. Results from our \hyperref[chap:2]{literature survey} suggest that such strategies can be summarised into three types: (1) choice of object representation, where coarse approximations of the underlying true shape of an object can simplify the generation of new grasps \cite{de_Farias_2021} \cite{geidenstam_2009}; (2) use of local symmetry properties to capture key geometric features of the object to generate promising grasp candidates \cite{de_Farias_2021}; (3) optimising shape modelling where target objects are parameterised using smooth, differentiable functions from point clouds using spectral analysis \cite{de_Farias_2021}.
+Another challenge is developing a concrete strategy for improving grasp quality and planning while conserving the efficiency of the overall system. Such strategies can be summarised into three types: (1) choice of object representation, where coarse approximations of the underlying true shape of an object can simplify the generation of new grasps \cite{de_Farias_2021} \cite{geidenstam_2009}; (2) use of local symmetry properties to capture key geometric features of the object to generate promising grasp candidates \cite{de_Farias_2021}; (3) optimising shape modelling where target objects are parameterised using smooth, differentiable functions from point clouds using spectral analysis \cite{de_Farias_2021}.
 
 
 \section{Project Aims}
@@ -595,7 +595,7 @@ In this section, we describe the methodology used to train and evaluate our prop
 
 
 \subsection{Dataset Collection}\label{sec:5.2.1}
-Utilising our Pybullet data collection pipeline from \hyperref[sec:4.2]{Section 4.2}, we collect multi-modal data for every object variation. Then, for each variation, we manually select $i=4$ seed poses and record the data of 20 successful and 20 unsuccessful grasps with Gaussian noise applied to the seed pose. This creates a dataset of 9x160=1440 grasps in total (720 stable and 720 unstable grasps) consisting of tactile sensor readings and hand poses.
+Utilising our Pybullet data collection pipeline from \hyperref[sec:4.2.2]{Section 4.2.2}, we collect multi-modal data for every object variation. Then, for each variation, we manually select $i=4$ seed poses and record the data of 20 successful and 20 unsuccessful grasps with Gaussian noise applied to the seed pose. This creates a dataset of 9x160=1440 grasps in total (720 stable and 720 unstable grasps) consisting of tactile sensor readings and hand poses.
 
 
 \subsection{Primitive Objects and Variations}\label{sec:5.2.2}
@@ -622,13 +622,13 @@ To enhance the robustness of our model, we have trained it on three primitive ob
 \end{table}
 
 
-\subsection{Collecting and Analysing Object Geometric Features}\label{sec:5.2.4}
-Each primitive object category in our dataset possesses unique characteristics. For instance, the curvature of an object's surface can differentiate cylinders and bottles from boxes with ease. As objects within a primitive class often share similar geometric features (such as the curvature of cylinders), our model could potentially generalise successful and unsuccessful grasp poses within each object category by establishing a connection between those poses and the object's properties.\\
+\subsection{Introducing Geometric Features of Objects}\label{sec:5.2.3}
+In this section, in addition to the end effector poses in our visual dataset, we investigate the possible impact and improvement of introducing geometric features of objects on our MLP model. Each primitive object category in our dataset possesses unique characteristics. For instance, the curvature of an object's surface can differentiate cylinders and bottles from boxes with ease. As objects within a primitive class often share similar geometric features (such as the curvature of cylinders), our model could potentially generalise successful and unsuccessful grasp poses within each object category by establishing a connection between those poses and the object's properties.\\
 
-To this end, we extracted and analysed several geometric features of the 9 object variations in order to determine which of them can effectively differentiate between the object categories.
+To this end, we extracted and analysed several geometric features of each of the 9 object variations in order to determine which of them can effectively differentiate between the object categories. We conclude that principal curvatures best represent the geometric features of said objects.
 
 
-\subsubsection{Principal Curvature}\label{sec:5.2.4.1}
+\subsubsection{Principal Curvature}\label{sec:5.2.3.1}
 The principal curvatures of an object mesh are pair of maximum and minimum values of curvatures at each vertex of the mesh, expressed by the eigenvalues of the shape operator at that vertex \cite{enwiki:1141654906}. We investigate whether the top $k$ principal curvatures are able to categorize the object variations correctly.
 
 \vspace*{-0.7cm}
@@ -649,73 +649,69 @@ The principal curvatures of an object mesh are pair of maximum and minimum value
 \noindent Thus, we conclude that the principal curvatures are a valid representation of geometric features for our dataset of objects.
 
 
-\subsection{Dataset Pre-processing}\label{sec:5.2.5}
-Based on the analysis results of our baseline approach in \hyperref[sec:4.7]{Section 4.7}, we concluded that under limited dimensionality circumstances, the Logistic Regression model fits the dataset with the highest accuracy using a convolutional neural network as a dimensionality reduction technique. Therefore, before training our MLP, we extract important features from our dataset using the same \hyperref[fig:4.5]{CNN architecture}. This results in a condensed dataset of shape $1200\times512$.\\
+\subsection{Dataset Pre-processing}\label{sec:5.2.4}
+Based on the analysis results of our baseline approach in \hyperref[sec:4.7]{Section 4.7}, we concluded that under limited dimensionality circumstances, the Logistic Regression model fits the dataset with the highest accuracy using a convolutional neural network as a dimensionality reduction technique. Therefore, before training our MLP, we extract important features from our dataset using the same CNN architecture as \ref{sec:4.4.2.2}. This results in a condensed dataset of shape $N\times512$ with $N$ examples.\\
 
 To improve the convergence speed and performance for training our MLP model, we normalise the tactile and visual datasets with zero mean and unit variance. This also prevents the initialisation of large weights during back-propagation.
 
 
-
-\subsection{MLP Architecture}\label{sec:5.2.6}
-
-
-
-\section{Training}\label{sec:5.3}
-We trained our MLP model on two versions of our dataset:
-\begin{enumerate}
-    \item tactile and visual data (end effector poses only)
-    \item tactile and visual data (end effector poses and object geometric features)
-\end{enumerate}
-
-
-\subsection{Training details}
-\begin{itemize}
-    \item Split dataset into 80\% training and 20\% validation;
-    \item loss function: simple binary cross-entropy with logits loss (sigmoid + bce loss in a single class)
-    \item optimizer: ADAM with lr=1e-3
-\end{itemize}
-
-
-
-
-\section{Evaluation of Results}\label{sec:5.4}
-\begin{table}[ht]
-    \centering
-    \begin{tabular}{l*{4}{>{\centering\arraybackslash}p{.15\linewidth}}}
-        \toprule
-        & \multicolumn{4}{c}{Models} \\
-        \cmidrule{2-5}
-        & Tactile + CNN & Visual + CNN & Both + CNN & All  \\
-        \midrule
-        Trial 1 & 68.06 & 62.50 & 73.26 & 76.04 \\
-        Trial 2 & 66.67 & 64.24 & 75.00 & 71.53 \\
-        Trial 3 & 69.44 & 64.24 & 71.53 & 73.96 \\
-        Trial 4 & 73.26 & 62.15 & 71.53 & 76.04 \\
-        Trial 5 & 71.88 & 68.40 & 75.35 & 74.65 \\
-        \midrule
-        Mean    & 69.86 & 64.31 & 73.33 & 74.44 \\
-        \bottomrule
-    \end{tabular}
-    \caption{Accuracy (\%) of various MLP models}
-\end{table}
-
-
-\subsection{Selecting $k$ for PCA}
-Using all data (tactile + visual + geometric) and then CNN for feature extraction performs the best. Now, apply PCA to this dataset and test its accuracy:
+\subsection{MLP Overview and Architecture}\label{sec:5.2.5}
+We define our MLP model in PyTorch and tailor it to predict grasp stability labels given a varying dataset size (depending on the dataset combination we use). This is enabled by making the input size of the network more flexible which can be defined through its \verb|input_size| parameter, allowing it to accommodate different dataset combinations for training. The MLP architecture consists of three fully connected layers, including two hidden layers with ReLU activation functions, and an output layer without an activation function.
 \begin{figure}[H]
     \centering
-    \includegraphics[scale=0.55]{docs/Project Report/Media/mlp_pca_accuracy_analysis.png}
-    \caption{Effect of dimensionality of PCA-reduced dataset on MLP performance}
+    \includegraphics[width=0.33\textwidth]{docs/Project Report/Media/mlp_architecture.png}
+    \caption{3-Layer MLP architecture. The input size of the model is flexible depending on the dimensions of the input dataset (the input size in the figure is 64 neurons for simplicity). The remaining layers consist of 64 neurons. The MLP outputs a binary label in the output layer, corresponding to the grasp stability prediction.}
     \label{fig:5.3}
 \end{figure}
 
 
-\section{Interesting experiments}
-\subsection{Train on 2 boxes, test on remaining box}
-Test for accuracy of individual object categories
+\section{Training and Evaluation of Initial Results}\label{sec:5.3}
+In this section, we explore the effectiveness of our Multi-Layer Perceptron (MLP) model in predicting grasp stability labels. Three distinct training methods were implemented and evaluated using the same dataset discussed in \hyperref[sec:5.2.2]{Section 5.2.2}.\\
+
+In the first method, the MLP model was trained on the aforementioned dataset to establish a baseline for its predictive performance. Subsequently, in the second method, the MLP model was trained on the same dataset concatenated with object features for each of the 9 object variations. This was done to investigate the impact of object features on the model's predictive performance. Finally, the third method involved applying Principal Component Analysis (PCA) to the dataset and re-training the MLP model with an input size of 5 principal components. The objective of this approach was to explore the effectiveness of dimensionality reduction in enhancing the model's accuracy.\\
+
+Our dataset from \hyperref[sec:5.2.4]{Section 5.2.4} was split into training and validation sets with an 80:20 ratio using the \verb|train_test_split()| function. The MLP model was trained using the Binary Cross-Entropy (BCE) logit loss function, which is commonly employed in binary classification tasks, and the Adam optimiser, a popular optimisation algorithm for training neural networks, with a learning rate of 0.001. The BCE logit loss function measures the difference between the predicted output of the model and the true label, penalising the model more for predicting the wrong label with high confidence. On the other hand, the Adam optimiser combines the benefits of two other optimisation methods: AdaGrad and RMSProp.\\
+
+The validation set was used to evaluate the performance of the trained MLP model on unseen data. The results of the study are indicative of the effectiveness of the proposed training method in predicting grasp stability labels. The model's generalisation ability was assessed by validating it on unseen data, thereby ensuring that the model did not over-fit the training data.\\
 
 
-\subsection{Randomly sample dataset to get N samples and train MLP}
+\subsection{Evaluation of Results}\label{sec:5.3.1}
+\begin{table}[H]
+    \centering
+    \begin{tabular}{l*{2}{>{\centering\arraybackslash}p{.35\linewidth}}}
+        \toprule
+        & \multicolumn{2}{c}{Models} \\
+        \cmidrule{2-3}
+        & Multi-modal Dataset + CNN & Complete Dataset + CNN \\
+        \midrule
+        Trial 1 & 73.26 & 76.04 \\
+        Trial 2 & 75.00 & 71.53 \\
+        Trial 3 & 71.53 & 73.96 \\
+        Trial 4 & 71.53 & 76.04 \\
+        Trial 5 & 75.35 & 74.65 \\
+        \midrule
+        Mean    & 73.33 & 74.44 \\
+        \bottomrule
+    \end{tabular}
+    \caption{Accuracy (\%) of various MLP models. The multi-modal dataset only includes tactile and visual data. The complete dataset contains tactile, visual and geometric features.}
+\end{table}
+The results indicated that adding object features to the dataset marginally improved the MLP model's predictive accuracy. Based on these results, we attempt to apply PCA to the complete dataset and reduce the input size to 5 principal components. \hyperref[fig:5.4]{Figure 5.4} shows the accuracies of our MLP model on varying numbers of principal components $k$ from applying PCA across 5 separate trials:
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.55]{docs/Project Report/Media/mlp_pca_accuracy_analysis.png}
+    \caption{Effect of dimensionality of PCA-reduced dataset on MLP performance}
+    \label{fig:5.4}
+\end{figure}
+We discover that using $k=11$ principal components yields the best prediction accuracy (approximately 74.10\%) across 5 trials using our MLP model.
+
+
+\newpage
+\section{Interesting experiments}\label{sec:5.4}
+\subsection{Object Class Robustness Tests}\label{sec:5.4.1}
+The first experiment tests whether our MLP model is able to
+
+
+\subsection{Randomly sample dataset to get N samples and train MLP}\label{sec:5.4.2}
 Test for the influence of sample size on MLP accuracy
 \begin{figure}[H]
     \centering
