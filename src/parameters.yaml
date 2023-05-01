@@ -27,7 +27,7 @@ target_object:
   # block1 = 003 cracker box, block2 = 004 sugar box, block3 = 008 pudding box
   # bottle1 = 021 bleach cleanser, bottle2 = 022 windex bottle, bottle3 = 006 mustard bottle
   # cylinder1 = 001 chips can, cylinder2 = 002 master chef can, cylinder3 = 005 tomato soup can
-  object_name: block1
+  object_name: bottle2
   object_position: [0, 0, 0.25]
   global_scaling : 1.0
 
