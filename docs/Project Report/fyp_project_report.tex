@@ -17,6 +17,9 @@
 % Links
 \usepackage{hyperref}
 
+% Lists
+\usepackage{enumitem}
+
 % Figures
 \usepackage{float}
 \usepackage{subfig}
@@ -634,15 +637,15 @@ The principal curvatures of an object mesh are pair of maximum and minimum value
 \vspace*{-0.7cm}
 \begin{figure}[H]%
     \centering
-    \subfloat[\centering Top $k=2$ components; Variance captured: 91.43\%]{{\includegraphics[width=0.4\textwidth]{docs/Project Report/Media/principal_curvature_2d.png} }}%
+    \subfloat[\centering Top $k=2$ components; Variance captured: 91.43\%]{{\includegraphics[width=0.35\textwidth]{docs/Project Report/Media/principal_curvature_2d.png} }}%
     \qquad
-    \subfloat[\centering Top $k=3$ components; Variance captured: 97.34\%]{{\includegraphics[width=0.4\textwidth]{docs/Project Report/Media/principal_curvature_3d.png} }}%
+    \subfloat[\centering Top $k=3$ components; Variance captured: 97.34\%]{{\includegraphics[width=0.35\textwidth]{docs/Project Report/Media/principal_curvature_3d.png} }}%
     \caption{Clustering using PCA-extracted components based on principal curvatures of objects}%
     \label{fig:5.2}%
 \end{figure}
 
 \hyperref[fig:5.2]{Figure 5.2} visualises the top $k=2$ and $k=3$ principal curvatures for all the object variations in our dataset. We found that the principal curvatures were able to:
-\begin{enumerate}
+\begin{enumerate}[\itemsep=0em]
     \item capture a high amount of variance of the curvatures for all objects
     \item successfully cluster the object variations for each category
 \end{enumerate}
@@ -668,11 +671,11 @@ We define our MLP model in PyTorch and tailor it to predict grasp stability labe
 \section{Training and Evaluation of Initial Results}\label{sec:5.3}
 In this section, we explore the effectiveness of our Multi-Layer Perceptron (MLP) model in predicting grasp stability labels. Three distinct training methods were implemented and evaluated using the same dataset discussed in \hyperref[sec:5.2.2]{Section 5.2.2}.\\
 
-In the first method, the MLP model was trained on the aforementioned dataset to establish a baseline for its predictive performance. Subsequently, in the second method, the MLP model was trained on the same dataset concatenated with object features for each of the 9 object variations. This was done to investigate the impact of object features on the model's predictive performance. Finally, the third method involved applying Principal Component Analysis (PCA) to the dataset and re-training the MLP model with an input size of 5 principal components. The objective of this approach was to explore the effectiveness of dimensionality reduction in enhancing the model's accuracy.\\
+The first method trained the MLP model on the aforementioned dataset to establish a baseline for its predictive performance. Subsequently, in the second method, the MLP model was trained on the same dataset concatenated with object features for each of the 9 object variations. This was done to investigate the impact of object features on the model's predictive performance. Finally, the third method involved applying Principal Component Analysis (PCA) to the dataset and re-training the MLP model with an input size of 5 principal components. This approach aimed to explore the effectiveness of dimensionality reduction in enhancing the model's accuracy.\\
 
 Our dataset from \hyperref[sec:5.2.4]{Section 5.2.4} was split into training and validation sets with an 80:20 ratio using the \verb|train_test_split()| function. The MLP model was trained using the Binary Cross-Entropy (BCE) logit loss function, which is commonly employed in binary classification tasks, and the Adam optimiser, a popular optimisation algorithm for training neural networks, with a learning rate of 0.001. The BCE logit loss function measures the difference between the predicted output of the model and the true label, penalising the model more for predicting the wrong label with high confidence. On the other hand, the Adam optimiser combines the benefits of two other optimisation methods: AdaGrad and RMSProp.\\
 
-The validation set was used to evaluate the performance of the trained MLP model on unseen data. The results of the study are indicative of the effectiveness of the proposed training method in predicting grasp stability labels. The model's generalisation ability was assessed by validating it on unseen data, thereby ensuring that the model did not over-fit the training data.\\
+The validation set was used to evaluate the performance of the trained MLP model on unseen data. The results of the study are indicative of the effectiveness of the proposed training method in predicting grasp stability labels. The model's generalisation ability was assessed by validating it on unseen data, ensuring that it did not over-fit the training data.\\
 
 
 \subsection{Evaluation of Results}\label{sec:5.3.1}
@@ -694,6 +697,7 @@ The validation set was used to evaluate the performance of the trained MLP model
         \bottomrule
     \end{tabular}
     \caption{Accuracy (\%) of various MLP models. The multi-modal dataset only includes tactile and visual data. The complete dataset contains tactile, visual and geometric features.}
+    \label{tbl:5.2}
 \end{table}
 The results indicated that adding object features to the dataset marginally improved the MLP model's predictive accuracy. Based on these results, we attempt to apply PCA to the complete dataset and reduce the input size to 5 principal components. \hyperref[fig:5.4]{Figure 5.4} shows the accuracies of our MLP model on varying numbers of principal components $k$ from applying PCA across 5 separate trials:
 \begin{figure}[H]
@@ -707,18 +711,46 @@ We discover that using $k=11$ principal components yields the best prediction ac
 
 \newpage
 \section{Interesting experiments}\label{sec:5.4}
-\subsection{Object Class Robustness Tests}\label{sec:5.4.1}
-The first experiment tests whether our MLP model is able to
+In this section, we present the results of some additional experiments that evaluate the robustness of the MLP model to primitive object classes and the influence of sample size on the model's performance.
 
 
-\subsection{Randomly sample dataset to get N samples and train MLP}\label{sec:5.4.2}
-Test for the influence of sample size on MLP accuracy
-\begin{figure}[H]
+\subsection{Robustness of MLP Model to Primitive Object Classes}\label{sec:5.4.1}
+To test the robustness of the MLP model to each primitive object class (rectangular box, cylinder, bottle), we trained the MLP model on two of its object variations and tested it on the remaining variation. The results are shown in the following table:
+\begin{table}[H]
     \centering
+    \begin{tabular}{lllc}
+        \toprule
+        Object Class & Training Objects & Testing Object & Accuracy (\%) \\
+        \midrule
+        Box & Box 1, Box 2 & Box 3 & 58.62 \\
+        & Box1, Box 3 & Box 2 & 50.00 \\
+        & Box2, Box 3 & Box 1 & 58.37 \\
+        Bottle & Bottle 1, Bottle 2 & Bottle 3 & 53.50 \\
+        & Bottle 1, Bottle 3 & Bottle 2 & 54.50 \\
+        & Bottle 2, Bottle 3 & Bottle 1 & 50.88 \\
+        Cylinder & Cylinder 1, Cylinder 2 & Cylinder 3 & 50.88 \\
+        & Cylinder 1, Cylinder 3 & Cylinder 2 & 61.50 \\
+        & Cylinder 2, Cylinder 3 & Cylinder 1 & 61.00 \\
+        \bottomrule
+    \end{tabular}
+    \caption{Accuracy of MLP model per object class over 5 trials}
+    \label{tab:5.3}
+\end{table}
+We observe that the accuracy of our MLP model was significantly lower in comparison to training on all object variations. This disparity in performance may be attributed to the incapacity of geometric features to discern between different object variations for the same object class. This is an expected result as our MLP is trained to predict grasp stability labels across all primitive object types 
+
+
+\subsection{Influence of Sample Size of Random Dataset on Model Performance}\label{sec:5.4.2}
+This experiment aims to investigate the effect of sample size on the accuracy of our MLP model. Specifically, this approach aims to achieve a balance between the size of the training dataset, which is randomly shuffled prior to model training, and the desired accuracy of the model to mitigate the occurrence of overfitting or underfitting. The investigation of the impact of sample size on the accuracy of the MLP models may also yield valuable insights into the generalisability and robustness of the model.\\
+
+In general, as the size of the training data set increases, the performance of the MLP model improves due to its ability to learn more complex patterns in the data. However, adding more data may also increase the computational cost of training the model, and there may be a point of diminishing returns where adding more data does not lead to a significant improvement in accuracy. Moreover, if the size of the dataset is too small, the MLP model may suffer from overfitting, which occurs when the model learns to fit the training data too closely and is unable to generalise well to new data.
+\begin{figure}[H]
+    \centering 
     \includegraphics[width=0.5\textwidth]{docs/Project Report/Media/5_5_2_size_vs_accuracy.png}
-    \caption{Impact of sample size of randomised dataset on MLP accuracy}
-    \label{fig:5.4}
+    \caption{Impact of the sample size of the randomised dataset on MLP accuracy}
+    \label{fig:5.5}
 \end{figure}
+As depicted in \hyperref[fig:5.5]{Figure 5.5}, the accuracy of the MLP models increases with an increase in the sample size of the randomised dataset, which aligns with theoretical expectations.
+
 
 
 %----------------------------------------------------------------------------------
