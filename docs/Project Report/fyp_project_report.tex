@@ -115,7 +115,7 @@ For several decades, researchers have delved into the domain of robotic grasping
 In recent years, the combination of physical simulators and machine learning has led to significant advancements in the field of robotic grasping. One of the key challenges in robotic grasping is developing algorithms that can handle the complexity and variability of the real world. Physical simulators such as Pybullet \cite{coumans2021} provide a valuable tool for generating large amounts of training data, allowing machine learning algorithms to learn from simulated experiences before being deployed on physical robots with minimal additional tuning \cite{berscheid2020selfsupervised}. Researchers have also utilised physical simulators to train robotic grasping policies \cite{Chebotar_2017} and transfer them to the real world, and have proven that data-driven approaches outperform classical methods \cite{zhang2022robotic}.
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=\textwidth]{docs/Project Report/Media/berscheid_2020_sl_for_precise_pickandplace_wo_obj_model_network.png}
+    \includegraphics[width=\textwidth]{docs/Project Report/Media/1_1_berscheid_2020_sl_for_precise_pickandplace_wo_obj_model_network.png}
     \caption{Berscheid et al.: Self-supervised learning for Precise Pick-and-place without Object Model \cite{berscheid2020selfsupervised}: A purely data-driven approach to generating data for self-supervised learning for robotic grasping using neural networks and object recognition}
     \label{fig:1.1}
 \end{figure}
@@ -128,7 +128,7 @@ We aim to take the best of both analytic (24) and data-driven methods \cite{bers
 However, developing a robust and efficient grasping system presents several challenges. One major hurdle is the incorporation of touch sensing into robotic grasping, which is hindered by hardware limitations such as sensor sensitivity and cost, as well as difficulties in integrating tactile inputs into standard control schemes \cite{Calandra_2018}. Consequently, most robotic grasping research has focused on vision and depth as the primary input modalities \cite{Calandra_2018, de_Farias_2021}.
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=\textwidth]{docs/Project Report/Media/calandra_2018_model.png}
+    \includegraphics[width=\textwidth]{docs/Project Report/Media/1_1_calandra_2018_model.png}
     \caption{Calandra et al.: More Than a Feeling: Learning to Grasp and Regrasp using Vision and Touch \cite{Calandra_2018}: A study on learning regrasping policies from multi-modal (tactile and visual) data by predicting the grasp stability outcome of a candidate grasp adjustment, then executing a grasp by iteratively selecting the most promising actions}
     \label{fig:1.2}
 \end{figure}
@@ -280,40 +280,105 @@ Humans rely on rich tactile feedback to grasp objects, however, most of the rece
 
 \section{Conclusion}
 \label{sec:2.4}
-% Conclude that not much work has been done on using tactile + visual data for robust grasping systems
+Conclude that not much work has been done on using tactile + visual data for robust grasping systems
+
 
 
 %----------------------------------------------------------------------------------
 % Section 3: Preliminaries
-% Describes the detailed process of developing the simulation for the project
 %----------------------------------------------------------------------------------
 \chapter{Preliminaries}
 \label{chap:3}
+In this chapter, we present the practical aspects of the project. We first provide an overview of the Pybullet simulation and its functionalities specific to the project.
 
 
-\section{Pybullet overview & project simulation functionalities}
-Arm control, grasp control, position control, gripper control, get 6d pose, tactile data visualisation
+\section{Pybullet Simulation Overview and Functionalities}\label{sec:3.1}
+Pybullet is a Python module designed for robotics simulation and machine learning purposes, specifically emphasising sim-to-real transfer, as indicated by Coumans and Bai \cite{coumans2021}. In this project, Pybullet's functionalities play a crucial role, such as:
+\begin{enumerate}[\itemsep=0em]
+    \item Allows the loading of articulated bodies from a variety of file formats, such as Universal Robot Description Files (URDFs), enabling the development of complex robotic systems;
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.6\textwidth]{docs/Project Report/Media/3_1_urdf_eg.png}
+        \caption{Example of a URDF file that describes a bottle}
+        \label{fig:3.1}
+    \end{figure}
+    \vspace{-0.2cm}
+    \item Provides forward dynamics simulation and inverse dynamics computation, enabling accurate physical modelling of robot movements and interactions with the environment;
+    \item Offers collision detection queries, which play a vital role in robot safety and efficiency.
+\end{enumerate}
 
-\subsection{Parameters}
-yaml parameters, loading parameters
+
+\subsection{Role of the Pybullet Simulation}\label{sec:3.1.1}
+In the scope of this project, the Pybullet simulation plays a fundamental role in the acquisition of both visual and tactile data. By simulating the robot's dynamics and its interactions with the environment, Pybullet generates data that can be exploited for the purpose of training machine learning algorithms or assessing control strategies. Furthermore, the collected data may also be utilised for analytical purposes, such as the evaluation of the efficacy of distinct robotic designs or the appraisal of the performance of a specific algorithm.\\
+
+Figure 3.1 is a screenshot of our Pybullet simulation with core user-defined parameters on the right panel. Some important parameters include:
+\begin{enumerate}
+    \item Manually manipulate of the end effector position of the robot gripper (via the sliders)
+    \item Data collection pipelines for the baseline and proposed approaches (via the \verb|Collect Data| buttons)
+\end{enumerate}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{docs/Project Report/Media/3_1_1_pybullet_sim.png}
+    \caption{A screenshot of the Pybullet simulation for this project. The left panel displays real-time visualisations of colour (RGB) and depth data. The right panel includes parameters that can be manually controlled to manipulate the robot setup to perform specific tasks.}
+    \label{fig:3.2}
+\end{figure}
 
 
-\section{Describe data (depth colour, ee pose), how to extract (via camera)}
+\subsection{Loading Parameters}\label{sec:3.1.2}
+This project allows users to configure the simulation via pre-defined parameters, including Pybullet camera positions and orientations, object variations, and robot setup parameters (e.g., Cartesian position, speed of grippers, etc.), by loading them through the \verb|parameters.yaml| file. YAML is a widely-used format for configuration files that is both human-readable and machine-parsable. In a YAML file, data is structured in a hierarchical system of key-value pairs, which are expressed in a plain-text format.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{docs/Project Report/Media/3_1_2_yaml.png}
+    \caption{Snippet of the {\verb|parameters.yaml|} configuration file for the Pybullet simulation}
+    \label{fig:3.3}
+\end{figure}
 
 
-\subsection{Tactile data}
-- visualise some tactile data (depth, colour pairs)
+\subsection{Robot Control and Data Collection}\label{sec:3.1.3}
+Our Pybullet simulation consists of two data collection pipelines for the baseline and proposed approaches respectively (see \hyperref[sec:4.2.2]{Section 4.2.2}). These pipelines are activated through the \verb|Collect Data| buttons on the right panel in the simulation. The data collection pipelines randomly generate end effector poses around the vicinity of the target object. Every time a new pose is generated, the robot's position and orientation are reset, and we move the robot to the generated pose via inverse kinematics provided by Pybullet.
 
 
-\subsection{Visual data}
-- "Visual" as in relative of hand to object
-- Each ee pose is a 6-tuple consisting of 3 Cartesian coordinates representing the spatial position of the end effector relative to the robot, as well as 3 Euler angles representing the orientation of the end effector
+\section{Description of Data}\label{sec:3.2}
+This work employs the terms "tactile" and "visual" data with frequent recurrence. A comprehensive elucidation of these terminologies shall be presented in the forthcoming sections. To acquire the majority of the data, we utilise "cameras", which are devices that capture sensory data by means of imaging objects being grasped as well as their surrounding environment. In the domain of robotic grasping, cameras are typically installed on a robot gripper and are capable of capturing diverse image types contingent on the given task. In \hyperref[sec:3.2.4]{Section 3.2.4}, we shall delve further into how the real-time visualisation of depth and colour image representations of tactile data is achieved within our simulation.
 
-\subsection{}
-\subsection{TACTO Camera for Live Tactile Data Visualisation}
-\label{sec:}
-- TACTO camera \cite{Wang2022TACTO}
-- self.digits.render()
+
+\newpage
+\subsection{Tactile data}\label{sec:3.2.1}
+In robotic grasping, tactile data refers to rich information collected from contact with a robotic hand or gripper during the manipulation of objects. It reflects the amount of force and pressure applied by the gripper on an object in the grasping process. Tactile data can be extracted from tactile sensors (cameras) mounted into robotic end effectors or grippers, which can be used to provide feedback to the control system about the grasp quality, such as whether the object is slipping or not, and to adjust the gripper's position and force to improve the grasp. In our simulation, we mount DIGIT tactile sensors \cite{Lambeta2020DIGIT} to each finger of a 2-finger gripper, thus generating a pair of tactile (depth and colour) readings per finger.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{docs/Project Report/Media/4_2_tactile_data_visualisation.png}
+    \caption{Example pair of depth and colour images extracted from the DIGIT cameras}
+    \label{fig:3.4}
+\end{figure}
+
+
+\subsection{Visual data}\label{sec:3.2.2}
+Visual sensing is an intuitive way for a robot to perceive its environment and is widely used in robotic grasping \cite{GUO2017274}. In this work, visual data refers to information collected by cameras in our simulation. Our visual data will consist of any of the following data sources:
+\begin{enumerate}
+    \item 6-Dimensional end effector poses relative to the robotic arm/gripper. We refer readers to \hyperref[sec:4.2.1]{Section 4.2.1} for a detailed description of this data.
+    \item Geometric features of target objects, which we utilise in \hyperref[chap:5]{Chapter 5}
+\end{enumerate}
+
+
+\subsection{DIGIT Camera for Live Tactile Data Visualisation}\label{sec:3.2.3}
+The PyBullet simulation visualisation tool is based on OpenGL and provides a 3D rendering of the simulated environment. Users can manipulate the camera view, zoom in and out, and move around the simulation environment using the mouse and keyboard. The GUI also provides tools for controlling the simulation, such as pausing and resetting, and for editing the simulated objects.\\
+
+In addition to the basic visualisation capabilities, the PyBullet GUI also supports advanced features such as rendering depth and segmentation maps, displaying sensor data from cameras and other sensors, and recording and playing back simulations. It also provides a Python scripting interface that allows users to automate tasks and customise the visualisation and simulation behaviour.\\
+
+DIGIT cameras in PyBullet \cite{Wang2022TACTO} are often used in conjunction with the "Camera Sensor" feature, which allows users to specify the position, orientation, and other parameters of a virtual camera within a simulated environment. Once configured, the camera can be used to capture RGB images, depth maps, or other types of sensor data from the environment. The captured images can then be used as input to machine learning models, or as visual feedback for controlling robotic agents within the simulation.
+
+\begin{figure}[H]%
+    \centering
+    \subfloat[\centering Real-time colour and depth readings from DIGIT camera]{{\includegraphics[width=0.41\textwidth]{docs/Project Report/Media/3_2_4_digit_camera.png}\label{fig:3.5a}}}%
+    \qquad
+    \subfloat[\centering Pybullet robot gripper and object state]{{\includegraphics[width=0.47\textwidth]{docs/Project Report/Media/3_2_4_pybullet_arm.png}\label{fig:3.5b}}}%
+    \caption{Demonstration of real-time visualisation of tactile sensory readings via DIGIT tactile sensors with Pybullet}%
+    \label{fig:3.5}%
+\end{figure}
+
+To generate live visualisations of colour and depth sensory data, we configure the DIGIT camera sensor within our Pybullet simulation by specifying its position and orientation relative to the sensors. Next, we capture the sensor data from the simulation and feed it into the DIGIT camera sensor, and finally use Pybullet's built-in visualisation tool which provides real-time visualisation of Pybullet physics simulations to display live visualisations of the tactile sensor data.
 
 
 
@@ -487,7 +552,7 @@ Based on the tactile and visual data collected in section 4.2, we created differ
 The first dataset consists of tactile sensor readings collected from a robotic gripper during grasping tasks. The dataset has a shape of $N\times160\times240\times4$, with $N$ distinct concatenated colour and depth tactile sensory readings per finger collected from the simulation data collection pipeline (\ref{sec:4.2.2}). The following flowchart illustrates how the tactile dataset was created:
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{docs/Project Report/Media/tactile_dataset_creation.png}
+    \includegraphics[width=\textwidth]{docs/Project Report/Media/4_4_1_tactile_dataset_creation.png}
     \caption{Creating the tactile dataset}
     \label{fig:4.7}
 \end{figure}
@@ -515,7 +580,7 @@ It is worth noting that the effectiveness of PCA for dimensionality reduction de
 In the context of multi-modal sensor data, feature extraction using convolutional neural networks (CNNs) has gained popularity due to their ability to capture spatial and temporal patterns in the data. The CNN architecture, as described with interleaved convolution and pooling layers, is well-suited for detecting local features in the input data. The convolution layers extract low-level features, such as edges or textures, while the pooling layers help reduce the dimensionality of the feature maps and provide translational invariance to the learned features. The combination of these layers can create a hierarchy of feature representations, with higher-level features capturing more complex and abstract patterns in the data.
 
 \begin{figure}[H]
-    \includegraphics[scale=0.7]{docs/Project Report/Media/nn.png}
+    \includegraphics[scale=0.7]{docs/Project Report/Media/4_4_2_nn.png}
     \caption{Architecture for feature extraction CNN}
     \label{fig:4.8}
 \end{figure}
@@ -565,6 +630,7 @@ Compared to traditional techniques like PCA, CNNs can learn complex, non-linear 
 Based on the results presented in \hyperref[tbl:4.2]{Table 4.2}, we have determined that using both tactile and visual data together produces the highest accuracy for our LR models. While raw data performed better than other pre-processing techniques, we recognise that the dimensionality of the data must also be considered. Therefore, we have found that extracting features from our dataset using a ConvNet and selecting only the top $k=5$ components provides comparable accuracy with significantly lower dimensionality.
 
 
+
 %----------------------------------------------------------------------------------
 % Section 5: Proposed Approach
 %----------------------------------------------------------------------------------
@@ -582,7 +648,7 @@ In the following sections, we provide a detailed description of our approach, ex
 There have been several academic studies addressing the problem of grasp stability classification using neural networks. In this section, we will briefly review some of these works. Kumra and Kana (2017) \cite{8202237} presented a novel approach to grasp detection that predicts an optimal grasping pose using RGB images of a scene. Their method considers the robotic grasp detection problem as finding a successful grasp configuration for a given object image. To address this, they proposed a single-step prediction technique, which is faster and less computationally expensive compared to previous methods that rely on running a simple classifier multiple times on small image patches. To solve the grasp detection problem, the authors used ResNet-50, a 50-layer deep residual model (see \ref{fig:5.1}) that incorporates residual layers to reformulate the mapping function between layers and overcome the challenge of learning an identity mapping. The authors introduced two different architectures for robotic grasp prediction: a uni-modal grasp predictor that uses only single-modality information such as RGB, and a multi-modal grasp predictor that uses multi-modal information such as RGB and depth.\\
 \begin{figure}[ht]
     \centering
-    \includegraphics{docs/Project Report/Media/kumra_kana_2017_residual_block.png}
+    \includegraphics{docs/Project Report/Media/5_1_kumra_kana_2017_residual_block.png}
     \caption{Kumra and Kanan \cite{8202237}: Robotic Grasp Detection using Deep Convolutional Neural Networks: Example of a residual block in ResNet}
     \label{fig:5.1}
 \end{figure}
@@ -637,9 +703,9 @@ The principal curvatures of an object mesh are pair of maximum and minimum value
 \vspace*{-0.7cm}
 \begin{figure}[H]%
     \centering
-    \subfloat[\centering Top $k=2$ components; Variance captured: 91.43\%]{{\includegraphics[width=0.35\textwidth]{docs/Project Report/Media/principal_curvature_2d.png} }}%
+    \subfloat[\centering Top $k=2$ components; Variance captured: 91.43\%]{{\includegraphics[width=0.35\textwidth]{docs/Project Report/Media/5_2_3_principal_curvature_2d.png} }}%
     \qquad
-    \subfloat[\centering Top $k=3$ components; Variance captured: 97.34\%]{{\includegraphics[width=0.35\textwidth]{docs/Project Report/Media/principal_curvature_3d.png} }}%
+    \subfloat[\centering Top $k=3$ components; Variance captured: 97.34\%]{{\includegraphics[width=0.35\textwidth]{docs/Project Report/Media/5_2_3_principal_curvature_3d.png} }}%
     \caption{Clustering using PCA-extracted components based on principal curvatures of objects}%
     \label{fig:5.2}%
 \end{figure}
@@ -662,7 +728,7 @@ To improve the convergence speed and performance for training our MLP model, we 
 We define our MLP model in PyTorch and tailor it to predict grasp stability labels given a varying dataset size (depending on the dataset combination we use). This is enabled by making the input size of the network more flexible which can be defined through its \verb|input_size| parameter, allowing it to accommodate different dataset combinations for training. The MLP architecture consists of three fully connected layers, including two hidden layers with ReLU activation functions, and an output layer without an activation function.
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.33\textwidth]{docs/Project Report/Media/mlp_architecture.png}
+    \includegraphics[width=0.33\textwidth]{docs/Project Report/Media/5_2_5_mlp_architecture.png}
     \caption{3-Layer MLP architecture. The input size of the model is flexible depending on the dimensions of the input dataset (the input size in the figure is 64 neurons for simplicity). The remaining layers consist of 64 neurons. The MLP outputs a binary label in the output layer, corresponding to the grasp stability prediction.}
     \label{fig:5.3}
 \end{figure}
@@ -702,7 +768,7 @@ The validation set was used to evaluate the performance of the trained MLP model
 The results indicated that adding object features to the dataset marginally improved the MLP model's predictive accuracy. Based on these results, we attempt to apply PCA to the complete dataset and reduce the input size to 5 principal components. \hyperref[fig:5.4]{Figure 5.4} shows the accuracies of our MLP model on varying numbers of principal components $k$ from applying PCA across 5 separate trials:
 \begin{figure}[H]
     \centering
-    \includegraphics[scale=0.55]{docs/Project Report/Media/mlp_pca_accuracy_analysis.png}
+    \includegraphics[scale=0.55]{docs/Project Report/Media/5_3_1_mlp_pca_accuracy_analysis.png}
     \caption{Effect of dimensionality of PCA-reduced dataset on MLP performance}
     \label{fig:5.4}
 \end{figure}
