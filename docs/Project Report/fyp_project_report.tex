@@ -748,15 +748,15 @@ To test the robustness of the MLP model to each primitive object class (rectangu
         \toprule
         Training Objects & Testing Object & Test Accuracy (\%) \\
         \midrule
-        Box 1, Box 2 & Box 3 & 51.70\pm1.08  \\
-        Box1, Box 3 & Box 2 & 67.80\pm2.65 \\
-        Box2, Box 3 & Box 1 & 56.22\pm2.20 \\
-        Bottle 1, Bottle 2 & Bottle 3 & 53.96\pm1.15 \\
-        Bottle 1, Bottle 3 & Bottle 2 & 56.98\pm0.64 \\
-        Bottle 2, Bottle 3 & Bottle 1 & 50.31\pm0.60 \\
-        Cylinder 1, Cylinder 2 & Cylinder 3 & 53.46\pm1.05 \\
-        Cylinder 1, Cylinder 3 & Cylinder 2 & 57.74\pm2.04\\
-        Cylinder 2, Cylinder 3 & Cylinder 1 & 59.00\pm1.50 \\
+        Box 1, Box 2 & Box 3 & 54.09\pm1.32  \\
+        Box1, Box 3 & Box 2 & 69.68\pm1.01 \\
+        Box2, Box 3 & Box 1 & 53.96\pm1.22 \\
+        Bottle 1, Bottle 2 & Bottle 3 & 53.96\pm1.29 \\
+        Bottle 1, Bottle 3 & Bottle 2 & 62.89\pm2.23 \\
+        Bottle 2, Bottle 3 & Bottle 1 & 50.31\pm1.00 \\
+        Cylinder 1, Cylinder 2 & Cylinder 3 & 47.55\pm1.30 \\
+        Cylinder 1, Cylinder 3 & Cylinder 2 & 61.13\pm1.66\\
+        Cylinder 2, Cylinder 3 & Cylinder 1 & 61.76\pm3.17 \\
         \bottomrule
     \end{tabular}
     \caption{Mean and standard deviation of MLP accuracy (\%) by object class across 5 trials}
@@ -799,10 +799,10 @@ Our model is primarily trained on the dataset consisting all data sources, that 
         \cmidrule{2-6}
         & Tactile only & Visual only (without geometric) & Visual only (with geometric) & Both (tactile, visual) & Full (tactile, visual, geometric) \\
         \midrule
-        Accuracy (\%) & 69.03\pm1.50 & 62.08\pm2.88 & 62.57\pm3.60 & 73.13\pm2.37 & 75.21\pm2.67 \\
-        Precision (\%) & 68.71\pm1.40 & 62.53\pm3.40 & 62.44\pm4.81 & 75.08\pm4.72 & 74.95\pm4.28 \\
-        Recall (\%) & 72.25\pm2.73 & 62.00\pm4.42 & 61.86\pm3.92 & 73.40\pm2.13 & 73.54\pm2.93 \\
-        F1 Score (\%) & 70.39\pm1.03 & 62.13\pm2.81 & 62.02\pm3.47 & 74.12\pm2.44 & 74.15\pm2.79 \\
+        Accuracy (\%)  & 71.81\pm1.92 & 62.22\pm2.19 & 62.36\pm1.96 & 74.17\pm2.37 & 74.86\pm1.36 \\
+        Precision (\%) & 70.08\pm2.63 & 62.97\pm4.06 & 61.07\pm1.31 & 76.10\pm3.84 & 76.43\pm1.16 \\
+        Recall (\%)    & 76.27\pm1.58 & 62.64\pm3.45 & 63.71\pm3.04 & 73.10\pm1.94 & 75.42\pm2.64 \\
+        F1 Score (\%)  & 73.01\pm1.58 & 62.75\pm3.23 & 62.32\pm1.61 & 74.54\pm2.60 & 75.91\pm1.84 \\
         \bottomrule
     \end{tabularx}
     \caption{Performance of various MLP models (average across 5 trials)}
@@ -819,15 +819,15 @@ The results indicated that adding object features to the dataset marginally impr
     \centering
     \begin{tabular}{lccccc}
         \toprule
-        Mean accuracy & 78.19$\pm$2.23 & 77.08$\pm$0.66 & 76.74$\pm$0.49 & 76.32$\pm$1.43 & 75.83$\pm$2.10 \\
+        Mean accuracy & 77.85$\pm$0.91 & 77.02$\pm$1.09 & 76.53$\pm$3.19 & 76.25$\pm$1.55 & 75.83$\pm$1.17 \\
         \midrule
-        $k$ & 28 & 15 & 25 & 29 & 27 \\
+        $k$ & 28 & 27 & 24 & 16 & 30 \\
         \bottomrule
     \end{tabular}
     \caption{Top 5 values and corresponding indices for PCA accuracies obtained with different numbers of components ($k=1$ to $k=30$)}
     \label{tb:5.4}
 \end{table}
-Since this experimentation aims to balance the trade-off between dataset dimensionality and accuracy, we disregard the corresponding model for $k=28$ and conclude that $k=15$ principal components results in the attainment of the most elevated mean validation accuracy (77.08\% on average across five trials) utilising our MLP model. This selection represents a judicious choice, as it reduces the dimensionality of our dataset from (1440, 512) to (1440, 15), while concurrently preserving and even enhancing the general level of accuracy.
+Since this experimentation aims to balance the trade-off between dataset dimensionality and accuracy, we disregard the corresponding model for $k=28$ and conclude that $k=16$ principal components results in the attainment of the most elevated mean validation accuracy (76.25\% on average across five trials) utilising our MLP model. This selection represents a judicious choice, as it reduces the dimensionality of our dataset from (1440, 512) to (1440, 16), while concurrently preserving and even enhancing the general level of accuracy.
 
 
 \subsection{Limitations}\label{sec:5.4.2}
@@ -839,13 +839,13 @@ As a reference point, we include in the following table a summary of the outcome
     \centering
     \footnotesize
     \renewcommand{\arraystretch}{1.5}
-    \begin{tabular}{p{0.175\textwidth} p{0.15\textwidth} p{0.125\textwidth} p{0.125\textwidth} p{0.275\textwidth}}
+    \begin{tabular}{p{0.125\textwidth} p{0.15\textwidth} p{0.1\textwidth} p{0.2\textwidth} p{0.275\textwidth}}
         \toprule
         Paper \& Author & Type(s) of Data & Dataset Size & Approach & Accuracy \\
         \midrule
-        Chumbley et al. (2022) \cite{chumbley2022integrating} & Tactile (depth, touch), vision & 10,000 & CNN with ResNet-18 back-bone & 82.7$\pm$0.6 (Known objects); \newline 61.3$\pm$2.8 (Unknown objects) \\
-        
-        Our work & Tactile, vision (EE pose, object features) & 1440 & MLP & 77.08$\pm$0.66 \\
+        Chumbley et al. (2022) \cite{chumbley2022integrating} & Tactile, vision & 10,000 & CNN with ResNet-18 back-bone & 82.7$\pm$0.6 (Known objects); \newline 61.3$\pm$2.8 (Unknown objects) \\
+        Garcia et al. (2019) \cite{garciagarcia2019tactilegcn} & Tactile & 5831 & Graph Convolutional Network with k-NN & 75.53 (without k-NN); \newline 92.7 (with k-NN) \\
+        Our work & Tactile, vision & 1440 & MLP & 76.3$\pm$0.66 \\
         \bottomrule
     \end{tabular}
     \caption{Comparison of performance of various academic works on grasp stability prediction}
