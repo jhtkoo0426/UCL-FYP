@@ -709,9 +709,9 @@ The principal curvatures of an object mesh are pair of maximum and minimum value
     \label{fig:5.2}
 \end{figure}
 
-\hyperref[fig:5.2]{Figure 5.2} visualises the top $k=2$ and $k=3$ principal curvatures for all the object variations in our dataset. We found that the principal curvatures were able to:
+\hyperref[fig:5.2]{Figure 5.2} visualises the top $k=3$ principal curvatures for all the object variations in our dataset. We found that the principal curvatures were able to:
 \begin{enumerate}[\itemsep=0em]
-    \item capture a high amount of variance of the curvatures for all objects
+    \item capture a high amount of variance of the curvatures for all objects (97.34\%)
     \item successfully cluster the object variations for each category
 \end{enumerate}
 
@@ -808,7 +808,7 @@ Our model is primarily trained on the dataset consisting all data sources, that 
     \caption{Performance of various MLP models (average across 5 trials)}
     \label{tbl:5.3}
 \end{table}
-The results indicated that adding object features to the dataset marginally improved the MLP model's predictive accuracy. Based on these results, we attempt to apply PCA to the complete dataset and reduce the input size to 5 principal components. \hyperref[fig:5.4]{Figure 5.4} shows the accuracies of our MLP model on varying numbers of principal components $k$ from applying PCA across 5 separate trials:
+The results indicated that adding object features to the dataset marginally improved the MLP model's predictive accuracy. Based on these results, we attempt to apply PCA to the complete dataset and reduce the input size to 5 principal components. \hyperref[fig:5.5]{Figure 5.5} shows the accuracies of our MLP model on varying numbers of principal components $k$ from applying PCA across 5 separate trials:
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.55]{docs/Project Report/Media/5_4_1_mlp_pca_accuracy_analysis.png}
@@ -839,13 +839,15 @@ As a reference point, we include in the following table a summary of the outcome
     \centering
     \footnotesize
     \renewcommand{\arraystretch}{1.5}
-    \begin{tabular}{p{0.125\textwidth} p{0.15\textwidth} p{0.1\textwidth} p{0.2\textwidth} p{0.275\textwidth}}
+    \begin{tabular}{p{0.125\textwidth} p{0.09\textwidth} p{0.075\textwidth} p{0.075\textwidth} p{0.2\textwidth} p{0.275\textwidth}}
         \toprule
-        Paper \& Author & Type(s) of Data & Dataset Size & Approach & Accuracy \\
+        Paper \& Author & Type(s) of Data & Dataset Size & No. of Objects & Approach & Accuracy \\
         \midrule
-        Chumbley et al. (2022) \cite{chumbley2022integrating} & Tactile, vision & 10,000 & CNN with ResNet-18 back-bone & 82.7$\pm$0.6 (Known objects); \newline 61.3$\pm$2.8 (Unknown objects) \\
-        Garcia et al. (2019) \cite{garciagarcia2019tactilegcn} & Tactile & 5831 & Graph Convolutional Network with k-NN & 75.53 (without k-NN); \newline 92.7 (with k-NN) \\
-        Our work & Tactile, vision & 1440 & MLP & 76.3$\pm$0.66 \\
+        Chumbley et al. (2022) \cite{chumbley2022integrating} & Tactile, vision & 10,000 & 20 & CNN with ResNet-18 back-bone & 82.7$\pm$0.6 (Known objects); \newline 61.3$\pm$2.8 (Unknown objects) \\
+        Garcia et al. (2019) \cite{garciagarcia2019tactilegcn} & Tactile & 5,831 & 41 & Graph Convolutional Network with k-NN & 75.53 (without k-NN); \newline 92.7 (with k-NN) \\
+        Calandra et al. (2018) \cite{Calandra_2018} & Tactile, vision & 18,070 & 87 & CNN with MLP & 80.28$\pm$0.68 \\
+        Chebotar et al. (2017) \cite{Chebotar_2017} & Tactile & 3,351 & 3 & ST-HMP, REPS, Neural Net & 90.43 (Known objects); \newline 80.7 (Unknown objects) \\
+        \textbf{Our work} & \textbf{Tactile, vision} & \textbf{1,440} & \textbf{9} & \textbf{MLP} & \textbf{76.3$\pm$0.66}\\
         \bottomrule
     \end{tabular}
     \caption{Comparison of performance of various academic works on grasp stability prediction}
