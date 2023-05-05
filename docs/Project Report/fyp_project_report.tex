@@ -24,6 +24,7 @@
 \usepackage{float}
 \usepackage{subfig}
 \usepackage{caption}
+\usepackage{rotating}
 \captionsetup[figure]{font=small,labelfont=Small}
 
 % Equations% Equations & Theorems
@@ -353,7 +354,7 @@ Pybullet is a Python module designed for robotics simulation and machine learnin
     \item Provides forward dynamics simulation and inverse dynamics computation, enabling accurate physical modelling of robot movements and interactions with the environment;
     \item Offers collision detection queries, which play a vital role in robot safety and efficiency.
 \end{enumerate}
-A system architecture diagram for our Pybullet simulation can be found in the \hyperref[]{Appendix}.
+A system architecture diagram for our Pybullet simulation can be found in the \hyperref[apdx:1]{Appendix}.
 
 
 \subsection{Role of the Pybullet Simulation}\label{sec:3.1.1}
@@ -931,7 +932,15 @@ Given that neural networks can predict other grasping properties, such as force 
 \appendix
 \printbibliography
 
-\chapter{Other appendices, e.g., code listing}
-Put your appendix sections here
+\chapter{System Flowchart}\label{apdx:1}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{docs/Project Report/Media/appendix_project_architecture.png}
+    \caption{A graphical representation of the project's full system, including simulation, data collection and modelling components}
+    \label{fig:apdx1}
+\end{figure}
+
+\chapter{Important Code Snippets}\label{apdx:2}
+
 
 \end{document}
