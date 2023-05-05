@@ -10,7 +10,7 @@
 \usepackage{setspace}
 
 % Tables
-\usepackage{tabularx}
+\usepackage{tabularx,ragged2e}
 \usepackage{booktabs}
 \setlength{\columnsep}{1cm}
 
@@ -306,12 +306,11 @@ Pybullet is a Python module designed for robotics simulation and machine learnin
     \item Provides forward dynamics simulation and inverse dynamics computation, enabling accurate physical modelling of robot movements and interactions with the environment;
     \item Offers collision detection queries, which play a vital role in robot safety and efficiency.
 \end{enumerate}
+A system architecture diagram for our Pybullet simulation can be found in the \hyperref[]{Appendix}.
 
 
 \subsection{Role of the Pybullet Simulation}\label{sec:3.1.1}
-In the scope of this project, the Pybullet simulation plays a fundamental role in the acquisition of both visual and tactile data. By simulating the robot's dynamics and its interactions with the environment, Pybullet generates data that can be exploited for the purpose of training machine learning algorithms or assessing control strategies. Furthermore, the collected data may also be utilised for analytical purposes, such as the evaluation of the efficacy of distinct robotic designs or the appraisal of the performance of a specific algorithm.\\
-
-Figure 3.1 is a screenshot of our Pybullet simulation with core user-defined parameters on the right panel. Some important parameters include:
+In the scope of this project, the Pybullet simulation plays a fundamental role in the acquisition of both visual and tactile data. By simulating the robot's dynamics and its interactions with the environment, Pybullet generates data that can be exploited for the purpose of training machine learning algorithms or assessing control strategies. Furthermore, the collected data may also be utilised for analytical purposes, such as the evaluation of the efficacy of distinct robotic designs or the appraisal of the performance of a specific algorithm. Figure 3.1 is a screenshot of our Pybullet simulation with core user-defined parameters on the right panel. Some important parameters include:
 \begin{enumerate}
     \item Manually manipulate of the end effector position of the robot gripper (via the sliders)
     \item Data collection pipelines for the baseline and proposed approaches (via the \verb|Collect Data| buttons)
@@ -337,6 +336,7 @@ This project allows users to configure the simulation via pre-defined parameters
 
 \subsection{Robot Control and Data Collection}\label{sec:3.1.3}
 Our Pybullet simulation consists of two data collection pipelines for the baseline and proposed approaches respectively (see \hyperref[sec:4.2.2]{Section 4.2.2}). These pipelines are activated through the \verb|Collect Data| buttons on the right panel in the simulation. The data collection pipelines randomly generate end effector poses around the vicinity of the target object. Every time a new pose is generated, the robot's position and orientation are reset, and we move the robot to the generated pose via inverse kinematics provided by Pybullet.
+
 
 
 \section{Description of Data}\label{sec:3.2}
@@ -700,14 +700,11 @@ To this end, we extracted and analysed several geometric features of each of the
 \subsubsection{Principal Curvature}\label{sec:5.2.3.1}
 The principal curvatures of an object mesh are pair of maximum and minimum values of curvatures at each vertex of the mesh, expressed by the eigenvalues of the shape operator at that vertex \cite{enwiki:1141654906}. We investigate whether the top $k$ principal curvatures are able to categorize the object variations correctly.
 
-\vspace*{-0.7cm}
-\begin{figure}[H]%
+\begin{figure}[H]
     \centering
-    \subfloat[\centering Top $k=2$ components; Variance captured: 91.43\%]{{\includegraphics[width=0.35\textwidth]{docs/Project Report/Media/5_2_3_principal_curvature_2d.png} }}%
-    \qquad
-    \subfloat[\centering Top $k=3$ components; Variance captured: 97.34\%]{{\includegraphics[width=0.35\textwidth]{docs/Project Report/Media/5_2_3_principal_curvature_3d.png} }}%
-    \caption{Clustering using PCA-extracted components based on principal curvatures of objects}%
-    \label{fig:5.2}%
+    \includegraphics[width=0.4\textwidth]{docs/Project Report/Media/5_2_3_principal_curvature_3d.png}
+    \caption{Clustering using PCA-extracted components based on principal curvatures of objects}
+    \label{fig:5.2}
 \end{figure}
 
 \hyperref[fig:5.2]{Figure 5.2} visualises the top $k=2$ and $k=3$ principal curvatures for all the object variations in our dataset. We found that the principal curvatures were able to:
@@ -715,68 +712,28 @@ The principal curvatures of an object mesh are pair of maximum and minimum value
     \item capture a high amount of variance of the curvatures for all objects
     \item successfully cluster the object variations for each category
 \end{enumerate}
-\noindent Thus, we conclude that the principal curvatures are a valid representation of geometric features for our dataset of objects.
+
+
+\subsubsection{Other Features}\label{sec:5.2.3.2}
+In addition to principal curvatures, we attempted to extract convexity and fundamental dimensions of objects, aimed at capturing their size and shape characteristics. Despite the analytical efforts, the results obtained from these features were not deemed promising and therefore were not incorporated into the model. Consequently, it can be inferred that the principal curvatures hold significant potential as a valid representation of geometric features for the object dataset under consideration.
 
 
 \subsection{Dataset Pre-processing}\label{sec:5.2.4}
-Based on the analysis results of our baseline approach in \hyperref[sec:4.7]{Section 4.7}, we concluded that under limited dimensionality circumstances, the Logistic Regression model fits the dataset with the highest accuracy using a convolutional neural network as a dimensionality reduction technique. Therefore, before training our MLP, we extract important features from our dataset using the same CNN architecture as \ref{sec:4.4.2.2}. This results in a condensed dataset of shape $N\times512$ with $N$ examples.\\
-
-To improve the convergence speed and performance for training our MLP model, we normalise the tactile and visual datasets with zero mean and unit variance. This also prevents the initialisation of large weights during back-propagation.
+Based on the analysis results of our baseline approach in \hyperref[sec:4.7]{Section 4.7}, we concluded that under limited dimensionality circumstances, the Logistic Regression model fits the dataset with the highest accuracy using a convolutional neural network as a dimensionality reduction technique. Therefore, before training our MLP, we extract important features from our dataset using the same CNN architecture as \ref{sec:4.4.2.2}. This results in a condensed dataset of shape $N\times512$ with $N$ examples. To improve the convergence speed and performance for training our MLP model, we normalise the tactile and visual datasets with zero mean and unit variance. This also prevents the initialisation of large weights during back-propagation.
 
 
 \subsection{MLP Overview and Architecture}\label{sec:5.2.5}
-We define our MLP model in PyTorch and tailor it to predict grasp stability labels given a varying dataset size (depending on the dataset combination we use). This is enabled by making the input size of the network more flexible which can be defined through its \verb|input_size| parameter, allowing it to accommodate different dataset combinations for training. The MLP architecture consists of three fully connected layers, including two hidden layers with ReLU activation functions, and an output layer without an activation function.
+We define our MLP model in PyTorch and tailor it to predict grasp stability labels given a varying dataset size (depending on the dataset combination we use). This is achieved by dynamically declaring the input size of the network through its \verb|input_size| parameter, allowing it to accommodate different dataset combinations for training. The MLP architecture consists of three fully connected layers, including two hidden layers with ReLU activation functions, and an output layer without an activation function.
+\vspace{-0.2cm}
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.33\textwidth]{docs/Project Report/Media/5_2_5_mlp_architecture.png}
+    \includegraphics[width=0.25\textwidth]{docs/Project Report/Media/5_2_5_mlp_architecture.png}
     \caption{3-Layer MLP architecture. The input size of the model is flexible depending on the dimensions of the input dataset (the input size in the figure is 64 neurons for simplicity). The remaining layers consist of 64 neurons. The MLP outputs a binary label in the output layer, corresponding to the grasp stability prediction.}
     \label{fig:5.3}
 \end{figure}
 
 
-\section{Training and Evaluation of Initial Results}\label{sec:5.3}
-In this section, we explore the effectiveness of our Multi-Layer Perceptron (MLP) model in predicting grasp stability labels. Three distinct training methods were implemented and evaluated using the same dataset discussed in \hyperref[sec:5.2.2]{Section 5.2.2}.\\
-
-The first method trained the MLP model on the aforementioned dataset to establish a baseline for its predictive performance. Subsequently, in the second method, the MLP model was trained on the same dataset concatenated with object features for each of the 9 object variations. This was done to investigate the impact of object features on the model's predictive performance. Finally, the third method involved applying Principal Component Analysis (PCA) to the dataset and re-training the MLP model with an input size of 5 principal components. This approach aimed to explore the effectiveness of dimensionality reduction in enhancing the model's accuracy.\\
-
-Our dataset from \hyperref[sec:5.2.4]{Section 5.2.4} was split into training and validation sets with an 80:20 ratio using the \verb|train_test_split()| function. The MLP model was trained using the Binary Cross-Entropy (BCE) logit loss function, which is commonly employed in binary classification tasks, and the Adam optimiser, a popular optimisation algorithm for training neural networks, with a learning rate of 0.001. The BCE logit loss function measures the difference between the predicted output of the model and the true label, penalising the model more for predicting the wrong label with high confidence. On the other hand, the Adam optimiser combines the benefits of two other optimisation methods: AdaGrad and RMSProp.\\
-
-The validation set was used to evaluate the performance of the trained MLP model on unseen data. The results of the study are indicative of the effectiveness of the proposed training method in predicting grasp stability labels. The model's generalisation ability was assessed by validating it on unseen data, ensuring that it did not over-fit the training data.\\
-
-
-\subsection{Evaluation of Results}\label{sec:5.3.1}
-\begin{table}[H]
-    \centering
-    \begin{tabular}{l*{2}{>{\centering\arraybackslash}p{.35\linewidth}}}
-        \toprule
-        & \multicolumn{2}{c}{Models} \\
-        \cmidrule{2-3}
-        & Multi-modal Dataset + CNN & Complete Dataset + CNN \\
-        \midrule
-        Trial 1 & 73.26 & 76.04 \\
-        Trial 2 & 75.00 & 71.53 \\
-        Trial 3 & 71.53 & 73.96 \\
-        Trial 4 & 71.53 & 76.04 \\
-        Trial 5 & 75.35 & 74.65 \\
-        \midrule
-        Mean    & 73.33 & 74.44 \\
-        \bottomrule
-    \end{tabular}
-    \caption{Accuracy (\%) of various MLP models. The multi-modal dataset only includes tactile and visual data. The complete dataset contains tactile, visual and geometric features.}
-    \label{tbl:5.2}
-\end{table}
-The results indicated that adding object features to the dataset marginally improved the MLP model's predictive accuracy. Based on these results, we attempt to apply PCA to the complete dataset and reduce the input size to 5 principal components. \hyperref[fig:5.4]{Figure 5.4} shows the accuracies of our MLP model on varying numbers of principal components $k$ from applying PCA across 5 separate trials:
-\begin{figure}[H]
-    \centering
-    \includegraphics[scale=0.55]{docs/Project Report/Media/5_3_1_mlp_pca_accuracy_analysis.png}
-    \caption{Effect of dimensionality of PCA-reduced dataset on MLP performance}
-    \label{fig:5.4}
-\end{figure}
-We discover that using $k=11$ principal components yields the best prediction accuracy (approximately 74.10\%) across 5 trials using our MLP model.
-
-
-\newpage
-\section{Interesting experiments}\label{sec:5.4}
+\section{Experiments on Impacts of Various Features}\label{sec:5.4}
 In this section, we present the results of some additional experiments that evaluate the robustness of the MLP model to primitive object classes and the influence of sample size on the model's performance.
 
 
@@ -802,7 +759,7 @@ To test the robustness of the MLP model to each primitive object class (rectangu
     \caption{Accuracy of MLP model per object class over 5 trials}
     \label{tab:5.3}
 \end{table}
-We observe that the accuracy of our MLP model was significantly lower in comparison to training on all object variations. This disparity in performance may be attributed to the incapacity of geometric features to discern between different object variations for the same object class. This is an expected result as our MLP is trained to predict grasp stability labels across all primitive object types 
+As evident from our analysis, the MLP model's precision experienced a considerable decrement in performance when compared to its training on all object variations. This observed incongruity in model output can be ascribed to the deficiency of geometric features in distinguishing between different object variations belonging to the same object class. That is, the principal curvatures prove inadequate in encapsulating intra-class object variability, but rather effectively represent the variation exhibited between different object classes. This outcome is not unexpected, as our MLP is primed to forecast grasp stability labels for all primitive object types.
 
 
 \subsection{Influence of Sample Size of Random Dataset on Model Performance}\label{sec:5.4.2}
@@ -818,13 +775,67 @@ In general, as the size of the training data set increases, the performance of t
 As depicted in \hyperref[fig:5.5]{Figure 5.5}, the accuracy of the MLP models increases with an increase in the sample size of the randomised dataset, which aligns with theoretical expectations.
 
 
+\section{Training and Evaluation of Initial Results}\label{sec:5.3}
+In this section, we explore the effectiveness of our Multi-Layer Perceptron (MLP) model in predicting grasp stability labels. Three distinct training methods were implemented and evaluated using the same dataset discussed in \hyperref[sec:5.2.2]{Section 5.2.2}.\\
+
+The first method trained the MLP model on the aforementioned dataset to establish a baseline for its predictive performance. Subsequently, in the second method, the MLP model was trained on the same dataset concatenated with object features for each of the 9 object variations. This was done to investigate the impact of object features on the model's predictive performance. Finally, the third method involved applying Principal Component Analysis (PCA) to the dataset and re-training the MLP model with an input size of 5 principal components. This approach aimed to explore the effectiveness of dimensionality reduction in enhancing the model's accuracy.\\
+
+Our dataset from \hyperref[sec:5.2.4]{Section 5.2.4} was split into training and validation sets with an 80:20 ratio using the \verb|train_test_split()| function. The MLP model was trained using the Binary Cross-Entropy (BCE) logit loss function, which is commonly employed in binary classification tasks, and the Adam optimiser, a popular optimisation algorithm for training neural networks, with a learning rate of 0.001. The BCE logit loss function measures the difference between the predicted output of the model and the true label, penalising the model more for predicting the wrong label with high confidence. On the other hand, the Adam optimiser combines the benefits of two other optimisation methods: AdaGrad and RMSProp.\\
+
+The validation set was used to evaluate the performance of the trained MLP model on unseen data. The results of the study are indicative of the effectiveness of the proposed training method in predicting grasp stability labels. The model's generalisation ability was assessed by validating it on unseen data, ensuring that it did not over-fit the training data.\\
+
+
+\subsection{Evaluation of Results}\label{sec:5.3.1}
+Our model is primarily trained on the dataset consisting all data sources, that is, tactile and visual (end effector poses and geometric data). For comparison of its effectiveness, we also train it on other variations of the datasets. The results are as follows:
+\begin{table}[H]
+    \centering
+    \small
+    \begin{tabularx}{\textwidth}{c *6{>{\Centering}X}}
+        \toprule
+        & \multicolumn{5}{c}{Models} \\
+        \cmidrule{2-6}
+        & Tactile only & Visual only (without geometric) & Visual only (with geometric) & Both (tactile, visual) & Full (tactile, visual, geometric) \\
+        \midrule
+        Trial 1 & 70.14 & 60.42 & 64.93 & 73.26 & 76.04 \\
+        Trial 2 & 72.57 & 55.56 & 61.46 & 71.18 & 71.53 \\
+        Trial 3 & 65.62 & 63.54 & 63.89 & 72.92 & 73.96 \\
+        Trial 4 & 70.83 & 60.76 & 64.24 & 71.53 & 76.04 \\
+        Trial 5 & 67.71 & 64.58 & 61.81 & 74.31 & 74.65 \\
+        \midrule
+        Mean    & 69.37 & 60.97 & 63.27 & 72.64 & 74.44 \\
+        Std.    & 2.44  & 3.14  & 1.38  & 1.15  & 1.67  \\
+        \bottomrule
+    \end{tabularx}
+    \caption{Mean and standard deviations (std) of accuracies (\%) of various MLP models. The multi-modal dataset only includes tactile and visual data. The complete dataset contains tactile, visual and geometric features.}
+    \label{tbl:5.2}
+\end{table}
+The results indicated that adding object features to the dataset marginally improved the MLP model's predictive accuracy. Based on these results, we attempt to apply PCA to the complete dataset and reduce the input size to 5 principal components. \hyperref[fig:5.4]{Figure 5.4} shows the accuracies of our MLP model on varying numbers of principal components $k$ from applying PCA across 5 separate trials:
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.55]{docs/Project Report/Media/5_3_1_mlp_pca_accuracy_analysis.png}
+    \caption{Effect of dimensionality of PCA-reduced dataset on MLP performance}
+    \label{fig:5.4}
+\end{figure}
+We discover that using $k=11$ principal components yields the best prediction accuracy (approximately 74.10\%) across 5 trials using our MLP model.
+
+
+\section{Conclusion}\label{sec:5.5}
+The purpose of this section was to train and evaluate a multi-modal multi-layer perceptron (MLP) utilising primarily multi-modal dataset combinations while examining the impact of object geometric features, particularly principal curvature, on its overall performance. The outcomes of the study indicate that the inclusion of object geometric features in our multi-modal dataset (tactile and visual) produced a minor positive impact on the MLP's accuracy, achieving an average accuracy of $74.44\%$. However, the MLP's robustness was not significantly demonstrated regarding in-class variation based on the results obtained.\\
+
+One limitation of this study was the comparatively small sample size employed for data collection, which could have influenced the accuracy of the findings. To address this limitation, future studies should compare the performance of the MLP trained on more extensive datasets. {\color{red} include some results, data used, and approaches for training of some papers}\\
+
+
+
+
 
 %----------------------------------------------------------------------------------
 % Section 6: Future Work
 %----------------------------------------------------------------------------------
 \chapter{Future Work}
 \label{chap:6}
-The grasp stability predictions have shown promising results in the previous chapter, indicating the potential for further development. However, the current project relies on the Pybullet simulation platform, which is no longer actively maintained and may lose support over time. To ensure compatibility with the latest technologies and continued support and updates, it is recommended to upgrade to the more stable and actively maintained MuJoCo and ROS (Robot Operating System), both of which are widely used in robotics research. MuJoCo is known for its stability and accuracy in physics simulation, while ROS provides a comprehensive set of tools and libraries for robotics research. Upgrading to these platforms will allow the project to benefit from the latest advancements in robotics research and explore new features and functionalities that were not previously available in Pybullet.\\
+This study aimed to evaluate the effectiveness and robustness of multi-modal sensory data on the performance of grasp learning models, as well as the impact of object geometric features on the performance of such models. The grasp stability predictions have shown promising results in the previous chapter, indicating the potential for further development. We achieved an average accuracy of $74.44\%$ across a multi-modal dataset consisting of tactile sensory readings, end effector poses as well as object-specific geometric features based on 9 object variations. There is room for further improvement in terms of model complexity, dataset sample sizes and approaches to classifying grasp stability.\\
+
+However, the current project relies on the Pybullet simulation platform, which is no longer actively maintained and may lose support over time. To ensure compatibility with the latest technologies and continued support and updates, it is recommended to upgrade to the more stable and actively maintained MuJoCo and ROS (Robot Operating System), both of which are widely used in robotics research. MuJoCo is known for its stability and accuracy in physics simulation, while ROS provides a comprehensive set of tools and libraries for robotics research. Upgrading to these platforms will allow the project to benefit from the latest advancements in robotics research and explore new features and functionalities that were not previously available in Pybullet.\\
 
 To evaluate the performance of the MLP neural network model in real-world scenarios, it is crucial to test the model on real data collected from a physical robot setup. Therefore, it is recommended to gather real-world data and assess the MLP's performance on it. This will provide a better understanding of the model's performance, identify potential issues when deploying the model in the real world, and determine its robustness and reliability in different environments and conditions.\\
 
