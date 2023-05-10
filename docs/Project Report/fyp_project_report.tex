@@ -17,6 +17,30 @@
 % Links
 \usepackage{hyperref}
 
+% Code
+% \usepackage{fancyvrb}
+\usepackage{listings}
+\usepackage[dvipsnames]{xcolor}
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+\lstset{frame=tb,
+  language=Python,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
+
 % Lists
 \usepackage{enumitem}
 
@@ -25,7 +49,7 @@
 \usepackage{subfig}
 \usepackage{caption}
 \usepackage{rotating}
-\captionsetup[figure]{font=small,labelfont=Small}
+\captionsetup[figure]{font=small,labelfont=small}
 
 % Equations% Equations & Theorems
 \usepackage{amssymb}
@@ -48,21 +72,19 @@
 \vspace{2cm}
 \begin{adjustwidth}{1cm}{1cm}
     \centering
-    \Huge Robust Robotic Grasping Utilising Touch Sensing
+    \Huge Robust Robotic Grasping \\ Utilising Touch Sensing
 \end{adjustwidth}}
-\\
+
 \date{Submission date: \today}
 \author{COMP0029\_ZZJN7\thanks{
 {\bf Disclaimer:}
 This report is submitted as part requirement for the BSc degree in Computer Science at UCL. It is
-substantially the result of my own work except where explicitly indicated in the text.
-\emph{Either:} The report may be freely copied and distributed provided the source is explicitly acknowledged
-\newline
-\emph{Or:}\newline
-The report will be distributed to the internal and external examiners, but thereafter may not be copied or distributed except with permission from the author.}
+substantially the result of my own work except where explicitly indicated in the text. The report will be distributed to the internal and external examiners, but thereafter may not be copied or distributed except with permission from the author.}
 \\ \\
 BSc Computer Science\\ \\
 Supervisors: Prof. Marc Deisenroth, Dr. Yasemin Bekiroglu}
+
+
 
 
 
@@ -88,7 +110,15 @@ In this project, we study how to build a robust learning framework that can be e
 %----------------------------------------------------------------------------------
 \renewcommand\abstractname{Acknowledgements}
 \begin{abstract}
+    I would like to extend my sincere gratitude to all those who have contributed to the successful completion of this project. I am sincerely grateful to all those who have contributed to this project, and I am honoured to have had the opportunity to work with such incredible individuals. Without their support and guidance, this accomplishment would not have been possible.\\
+
+    First and foremost, I would like to express my deepest appreciation to my supervisors, Prof. Marc Deisenroth and Dr. Yasemin Bekiroglu, for their invaluable guidance, expert knowledge, and unwavering support throughout this research journey. Despite facing a steep learning curve in familiarising myself with the field, their mentorship has greatly expanded my understanding and revealed the immense potential of robotic grasping in real-life applications.\\
     
+    I would also like to acknowledge the assistance of Sicelukwanda Zwane from the Statistical Machine Learning Group, who provided valuable guidance on practical aspects of the project. Our stimulating exchanges allowed me to benefit from his expertise in simulation environments and integrating different physical robot components. Additionally, I am grateful to Jeffery Wei, a Master's project student also working with the SML group, who collaborated intensively with me during the early stages of the project, helping to develop a Pybullet simulation that forms the foundation of my work.\\
+
+    Furthermore, I would like to thank all my friends and colleagues who have provided me with moral support and engaging discussions during this intense research period. Your presence has made the journey more enjoyable and has created lasting memories.\\
+    
+    Lastly, I want to express my heartfelt appreciation to my parents for their unwavering love, belief in my abilities, and endless encouragement. Their presence and the opportunities they have provided me have been instrumental in my academic journey.
 \end{abstract}
 
 
@@ -119,14 +149,16 @@ In recent years, the combination of physical simulators and machine learning has
     \label{fig:1.1}
 \end{figure}
 
-However, little work has been done on increasing robustness in grasping systems that utilise multi-modal (tactile and visual) data. Robustness in robotic grasping is a crucial property for ensuring effective and reliable manipulation of objects in a wide range of scenarios. It refers to the ability of a robotic grasping system to perform successful grasps despite uncertainties and variations in the environment and object properties (geometric, physical). One of the primary challenges in robotic grasping is the wide variety of shapes and sizes that objects can come in. This can make it difficult for a robotic grasping system to determine the best approach for grasping, as well as to adjust its grasp strategy based on the object's properties. A robust system should be able to handle these variations and adjust its grasp strategy accordingly to ensure that the object is firmly held during manipulation. Another challenge is posed by uncertainties in the object's pose. Objects can be placed in various orientations and positions, making it challenging for a robot to determine the optimal grasping location. A robust system should be able to estimate the object's pose accurately and choose an appropriate grasp location to ensure that the object is grasped correctly. Furthermore, the environment in which a robot operates can change unpredictably, with variations in lighting conditions, surface textures, and other factors affecting the ability of a robotic grasping system to perform well. A robust system should be able to adapt to these changes and adjust its grasping strategy accordingly.\\
+However, little work has been done on increasing robustness in grasping systems that utilise multi-modal (tactile and visual) data. Robustness in robotic grasping is a crucial property for ensuring effective and reliable manipulation of objects in a wide range of scenarios. It refers to the ability of a robotic grasping system to perform successful grasps despite uncertainties and variations in the environment and object properties (geometric, physical). In addition, ideally our robotic grasping system should be trained on relatively simple models and datasets while preserving as much performance as possible.\\
+
+One of the primary challenges in robotic grasping is the wide variety of shapes and sizes that objects can come in. This can make it difficult for a robotic grasping system to determine the best approach for grasping, as well as to adjust its grasp strategy based on the object's properties. A robust system should be able to handle these variations and adjust its grasp strategy accordingly to ensure that the object is firmly held during manipulation. Another challenge is posed by uncertainties in the object's pose. Objects can be placed in various orientations and positions, making it challenging for a robot to determine the optimal grasping location. A robust system should be able to estimate the object's pose accurately and choose an appropriate grasp location to ensure that the object is grasped correctly. Furthermore, the environment in which a robot operates can change unpredictably, with variations in lighting conditions, surface textures, and other factors affecting the ability of a robotic grasping system to perform well. A robust system should be able to adapt to these changes and adjust its grasping strategy accordingly.\\
 
 
 We aim to take the best of both analytic (24) and data-driven methods \cite{berscheid2020selfsupervised, pinto2015supersizing} to develop robust and scalable grasping methods. Robustness in a robotic grasping system refers to its versatility of accurately recognising and grasping objects with varying geometric features (width, depth, curvature, etc) and its ability to successfully grasp the objects. Robustness is increasingly becoming a vital factor in the study of grasp stability and quality, however, incorporating robustness makes it practically difficult to design a single gripper that can effectively grasp all objects. As a result, researchers and engineers have developed dedicated grippers tailored to specific grasping tasks or types of objects.\\
 
-However, developing a robust and efficient grasping system presents several challenges. One major hurdle is the incorporation of touch sensing into robotic grasping, which is hindered by hardware limitations such as sensor sensitivity and cost, as well as difficulties in integrating tactile inputs into standard control schemes \cite{Calandra_2018}. Consequently, most robotic grasping research has focused on vision and depth as the primary input modalities \cite{Calandra_2018, de_Farias_2021}.
+Developing a robust and efficient grasping system presents several challenges. One major hurdle is the incorporation of touch sensing into robotic grasping, which is hindered by hardware limitations such as sensor sensitivity and cost, as well as difficulties in integrating tactile inputs into standard control schemes \cite{Calandra_2018}. Consequently, most robotic grasping research has focused on vision and depth as the primary input modalities \cite{Calandra_2018, de_Farias_2021}.\\
 
-However, vision-based grasping approaches have limitations in measuring and reacting to ongoing contact forces, which hinders the full potential benefits of interaction. As a result, these approaches mostly rely on pre-selecting a grasp configuration, such as location, orientation, and forces, before making contact with the object. Addressing these limitations and integrating tactile feedback could significantly improve robotic grasping, leading to more efficient and effective interactions between robots and the physical world.\\
+However, vision-based grasping approaches have limitations in measuring and reacting to ongoing contact forces, which hinders the full potential benefits of interaction. As a result, these approaches mostly rely on pre-selecting grasp configurations, such as location, orientation, and forces, before making contact with the object. Addressing these limitations and integrating tactile feedback could significantly improve robotic grasping, leading to more efficient and effective interactions between robots and the physical world. Despite the advantages of pre-selecting grasp configurations, it is important to note that this approach may not fully address object variations and results in limited generalisations.\\
 
 Another challenge is developing a concrete strategy for improving grasp quality and planning while conserving the efficiency of the overall system. Such strategies can be summarised into three types: (1) choice of object representation, where coarse approximations of the underlying true shape of an object can simplify the generation of new grasps \cite{de_Farias_2021} \cite{geidenstam_2009}; (2) use of local symmetry properties to capture key geometric features of the object to generate promising grasp candidates \cite{de_Farias_2021}; (3) optimising shape modelling where target objects are parameterised using smooth, differentiable functions from point clouds using spectral analysis \cite{de_Farias_2021}.
 
@@ -138,14 +170,14 @@ Having gained a comprehensive understanding of the previously discussed optimisa
 \section{Project Objectives}\label{sec:1.3}
 This project is concerned with the development of a complete simulation with supporting features for data collection and analysis. Therefore, the aims of this project are split according to our system requirements, which we describe in detail below. These objectives are expected to be completed throughout the academic year:
 \begin{enumerate}
-    \item Set up a simulation environment, e.g. PyBullet \cite{coumans2021} or NVIDIA Isaac. 
-    \item Create a data collection pipeline for sensory data (e.g. visual and force/torque readings) via the simulator.
-    \item Apply basic simulation functionalities: position control and vision sensing on the robot.
+    \item Setting up a simulation environment, e.g. PyBullet \cite{coumans2021} or NVIDIA Isaac. 
+    \item Creating a data collection pipeline for sensory data (e.g. visual and force/torque readings) via the simulator.
+    \item Applying basic simulation functionalities: position control and vision sensing on the robot.
     \item Implement and test baseline (e.g. \cite{breyer2020volumetric}, and a basic approach such as executing predefined grasps per object model given object pose).
     \item Build the learning framework:
     \begin{enumerate}
-        \item Learning grasps based on Bayesian Optimisation, from a chosen scene representations such as signed distance function 
-        \item Picking with two fingers given object model (primitive shapes such as box, sphere, cylinder) and pose, all learned by trial and error
+        \item Learning a grasp model encoding relevant grasp parameters given train and test object sets and available sensory data
+        \item Grasping with two fingers based on the learned model 
     \end{enumerate}
 \end{enumerate}
 
@@ -167,11 +199,11 @@ This project is completely conducted via a simulation environment, including dat
 \end{enumerate}
 The Pybullet simulation should support the following features for our project:
 \begin{enumerate}
-    \item manual robot (end effector) manipulation
-    \item real-time display of tactile data (depth and colour cameras)
-    \item a grasp planner using inverse kinematics
-    \item a random end effector pose generator for creating varying grasp poses
-    \item a tactile data collection pipeline using randomly-generated end effector grasp poses
+    \item grasping and manipulation of objects using a two-finger gripper 
+    \item Real-time display of tactile data (depth and colour cameras)
+    \item A grasp planner and grasp execution implementation based on inverse kinematics given a grasp configuration
+    \item A random end effector pose generator for sampling varying grasp poses from manually-selected seed poses
+    \item A tactile data collection pipeline using the randomly-sampled end effector grasp poses
 \end{enumerate}
 \noindent This will be further discussed in \hyperref[sec:3.1]{Section 3.1}.
 
@@ -181,11 +213,11 @@ This phase focuses on determining the optimal dataset representation for our col
 
 
 \subsection{Execution Phase - Learning Approach Implementation}\label{sec:1.4.4}
-Following the outcomes of our baseline approach where we identified the optimal feature representation of our dataset, we move on to develop our learning-based approach which is trained on three primitive object types. In addition to tactile sensor readings and visual data (randomly-generated end effector poses), we include the object features for each object class in our dataset, and train this dataset on a multi-layer perceptron (MLP). Finally, we conduct several interesting experiments, including (1) training our MLP using various dataset segmentations; and (2) validating our MLP on unseen objects that comprise similar geometric features to that of the primitive objects that our MLP was trained on.
+Following the outcomes of our baseline approach where we identified the optimal feature representation of our dataset, we move on to develop our learning-based approach which is trained on three primitive object types. In addition to tactile sensor readings and visual data (randomly-generated end effector poses), we include the object features for each object class in our dataset, and train this dataset on a multi-layer perceptron (MLP). Finally, we conduct several experiments, including (1) training our MLP using various dataset segmentations; and (2) validating our MLP on unseen objects that comprise similar geometric features to that of the primitive objects that our MLP was trained on.
 
 
 \subsection{Documentation Phase}\label{sec:1.4.5}
-The final phase of the project involves the completion of the project report, writing documentation on setting up and using the simulation, as well as including a brief description of the methodology behind our baseline and learning-based approaches which are implemented in Jupyter Notebook.
+The final phase of the project involves the completion of the project report, writing documentation on setting up and using the simulation, as well as including a brief description of the methodology behind our baseline and learning-based approaches which are implemented in Python.
 
 
 \section{Report Structure}\label{sec:1.5}
@@ -208,9 +240,9 @@ Chapter 6 summarises the results and performances of the project, as well as mak
 
 
 \section{Robotic Grasping}\label{sec:2.1}
-In the field of robotics, grasping is a fundamental yet challenging skill of robots which refers to the autonomous ability of a robot to grasp and move objects with its mechanical grippers or other end effectors \cite{zhang2022robotic}. It demands precise coordination between the visual perception of the surrounding environment and efficient grasp planning, as well as a robot's adaptiveness to unseen object classes (robustness).\\
+In the field of robotics, grasping is a fundamental yet challenging skill of robots which refers to the autonomous ability of a robot to grasp and move objects with its mechanical grippers or other end effectors \cite{zhang2022robotic}. It demands precise coordination between the visual perception of the surrounding environment and efficient grasp planning, as well as uncertainties in the perceptual data (robustness).\\
 
-Robotic grasping is far away from developing into an intuitive and instinctive sense as in human beings. There are many unknown factors that enable humans to flawlessly perform grasps when provided with visual and tactile information. However, with the advancements of deep learning and computer vision, semantic grasping is becoming the main focus and basis for autonomous robotic grasping systems \cite{zhang2022robotic}, where a robot is trained on monocular images of a user-specified object type \cite{jang2017endtoend}.\\
+Robotic grasping is far away from being as intuitive, instinctive and successful as human grasping skills. There are many unknown factors that enable humans to flawlessly perform grasps when provided with visual and tactile information. However, with the advancements of deep learning and computer vision, semantic grasping is becoming the main focus and basis for autonomous robotic grasping systems \cite{zhang2022robotic}, where a robot is trained on monocular images of a user-specified object type \cite{jang2017endtoend}.\\
 
 To successfully grasp an object, a robot needs to detect the object's location (through, for example, a wrist camera), orientation, and size accurately, estimate the best grasp point and orientation, and then execute the grasp with appropriate force and control to ensure a secure hold. The grasping process can be performed using various types of end effectors, including grippers, suction cups, or specialised tools designed for specific tasks.\\
 
@@ -219,24 +251,29 @@ Therefore, accurate and efficient grasp representation and planning are paramoun
 
 \newpage
 \subsection{Object Representation}\label{sec:2.1.1}
-A grasp in robotic grasping is a specific configuration of a robotic hand or gripper which allows it to firmly hold an object. These representations can be used in different grasp planning algorithms and can be combined to create more complex representations of grasps.
+A grasp in robotic grasping refers to a specific configuration of a robotic hand or gripper that enables a firm grasp on an object. These representations are utilised in grasp planning algorithms and can be combined to create more complex grasp representations.
 
 \subsubsection{2D Object Images}\label{sec:2.1.1.1}
-The use of 2D object images as visual input to train machine learning models for object recognition and grasping is a prevalent technique in robotic grasping. Specifically, object recognition involves the input of object images into a machine learning model such as a Convolutional Neural Network (CNN), which learns to identify and classify the object depicted in the image. For instance, Chiu \cite{5652597} applied this principle in developing a method for reconstructing 3D models of objects depicted in 2D images:
+Object detection through the use of 2D object images as visual input is a common first step in robotic grasping to identify relevant grasp parameters given a known object. Specifically, object recognition involves the input of object images into a machine learning model such as a Convolutional Neural Network (CNN), which learns to identify and classify the object depicted in the image. For instance, Chiu \cite{5652597} applied this principle in developing a method for reconstructing 3D models of objects depicted in 2D images:
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{docs/Project Report/Media/2_1_1_object_detection.png}
     \caption{Chiu et al. \cite{5652597}: Class-specific grasping of 3D objects from a single 2D image: In this work, object detection is applied to 2D images for the reconstruction of a 3D object model of the object in the images}
     \label{fig:2.1}
 \end{figure}
+In contrast, grasping unknown objects is a much more challenging task. Shannon et al. \cite{Shannon2021} proposed a scalable approach that efficiently generalises grasping policies on novel objects into real-world scenarios, without requiring any type of prior object awareness or task-specific training data.
 
 \subsubsection{Meshes}\label{sec:2.1.1.2}
 In computer graphics and object modelling, a (polygon) mesh is a 3-dimensional representation or rigid reconstruction of the surface of an object. Typically, the representation is a collection of vertices, edges and faces that define the object's shape. Faces usually consist of triangles an object's surface that is composed of vertices, edges, and faces. Grasps can be represented as a set of vertices on the mesh that corresponds to the location of the gripper's fingertips and palm.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.125\textwidth]{docs/Project Report/Media/block1.png}
+    \caption{Example of an object mesh in our Pybullet simulation}
+    \label{fig:2.2}
+\end{figure}
 
 \subsubsection{Point Clouds}\label{sec:2.1.1.3}
-In the context of robotics, a point cloud is a discrete set of 3-dimensional Cartesian coordinates which collectively represents the surface of an object. The location of a gripper's fingertips can be represented as sets of points on the point cloud in order to annotate a grasp. In addition to object representations, point clouds can be merged for surface reconstruction (using, for example, Poisson surface reconstruction), which creates a mesh (or set of surfaces) that approximate the true shape of the target object.\\
-
-In the Pybullet simulation for this project, we include a simple feature that generates a point cloud of the rendered object of the simulation which can be inspected visually. In the physical world, a point cloud is generated using 3D scanners or photogrammetry software, which can be rendered and inspected in a virtual world.
+In the context of robotics, a point cloud is a discrete set of 3-dimensional Cartesian coordinates which collectively represents the surface of an object. The location of a gripper's fingertips can be represented as sets of points on the point cloud in order to annotate a grasp. In addition to object representations, point clouds can be merged for surface reconstruction (using, for example, Poisson surface reconstruction), which creates a mesh (or set of surfaces) that approximate the true shape of the target object.
 
 
 \subsection{Grasp Representations}\label{sec:2.1.2}
@@ -249,18 +286,18 @@ Grasp rectangles are used in robotic grasping to define the orientation and posi
     \centering
     \includegraphics[width=0.3\textwidth]{docs/Project Report/Media/2_1_2_grasp_rectangle_definition.png}
     \caption{Kleeberger et al. \cite{kleeberger2020}: A Survey on Learning-Based Robotic Grasping: Parameterisation for robotic grasp detection: Two values for the position, two for the size, and one for the orientation of the oriented rectangle. Red sides indicate the jaws of the gripper and blue the opening width}
-    \label{fig:2.2}
+    \label{fig:2.3}
 \end{figure}
-\hyperref[fig:2.2]{Figure 2.2} is an example of a grasp rectangle with width $w$, height $w$, centre of mass at coordinates $(x,y)$. In addition, the term $\gamma$ refers to the angle between the grasp rectangle's major axis and the horizontal axis of the image or coordinate system. The major axis of the grasp rectangle is the longer side of the rectangle, and it is aligned with the object's principal axis. The gamma angle specifies the amount of rotation that is required to align the grasp rectangle's major axis with the horizontal axis.\\
+\hyperref[fig:2.3]{Figure 2.3} is an example of a grasp rectangle with width $w$, height $w$, centre of mass at coordinates $(x,y)$. In addition, the term $\gamma$ refers to the angle between the grasp rectangle's major axis and the horizontal axis of the image or coordinate system. The major axis of the grasp rectangle is the longer side of the rectangle, and it is aligned with the object's principal axis. The gamma angle specifies the amount of rotation that is required to align the grasp rectangle's major axis with the horizontal axis.\\
 
 The grasp rectangle is used to guide the robotic gripper towards the object and ensures that the gripper can grasp the object securely without dropping it. Once the grasp rectangle is defined, the robotic system can use it to plan a grasping trajectory that will bring the gripper into contact with the object in the desired position and orientation. The system can then execute the grasping motion, picking up the object and moving it to a desired location.
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.7\textwidth]{docs/Project Report/Media/2_1_2_grasp_rectangle_application.png}
     \caption{Lenz et al. \cite{lenz2014deep}: Deep Learning for Detecting Robotic Grasps: Application of grasp rectangles corresponding to robotic grasps for objects in the scene}
-    \label{fig:2.3}
+    \label{fig:2.4}
 \end{figure}
-\hyperref[fig:2.3]{Figure 2.3} illustrates an example of applying grasp rectangles to objects in a scene. The objects are first detected using cameras or depth sensors, then a grasp rectangle is defined around the object based on its shape, size, and centre of mass.
+\hyperref[fig:2.4]{Figure 2.4} illustrates an example of applying grasp rectangles to objects in a scene. The objects are first detected using cameras or depth sensors, then a grasp rectangle is defined around the object based on its shape, size, and centre of mass.
 
 \subsubsection{6-Dimensional End Effector Pose}\label{sec:2.1.2.2}
 An end effector pose refers to the position and orientation of the end effector of a robot relative to the object being grasped. It is typically represented using a 6-degree-of-freedom (6-DOF) pose as follows:
@@ -273,36 +310,37 @@ where $x,y,z$ are Cartesian coordinates describing the position of the end effec
     \centering
     \includegraphics[width=0.35\textwidth]{docs/Project Report/Media/2_1_2_ee_pose_eg.png}
     \caption{Jiménez et al. \cite{jimenez2014}: Robust Pose Control of Robot Manipulators Using Conformal Geometric Algebra: An example of a 6-dimensional end effector pose}
-    \label{fig:2.4}
+    \label{fig:2.5}
 \end{figure}
 
-An end effector pose describes the joint angles or positions of a robotic hand or gripper relative to the robot itself. This is a simple and straightforward approach to representing grasps. In this work, we use the terms "hand configurations" and "end effector poses" interchangeably.
+An end effector pose describes the joint angles or positions of a robotic hand or gripper relative to the robot itself. This is a simple and straightforward approach to representing grasps. In this work, we use the terms "hand configurations" and "end effector poses" interchangeably.\\
 
+In this work, we will utilise object meshes in our Pybullet simulation as our object representation and adopt end effector poses for our grasp representation.
 
 
 \section{Role of Tactile Sensing in Robotic Grasping}
 \label{sec:2.2}
-Tactile sensing provides robots with the ability to sense and response to physical contact with target objects in their environment in a similar manner to human beings. It has been widely used to provide robots with information about target objects, allowing them to grasp and manipulate said objects with greater precision. Incorporating tactile sensors into their end-effectors enables robots to better grasp and manipulate objects of varying shapes, sizes, and textures.\\
+Tactile sensing provides robots with the ability to sense and respond to physical contact with target objects in their environment in a similar manner to human beings. It has been widely used to provide robots with information about target objects, allowing them to grasp and manipulate said objects with greater precision. Incorporating tactile sensors into their end-effectors enables robots to better grasp and manipulate objects of varying shapes, sizes, and textures.\\
 
 A common use of tactile sensing in robotic grasping is to determine object properties \cite{chitta2010, hsiao2010, JIMENEZ1997488}. Tactile sensing can be used to determine the properties of objects by detecting and analysing various physical cues, such as force, pressure, and vibration. By measuring these cues at different points on an object's surface, tactile sensors can provide information about the object's size, shape, texture, and hardness, among other properties. \cite{chitta2010} discusses a tactile perception strategy that enables mobile robots with tactile sensors to measure the properties of objects that are inaccessible through visual perception using a two-finger gripper. \cite{hsiao2010} applies tactile sensing to a robot hand which localises the object and selects the best trajectory for achieving the target placement through a decision-making process. \cite{JIMENEZ1997488} uses a neural network (learning vector quantisation (LVQ)) for object classification using pattern variations in position, orientation and size.\\
 
-Object recognition uses tactile sensing by comparing the sensory data to a database of known objects, which helps the robot identify the target object they are grasping \cite{5652597, gorges2010, schneider2009}. This allows the robot to execute appropriate grasping and manipulation strategies. \cite{gorges2010} uses modified tactile sensors to introduce passive degrees of freedom (DOF) to improve the acquisition of sensor information. The tactile data collected is then used to classify an object without building a 3D model of the object. \cite{schneider2009} collects low-resolution images of objects obtained from grasping them and applies unsupervised clustering to learn a vocabulary of tactile observations. The study demonstrates that the approach is able to classify a large set of objects and distinguish between visually similar objects with different elasticity properties by solely relying on tactile sensory data.\\
+Tactile sensing is also used for object recognition by comparing the sensory data to a database of known objects, which helps the robot identify the target object they are grasping \cite{5652597, gorges2010, schneider2009}. This allows the robot to execute appropriate grasping and manipulation strategies. \cite{gorges2010} uses modified tactile sensors to introduce passive degrees of freedom (DOF) to improve the acquisition of sensor information. The tactile data collected is then used to classify an object without building a 3D model of the object. \cite{schneider2009} collects low-resolution images of objects obtained from grasping them and applies unsupervised clustering to learn a vocabulary of tactile observations. The study demonstrates that the approach is able to classify a large set of objects and distinguish between visually similar objects with different elasticity properties by solely relying on tactile sensory data.\\
 
 Tactile sensing is also widely-used for grasp optimisation and grasp stability prediction \cite{6094878, chumbley2022integrating, de_Farias_2021, Lambeta2020DIGIT, liu2022gelsight}. \cite{6094878} uses tactile imprints as perceptions and a kernel logistic regression model to determine the probability of grasp success. \cite{chumbley2022integrating} summarises how high-resolution tactile sensors can improve the prediction of grasp stability when used in combination with vision and depth sensing for training neural networks. Monitoring grasp stability \cite{Bekiroglu2012LearningTA, Chebotar_2017, garciagarcia2019tactilegcn, GUO2017274} is achieved through tactile sensing by measuring the forces applied to the target object during grasping, where tactile sensors detect changes in the grasp or slipping of the object, hence providing information that can be utilised to correct the robot's grasp and maintain stability.
 
 
 \section{Common Grasping Approaches}
 \label{sec:2.3}
-Grasping approaches are used to equip a robot with the ability to effectively grasp and manipulate objects in its environment. These approaches can be broadly categorised into two types: analytical and numerical (empirical) approaches.\\
+Grasping approaches are used to equip a robot with the ability to effectively grasp and manipulate objects in its environment. These approaches can be broadly categorised into two types: analytical approaches \cite{ding2000, haschke2005}, which involve developing mathematical models based on theoretical principles to compute grasping configurations, and numerical (empirical) approaches \cite{Chebotar_2017, Calandra_2018, de_Farias_2021} which are learning-based approaches that adopt data-driven techniques to enable robotic grasping.\\
 
-A common approach is to train regrasping policies for robotic grasping. Chebotar et al. \cite{Chebotar_2017} aims to learn a general regrasping behaviour using a reinforcement learning policy. During the initial phases of grasp learning in this work, a grasp stability predictor (using Support Vector Machines) was learned for the early detection of grasp failures based on spatio-temporal tactile features, where Spatio-Temporal Hierarchical Matching Pursuit (ST-HMP) was used for temporal tactile data classification tasks. Next, grasp prediction was utilised to provide feedback for reinforcement learning of low-dimensional regrasping policies for single projects. Principal Component Analysis (PCA) was used to reduce the dimensionality of the ST-HMP descriptors to a single principal component, and Relative Entropy Policy Search (REPS) was used to optimise linear policies for individual objects. Finally, a high-dimensional policy was trained via supervised learning using the outputs of the aforementioned individual policies. This is performed using a neural network that employs the Levenberg-Marquardt (LM) optimisation algorithm, which is based on the Gauss-Netwon algorithm that is famous for converging quickly. Hyperbolic tangent sigmoid functions were used as activation layers in the network, and a linear transfer function was used as the activation function for the output layer. This approach was able to learn complex high-dimensional policies using small amounts of data by using reinforcement learning to mimic the behaviour of various simple policies. The method achieved an 80\% grasp success rate after a single regrasp on an unseen object during training, and demonstrated that the network was able to generalise the learned policies to more complex objects.\\
+A common approach is to train regrasping policies for robotic grasping. Chebotar et al. \cite{Chebotar_2017} aims to learn a general regrasping behaviour using a reinforcement learning policy. During the initial phases of grasp learning in this work, a grasp stability predictor (using Support Vector Machines) was learned for the early detection of grasp failures based on spatio-temporal tactile features, where Spatio-Temporal Hierarchical Matching Pursuit (ST-HMP) was used for temporal tactile data classification tasks. Next, grasp prediction was utilised to provide feedback for reinforcement learning of low-dimensional regrasping policies for single projects. Principal Component Analysis (PCA) was used to reduce the dimensionality of the ST-HMP descriptors to a single principal component, and Relative Entropy Policy Search (REPS) was used to optimise linear policies for individual objects. Finally, a high-dimensional policy was trained via supervised learning using the outputs of the aforementioned individual policies. This is performed using a neural network that employs the Levenberg-Marquardt (LM) optimisation algorithm, which is based on the Gauss-Netwon algorithm that is famous for converging quickly. Hyperbolic tangent sigmoid functions are used as activation layers in the network, and a linear transfer function was used as the activation function for the output layer. This approach was able to learn complex high-dimensional policies using small amounts of data by using reinforcement learning to mimic the behaviour of various simple policies. The method achieved an 80\% grasp success rate after a single regrasp on an unseen object during training, and demonstrated that the network was able to generalise the learned policies to more complex objects.\\
 
 Calandra et al. \cite{Calandra_2018} presented an action-conditional model (a multi-modal Convolutional Neural Network) to learn regrasping policies from tactile and visual data. The model predicts the grasp outcome of a candidate grasp adjustment, then executes a grasp by iteratively selecting the most promising actions.
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{docs/Project Report/Media/1_1_calandra_2018_model.png}
     \caption{Calandra et al. \cite{Calandra_2018}: More Than a Feeling: Learning to Grasp and Regrasp using Vision and Touch: A study on learning regrasping policies from multi-modal (tactile and visual) data by predicting the grasp stability outcome of a candidate grasp adjustment, then executing a grasp by iteratively selecting the most promising actions}
-    \label{fig:2.5}
+    \label{fig:2.6}
 \end{figure}
 The above figure is an overview of the study's model. It consists of two branches of tactile CNNs, one each for tactile sensory readings collected on each finger of its two-finger gripper robot, one branch of visual CNNs for extracting features from the object scene captured by a camera, and a multilayer perceptron (MLP) to preprocess possible actions. The outputs of these networks are concatenated and passed into another MLP, which outputs a single grasp success probability for a candidate grasp adjustment. This approach does not require the calibration of the tactile sensors or any analytical modelling of the contact forces between its sensors and the target object.\\
 
@@ -311,11 +349,11 @@ An alternative grasping approach to learning regrasping policies is object explo
     \centering
     \includegraphics[width=0.9\textwidth]{docs/Project Report/Media/2_3_de_farias_network.png}
     \caption{De Farias et al. \cite{de_Farias_2021}: Simultaneous Tactile Exploration and Grasp Refinement for Unknown Objects: A Bayesian Optimisation-based exploration pipeline for shape reconstruction and grasp search. This approach explores an unknown object to model its shape using tactile sensors, while also improving finger placement to optimise grasp stability simultaneously.}
-    \label{fig:2.6}
+    \label{fig:2.7}
 \end{figure}
 The presented approach in this study uses an optimisation framework that optimises two objectives, where successive finger placements are planned to improve grasp stability and shape representation. Optimisation is done simultaneously for grasp stability and model shaping without exhaustive exploration. Emphasis is put on improving the placement of fingers of a multi-finger hand in terms of optimising grasp stability, while also simultaneously exploring the shape of a partially unknown object. A free-floating hand was deployed in Pybullet for proof of concept, and a hand and arm setup was used for a concrete implementation.\\
 
-An overview of the pipeline of this approach can be found in \hyperref[fig:2.6]{Figure 2.6}. To summarise, the pipeline is split into three phases: 1) determining a good shape for grasping. This phase yields sufficient surface reconstructions to identify and categorise objects; 2) addressing errors and uncertainty since no object can be modelled perfectly. This is done by using GPIS to construct a probabilistic object shape representation; 3) grasp planning via Bayesian Optimisation, which handles complexity and uncertainty in various parameters to create optimal grasps.
+An overview of the pipeline of this approach can be found in \hyperref[fig:2.7]{Figure 2.7}. To summarise, the pipeline is split into three phases: 1) determining a good shape for grasping. This phase yields sufficient surface reconstructions to identify and categorise objects; 2) addressing errors and uncertainty since no object can be modelled perfectly. This is done by using GPIS to construct a probabilistic object shape representation; 3) grasp planning via Bayesian Optimisation, which handles complexity and uncertainty in various parameters to create optimal grasps.
 
 
 
@@ -326,16 +364,16 @@ To summarise, this section has explored several strategies that could potentiall
     \item Choice of object representation: Coarse approximations of the underlying true shape can simplify grasp generation and reduce computability costs.
     \item Using local symmetry properties: This captures key object features, especially for objects with more symmetry such as rectangular boxes and cylinders.
     \item Shape modelling: Representing objects and grasps in a common space enables transferable grasps to various objects. However, this may deteriorate with partial point cloud data, therefore the shape space must accommodate missing data while avoiding unrealistic shape reconstructions.
-    \item Usage of tactile sensing: Tactile sensing can improve grasp planners, for example, through reinforcement learning to support open-loop systems. It provides an in-depth local regrasping procedure to improve stability without considering the 3-dimensional geometry of the object.
+    \item Use of tactile sensing: Tactile sensing can improve grasp planners, for example, through reinforcement learning to support open-loop systems. It provides an in-depth local regrasping procedure to improve stability.
 \end{enumerate}
-Most studies we have investigated incorporates some combination of tactile and visual data for learning grasping policies or predicting grasp stability, but very few have been optimised for robust performance that considers a variety of object classes. Therefore, our work will primarily address achieving good robustness (consistent performance of the grasping policy towards different objects).
+Most studies we have investigated incorporates some combination of tactile and visual data for learning grasping policies or predicting grasp stability, but very few have been optimised for high and robust performance. Therefore, our work primarily addresses the impact of various feature representations on the performance of our supervised-learning models to reduce the dimensionality of our datasets, while attempting to achieve good robustness across all known objects in our project. 
 
 
 
 %----------------------------------------------------------------------------------
-% Section 3: Preliminaries
+% Section 3: Preliminaries: Simulation and Data
 %----------------------------------------------------------------------------------
-\chapter{Preliminaries}
+\chapter{Preliminaries: Simulation and Data}
 \label{chap:3}
 In this chapter, we present the practical aspects of the project. We first provide an overview of the Pybullet simulation and its functionalities specific to the project.
 
@@ -372,7 +410,7 @@ In the scope of this project, the Pybullet simulation plays a fundamental role i
 \end{figure}
 
 
-\subsection{Loading Parameters}\label{sec:3.1.2}
+\subsection{Configuring the Simulation Environment}\label{sec:3.1.2}
 This project allows users to configure the simulation via pre-defined parameters, including Pybullet camera positions and orientations, object variations, and robot setup parameters (e.g., Cartesian position, speed of grippers, etc.), by loading them through the \verb|parameters.yaml| file. YAML is a widely-used format for configuration files that is both human-readable and machine-parsable. In a YAML file, data is structured in a hierarchical system of key-value pairs, which are expressed in a plain-text format.
 \begin{figure}[H]
     \centering
@@ -383,7 +421,7 @@ This project allows users to configure the simulation via pre-defined parameters
 
 
 \subsection{Robot Control and Data Collection}\label{sec:3.1.3}
-Our Pybullet simulation consists of two data collection pipelines for the baseline and proposed approaches respectively (see \hyperref[sec:4.2.2]{Section 4.2.2}). These pipelines are activated through the \verb|Collect Data| buttons on the right panel in the simulation. The data collection pipelines randomly generate end effector poses around the vicinity of the target object. Every time a new pose is generated, the robot's position and orientation are reset, and we move the robot to the generated pose via inverse kinematics provided by Pybullet.
+Our Pybullet simulation consists of two data collection pipelines for the baseline and proposed approaches respectively (see \hyperref[sec:4.2.2]{Section 4.2.2}). These pipelines are activated through the \verb|Collect Data| buttons on the right panel in the simulation. The data collection pipelines generate randomised end effector poses from manually-selected seed poses around the vicinity of the target object. Every time a new pose is generated, the robot's position and orientation are reset, and we move the robot to the generated pose via inverse kinematics provided by Pybullet.
 
 
 
@@ -406,7 +444,7 @@ In robotic grasping, tactile data refers to rich information collected from cont
 Visual sensing is an intuitive way for a robot to perceive its environment and is widely used in robotic grasping \cite{GUO2017274}. In this work, visual data refers to information collected by cameras in our simulation. Our visual data will consist of any of the following data sources:
 \begin{enumerate}
     \item 6-Dimensional end effector poses relative to the robotic arm/gripper. We refer readers to \hyperref[sec:4.2.1]{Section 4.2.1} for a detailed description of this data.
-    \item Geometric features of target objects, which we utilise in \hyperref[chap:5]{Chapter 5}
+    \item Geometric features of target objects, which we utilise in \hyperref[chap:5]{Chapter 5}.
 \end{enumerate}
 
 
@@ -461,7 +499,7 @@ Therefore using our learned logit model (with an optimised weights vector), we c
 To generate a dataset for training our proposed logit model, we collect tactile and visual data by randomly generating grasps on a smooth rectangular box of dimensions (depth: 0.025, width: 0.05, height: 0.05) in our Pybullet simulation. These dimensions are re-scaled to be compatible with the dimensions of the robot setup, which are defined in its URDF (Unified Robot Description Format) file.
 
 
-\subsection{Random Grasp Synthesis}\label{sec:4.2.1}
+\subsection{Randomised Grasp Sampling}\label{sec:4.2.1}
 To generate random grasps on the box, we first manipulate the robot's end effector manually into diverse positions within the box's vicinity and collect three distinct end effector poses $S_i:i=1,2,3$ to ensure some variability in grasping orientation, position and efficacy. The selected end effector poses are subsequently referred to as seed poses, denoted as 6-tuples $S_i$:
 \begin{equation}
     S_i=(x,y,z,r_x,r_y,r_z)
@@ -564,7 +602,7 @@ We create a visualisation of each hand pose $X_n$ in a 3-dimensional space, usin
 \noindent Using this information, we annotate all randomly-generated hand poses from our dataset in 3 dimensions using \verb|matplotlib|. Each 6D hand pose is represented using a skeleton 2-finger model in a similar manner to \cite{Bekiroglu2012LearningTA}, where green and red poses denote successful and unsuccessful grasps respectively:
 \begin{figure}[H]%
     \centering
-    \subfloat[\centering Box without poses]{{\includegraphics[width=0.29\textwidth]{docs/Project Report/Media/4_3_2_box_3d_plot.png} }}%
+    \subfloat[\centering Box model. Grasp poses are not shown.]{{\includegraphics[width=0.29\textwidth]{docs/Project Report/Media/4_3_2_box_3d_plot.png} }}%
     \qquad
     \subfloat[\centering Orientation 1]{{\includegraphics[width=0.29\textwidth]{docs/Project Report/Media/4_3_2_all_ee_pose_visualise.png} }}%
     \qquad
@@ -605,11 +643,11 @@ The first dataset consists of tactile sensor readings collected from a robotic g
     \label{fig:4.7}
 \end{figure}
 
-The second dataset consists of end effector poses relative to the robot arm during grasping tasks. The dataset has a shape of $N\times6$, where $6$ represents the 6 degrees of freedom (DOF) of the simulation robot. We leave this dataset as it is.\\
+The second dataset consists of end effector poses relative to the robot arm during grasping tasks. The dataset has a shape of $N\times6$, where $6$ represents the 6 degrees of freedom (DOF) of the simulation robot.\\
 
 The third dataset is a combination of tactile and visual data and consists of both tactile sensor readings and end effector poses collected during grasping tasks, concatenated together as NumPy arrays along the second dimension, creating a dataset of the shape $N\times(160\times240\times4+6)$.\\
 
-Concatenation approaches involving the combination of sensory data for robotic grasping analysis have been explored in several related works. Calandra et al. (2018) \cite{Calandra_2018} used a combination of tactile and visual data to train a deep neural network for predicting grasp outcomes. The authors concatenated the tactile sensor readings and end effector poses into a single input vector for the neural network.
+Concatenation approaches involving the combination of sensory data for robotic grasping analysis have been explored in several related works. Calandra et al. (2018) \cite{Calandra_2018} used a combination of tactile and visual data to train a deep neural network for predicting grasp outcomes. The authors concatenated the tactile sensor readings and end effector poses into a single input vector for the neural network. In this project, we adopt a similar approach by concatenating our tactile and visual data.
 
 
 \subsection{Dimensionality Reduction}\label{sec:4.4.2}
@@ -648,7 +686,7 @@ To train the binary logistic regression classifier on the tactile sensory data a
 After preparing the datasets, the logistic regression (logit) classifier was trained using the three dataset combinations that were previously discussed in \hyperref[sec:4.4.1]{Section 4.4.1}. To further explore the dataset characteristics, a combination of dimensionality reduction techniques was applied to these datasets, as discussed in \hyperref[sec:4.4.2]{Section 4.4.2}. Specifically, the techniques used were ConvNet only and ConvNet with PCA (top $k$ principal components). The logit model was then trained on these variations of the datasets with the aim of selecting the model and dataset combination that achieves the best accuracy. This approach allowed us to thoroughly explore the impact of different dataset combinations and dimensionality reduction techniques on the performance of the logit classifier.
 
 
-\subsection{Summary of training results}\label{sec:4.5.1}
+\subsection{Summary of Training Results}\label{sec:4.5.1}
 \label{sec:4.5.1}
 \begin{table}[H]
     \centering
@@ -660,19 +698,22 @@ After preparing the datasets, the logistic regression (logit) classifier was tra
         Pre-processing & Visual only & Tactile only & Both & Shape & Dimensionality \\
         \midrule
         Raw & 70.83\% & 83.33\% & 83.33\% & 160x240x4 & 153600 \\
-        CNN & -- & 83.33\% & 87.50\% & 64x10x15  & 9600 \\
-        CNN + PCA ($k=5$) & -- & 77.08\% & 77.08\% & 5 & 5\\
+        CNN & N/A & 83.33\% & 87.50\% & 64x10x15  & 9600 \\
+        CNN + PCA ($k=5$) & N/A & 77.08\% & 77.08\% & 5 & 5\\
         \bottomrule
     \end{tabular}
     \caption{Accuracy of LR model on dataset variations with N=200 samples}
     \label{tbl:4.2}
 \end{table}
-As previously discussed, the logistic regression model was trained on three different dataset segmentations and three pre-processing methods were applied. The results, as presented in \hyperref[tbl:4.2]{Table 4.2}, indicate that although utilising ConvNets and/or PCA techniques did not have a significant impact on the accuracy of the logit model, it is noteworthy that the dimensionality of the datasets was significantly reduced by more than 90\% when dimensionality-reducing techniques were used.
+As previously discussed, the logistic regression model was trained using three distinct dataset segmentations, with the application of three pre-processing methods. It is noteworthy that the employment of CNN and PCA techniques was omitted for the 6-dimensional visual-only data, as its dimensionality suffices for training purposes.
 
 
-\subsection{Trade-off between accuracy and dimensionality}\label{sec:4.5.2}
-Compared to traditional techniques like PCA, CNNs can learn complex, non-linear relationships between the tactile and visual features and the grasp outcome. This is particularly useful when dealing with high-dimensional data, where PCA may not capture the underlying patterns in the data. Moreover, the ability of CNNs to learn hierarchical feature representations can make them more interpretable, as each layer captures increasingly complex and abstract features, leading to a better understanding of the underlying mechanisms of the problem.
+\subsection{Analysis of Training Results and Balancing the Trade-off Between Accuracy and Dimensionality}\label{sec:4.5.2}
+The outcomes as presented in \hyperref[tbl:4.2]{Table 4.2} reveal that the incorporation of PCA techniques did not yield a considerable impact on the accuracy of the logit model. This observation can potentially be attributed to two underlying factors: firstly, the application of PCA to the dataset may result in the elimination of pertinent features or the introduction of noise through the utilisation of said techniques; secondly, it is plausible that non-linear relationships exist among the variables. However, it is worth noting that PCA assumes linearity in the relationships among variables, thereby implying that its accuracy may be influenced by the inability to capture relevant patterns, thereby resulting in a decline in accuracy.\\
 
+This also explains why applying CNN alone preserves or even increases the accuracy of our model, since it can learn complex, non-linear relationships between the tactile and visual features and the grasp outcome. This is particularly useful when dealing with high-dimensional data, where PCA may not capture the underlying patterns in the data. Moreover, the ability of CNNs to learn hierarchical feature representations can make them more interpretable, as each layer captures increasingly complex and abstract features, leading to a better understanding of the underlying mechanisms of the problem.\\
+
+Nevertheless, the application of dimensionality-reducing techniques resulted in a significant reduction of dataset dimensionality by over 90\%. This demonstrates a well-balanced trade-off between the accuracy and dimensionality of our dataset.
 
 \section{Conclusion}\label{sec:4.6}
 Based on the results presented in \hyperref[tbl:4.2]{Table 4.2}, we have determined that using both tactile and visual data together produces the highest accuracy for our LR models. While raw data performed better than other pre-processing techniques, we recognise that the dimensionality of the data must also be considered. Therefore, we have found that extracting features from our dataset using a ConvNet and selecting only the top $k=5$ components provides comparable accuracy with significantly lower dimensionality.
@@ -703,9 +744,7 @@ There have been several academic studies addressing the problem of grasp stabili
 To solve the grasp detection problem, the authors used ResNet-50, a 50-layer deep residual model (see \ref{fig:5.1}) that incorporates residual layers to reformulate the mapping function between layers and overcome the challenge of learning an identity mapping. The authors introduced two different architectures for robotic grasp prediction: a uni-modal grasp predictor that uses only single-modality information such as RGB, and a multi-modal grasp predictor that uses multi-modal information such as RGB and depth.\\
 
 
-Mahler et al. \cite{mahler2017dexnet} have proposed a method for evaluating grasp quality using a CNN trained on RGB-D images and force measurements. RGB-D refers to a type of sensor that captures both colour (RGB) and depth (D) information about a scene. RGB-D sensors typically consist of a regular colour camera to capture RGB images and an additional depth sensor, such as a time-of-flight or structured light sensor, which provides a depth image. The combination of RGB and depth information can be particularly useful for robotics applications, as it allows the robot to perceive and reason about the 3D structure of the environment, and to distinguish between objects that are close together but at different depths.\\
-
-In this paper, the authors propose a method for evaluating grasp quality using a CNN trained on RGB-D images and force/torque measurements. The network takes as input an RGB-D image of the scene, along with the 6-dimensional force/torque measurements recorded during a grasp attempt. It then predicts a scalar value for each grasp, indicating its expected success rate. The CNN was trained on a dataset of over 10000 grasps on a variety of objects. However, a limitation of this approach is that it requires accurate force sensing during the grasp attempt, which may not be always feasible in practice. Additionally, the scalar success rate predicted by the network may not be as interpretable as other grasp stability metrics, such as the wrench space analysis or the friction cone model. Nonetheless, this paper represents an important step towards using neural networks to evaluate grasp quality in robotics applications.
+Mahler et al. \cite{mahler2017dexnet} have proposed a method for evaluating grasp quality using a CNN trained on RGB-D images and force measurements. RGB-D refers to a type of sensor that captures both colour (RGB) and depth (D) information about a scene. RGB-D sensors typically consist of a regular colour camera to capture RGB images and an additional depth sensor, such as a time-of-flight or structured light sensor, which provides a depth image. The combination of RGB and depth information can be particularly useful for robotics applications, as it allows the robot to perceive and reason about the 3D structure of the environment, and to distinguish between objects that are close together but at different depths. In the paper, the authors propose a method for evaluating grasp quality using a CNN trained on RGB-D images and force/torque measurements. The network takes as input an RGB-D image of the scene, along with the 6-dimensional force/torque measurements recorded during a grasp attempt. It then predicts a scalar value for each grasp, indicating its expected success rate. The CNN was trained on a dataset of over 10000 grasps on a variety of objects. However, a limitation of this approach is that it requires accurate force sensing during the grasp attempt, which may not be always feasible in practice. Additionally, the scalar success rate predicted by the network may not be as interpretable as other grasp stability metrics, such as the wrench space analysis or the friction cone model. Nonetheless, this paper represents an important step towards using neural networks to evaluate grasp quality in robotics applications.
 
 
 \newpage
@@ -784,7 +823,7 @@ We define our MLP model in PyTorch and tailor it to predict grasp stability labe
 
 
 \section{Experiments on Impacts of Various Features}\label{sec:5.3}
-In this section, we present the results of some additional experiments that evaluate the robustness of the MLP model to primitive object classes and the influence of sample size on the model's performance.
+In this section, we present the results of some additional experiments that evaluate the robustness of the MLP model to primitive object classes and the influence of sample size on the model's performance. All models are trained for 500 epochs.
 
 
 \subsection{Robustness of MLP Model to Primitive Object Classes}\label{sec:5.3.1}
@@ -805,6 +844,8 @@ To test the robustness of the MLP model to each primitive object class (rectangu
         Cylinder 1, Cylinder 2 & Cylinder 3 & 47.55\pm1.30 \\
         Cylinder 1, Cylinder 3 & Cylinder 2 & 61.13\pm1.66\\
         Cylinder 2, Cylinder 3 & Cylinder 1 & 61.76\pm3.17 \\
+        \midrule
+        Average & & 57.26\pm1.71 \\
         \bottomrule
     \end{tabular}
     \caption{Mean and standard deviation of MLP accuracy (\%) by object class across 5 trials}
@@ -823,7 +864,7 @@ In general, as the size of the training data set increases, the performance of t
     \caption{Impact of the sample size of the randomised dataset on MLP accuracy}
     \label{fig:5.4}
 \end{figure}
-As depicted in \hyperref[fig:5.4]{Figure 5.4}, the accuracy of the MLP models increases with an increase in the sample size of the randomised dataset, which aligns with theoretical expectations.
+As depicted in \hyperref[fig:5.4]{Figure 5.4}, the accuracy of the MLP models increases with an increase in the sample size of the randomised dataset, which aligns with theoretical expectations. The MLP accuracy converges after approximately a sample size of 800 examples, thus the amount of data in this experiment is sufficient based on this analysis.
 
 
 \section{Training and Evaluation of Initial Results}\label{sec:5.4}
@@ -837,7 +878,7 @@ The validation set was used to evaluate the performance of the trained MLP model
 
 
 \subsection{Evaluation of Results}\label{sec:5.4.1}
-Our model is primarily trained on the dataset consisting all data sources, that is, tactile and visual (end effector poses and geometric data). For comparison of its effectiveness, we also train it on other variations of the datasets. The results are as follows:
+Our model is primarily trained on the dataset consisting all data sources, that is, tactile and visual (end effector poses and geometric data). For comparison of its effectiveness, we also train it on other variations of the datasets for 500 epochs. The results are as follows:
 \begin{table}[H]
     \centering
     \small
@@ -853,7 +894,7 @@ Our model is primarily trained on the dataset consisting all data sources, that 
         F1 Score (\%)  & 73.01\pm1.58 & 62.75\pm3.23 & 62.32\pm1.61 & 74.54\pm2.60 & 75.91\pm1.84 \\
         \bottomrule
     \end{tabularx}
-    \caption{Performance of various MLP models (average across 5 trials)}
+    \caption{Performance of various MLP models (average across 5 trials), 500 epochs}
     \label{tbl:5.3}
 \end{table}
 The results indicated that adding object features to the dataset marginally improved the MLP model's predictive accuracy. Based on these results, we attempt to apply PCA to the complete dataset and reduce the input size to 5 principal components. \hyperref[fig:5.5]{Figure 5.5} shows the accuracies of our MLP model on varying numbers of principal components $k$ from applying PCA across 5 separate trials:
@@ -875,11 +916,11 @@ The results indicated that adding object features to the dataset marginally impr
     \caption{Top 5 values and corresponding indices for PCA accuracies obtained with different numbers of components ($k=1$ to $k=30$)}
     \label{tb:5.4}
 \end{table}
-Since this experimentation aims to balance the trade-off between dataset dimensionality and accuracy, we disregard the corresponding model for $k=28$ and conclude that $k=16$ principal components results in the attainment of the most elevated mean validation accuracy (76.25\% on average across five trials) utilising our MLP model. This selection represents a judicious choice, as it reduces the dimensionality of our dataset from (1440, 512) to (1440, 16), while concurrently preserving and even enhancing the general level of accuracy.
+Since this experimentation aims to balance the trade-off between dataset dimensionality and accuracy, we disregard the corresponding model for $k=28$ and conclude that $k=16$ principal components results in the attainment of the most elevated mean validation accuracy (76.25\% on average across 5 trials) utilising our MLP model. This selection represents a judicious choice, as it reduces the dimensionality of our dataset from (1440, 512) to (1440, 16), while preserving and even enhancing the general level of accuracy.
 
 
 \subsection{Limitations}\label{sec:5.4.2}
-This study was subject to a limitation that warrants acknowledgement, specifically, the relatively modest sample size of the dataset we collected. This shortcoming may have exerted an impact on the accuracy of our findings. The source of this limitation is primarily attributed to the data collection pipeline in Pybullet, which demands a substantial amount of time to gather adequate data for the purpose of training. This arises from our approach of generating random hand configurations for grasping, and imposing constraints on the collection process to yield a balanced dataset (namely, an equal number of successful and unsuccessful grasps).\\
+This study was subject to the relatively modest sample size of the dataset we collected. This shortcoming may have exerted an impact on the accuracy of our findings. The source of this limitation is primarily attributed to the data collection pipeline in Pybullet, which demands a substantial amount of time to gather adequate data for the purpose of training. This arises from our approach of generating random hand configurations for grasping, and imposing constraints on the collection process to yield a balanced dataset (namely, an equal number of successful and unsuccessful grasps).\\
 
 As a reference point, we include in the following table a summary of the outcomes of several exemplary studies in the realm of grasp stability prediction, for the purpose of benchmarking our model's performance.
 
@@ -899,9 +940,11 @@ As a reference point, we include in the following table a summary of the outcome
         \textbf{Our work} & \textbf{Tactile, vision} & \textbf{1,440} & \textbf{9} & \textbf{MLP} & \textbf{76.3$\pm$0.66}\\
         \bottomrule
     \end{tabular}
-    \caption{Comparison of performance of various academic works on grasp stability prediction}
+    \caption{A comparison of performance of various grasp stability prediction models}
     \label{tbl:5.5}
 \end{table}
+
+Furthermore, Pybullet simulations may not perfectly emulate the complexity and variability of real-world scenarios. Although Pybullet provides a robust physics engine, it may lack certain nuances and intricacies that exist in real environments, such as variations in material properties, surface roughness, or lighting conditions. Consequently, the tactile data collected in the simulation may not fully capture the range of tactile interactions and sensory feedback observed in reality. Moreover, the compliance, elasticity and noise characteristics of the DIGIT tactile sensors may not  be adequately modelled in the simulation, further limiting the authenticity of the tactile data acquired.
 
 
 \section{Conclusion}\label{sec:5.5}
@@ -940,7 +983,917 @@ Given that neural networks can predict other grasping properties, such as force 
     \label{fig:apdx1}
 \end{figure}
 
-\chapter{Important Code Snippets}\label{apdx:2}
+
+\chapter{System Manual}\label{apdx:2}
+\section{Prerequisites}\label{apdx:2.1}
+We recommend downloading the zip file containing all relevant code for this project separately either from the submission or \hyperref[]{this link}. The repository is anonymous.\\
+
+Before compiling and testing the listed code in \hyperref[apdx:3]{Appendix 3}, please ensure that your system has been properly configured with the following requirements:
+\begin{enumerate}
+    \item Linux Operating System (preferably Ubuntu 20.04). The code for this project was only developed and tested on Ubuntu 20.04. It is not guaranteed to compile and run fully functionally on other operating system and devices.
+\end{enumerate}
+
+\section{Code Deployment}\label{apdx:2.2}
+Please follow these steps to deploy the project code:
+\begin{enumerate}
+    \item Clone the repository or download a zip file containing the repository code.
+    \item Create a Python virtual environment with Python 3.8.16. Ensure that the virtual environment is created in the root directory of the project:
+    \item Activate the virtual environment:
+    % \begin{lstlisting}
+    % source fyp_env/activate
+    % \end{lstlisting}
+    
+    % \item Install all required Python packages:
+    % \begin{lstlisting}
+    % pip install requirements.txt
+    % \end{lstlisting}
+    
+    % \item Run the Pybullet simulation:
+    % \begin{lstlisting}
+    % python src/main.py
+    % \end{lstlisting}
+\end{enumerate}
+
+\section{Using the Simulation}\label{apdx:2.3}
+There are several core functionalities provided by our Pybullet simulation. These functionalities are listed as either sliders or buttons on the right panel of the simulation GUI.
+\begin{itemize}
+    \item \textbf{Manual manipulation of the robot}: Adjust the six available sliders for the end effector pose (x,y,z,roll,pitch,yaw) and the slider for the gripper length (0 = gripper is completely closed, maximum = gripper is completely open).
+    \item \textbf{Reset simulation}: Resets all sliders and the robot (end effector position).
+    \item \textbf{Get joint coordinates}: Retrieves all movable joints of the robot arm and gripper.
+    \item \textbf{Get object features}: Retrieves the object features of the created object mesh in the simulation. Currently this function returns the 3 principal curvatures of the object, one for each dimension (width, height, depth).
+    \item \textbf{Collect data (baseline)}: Data collection pipeline to collect data for the baseline approach. To run this function, please ensure the \verb|object_name| property is set to \verb|block| in the \verb|parameters.yaml| file. This function will not work for any other object name since manually-selected end effector poses were only collected for block.
+    \item \textbf{Collect data (proposed)}: Data collection pipeline to collect data for the proposed approach (MLP). To run this function, please ensure the \verb|object_name| property is set to one of the following in the \verb|parameters.yaml| file:
+    % \begin{lstlisting}
+    %     object_name: block1/block2/block3/bottle1/bottle2/bottle3/
+    %     cylinder1/cylinder2/cylinder3
+    % \end{lstlisting}
+\end{itemize}
 
 
+\chapter{Code Listing}\label{apdx:3}
+Due to the code listing page limit, this section only documents the intriguing bits of code snippets for the project. The complete code base with the simulation code, training datasets, etc. can be found via \hyperref[]{this link}.
+
+\section{Baseline Model Training Code}
+\begin{lstlisting}
+## UCL COMP0029 Individual Project for Year 3 BSc
+### Robust Robotic Grasping Utilising Touch Sensing - Baseline Approach Notebook
+### This notebook contains the code for developing a baseline approach to grasping using classifiers: given some combinations of tactile data, end effector poses relative to the robot hand (visual data), etc., determine whether these constraints will produce a successful/unsuccessful grasp.
+### 1. Load packages
+import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+
+import torch
+import torch.nn as nn
+import torch.optim as optim
+import torch.nn.init as init
+import gc
+
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, confusion_matrix, ConfusionMatrixDisplay
+from sklearn.decomposition import PCA
+
+from math import sin, cos
+
+import seaborn as sns
+# Set device for `PyTorch` training
+# Use GPU if available, else CPU
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device
+# Empty PyTorch cache
+gc.collect()
+torch.cuda.empty_cache()
+# Set numpy seed
+np.random.seed(seed=1)
+### 2. Load datasets from saved .npy files
+# To collect data for this experiment, you can run the "Collect Sensory Data" button in the Pybullet simulation. This generates a predefined number of Gaussian grasps randomly generated from a base hand pose. Each individual grasp is considered as an individual experiment, and the data collected from this experiment is split into four, each stored in its own dataset.
+
+# For all object models used in this experiment, each object has 4 datasets which include:
+# - `depth_ds.npy` which stores the depth tactile data from the mounted DIGIT sensors
+# - `color_ds.npy` which stores the colored (RGB) version of the depth tactile data from the mounted DIGIT sensors
+# - `poses_ds.npy` which stores the randomly-generated 6d hand poses from the simulation
+# - `outcomes_ds.npy` which stores the outcomes of each random pose
+root = "../models/baseline_model/"
+object_name = "block"      # object_name should be in [bottle, block, mug]
+
+depth_data = np.load(root + object_name + "/depth_ds.npy")
+color_data = np.load(root + object_name + "/color_ds.npy")
+poses_data = np.load(root + object_name + "/poses_ds.npy")
+grasp_outcomes_data = np.load(root + object_name + "/grasp_outcomes.npy")
+# These datasets should all be in the form of $(N\times...)$ where $N$ is the number of examples:
+print(f"Shape of depth_data: {depth_data.shape}")
+print(f"Shape of color_data: {color_data.shape}")
+print(f"Shape of poses_data: {poses_data.shape}")
+print(f"Shape of grasp_outcomes_data: {grasp_outcomes_data.shape}")
+# Additionally, we confirm the number of successful and unsuccessful grasps recorded. This helps us in the next section to determine how many examples we should include for each class in order to produce a balanced dataset.
+print(f"# of sucessesful grasps: {(grasp_outcomes_data == 1).sum()}")
+print(f"# of unsuccessful grasps: {(grasp_outcomes_data == 0).sum()}")
+### 3. Data preprocessing
+# We will train a logistic regression classifier on 3 combinations of data:
+# - **Tactile** only: concatenated and flattened depth and color data
+# - **Visual** only: 6D end effector poses consisting of position (x,y,z) and orientation (r,p,y) data
+# - **Both**: concatenated and flattened tactile and visual data
+# We define some reusable functions for later:
+def normalize(arr):
+    # Normalize & standardize each column
+    mean = np.mean(arr, axis=0)
+    std = np.std(arr, axis=0)
+    
+    arr = (arr - mean) / std
+    arr = np.nan_to_num(arr, 0)
+    arr[np.isinf(arr)] = 0
+    return arr
+# Since each tactile reading (depth and color) is a pair of images (one on each finger), we concatenate them together as a single 160x240 image.
+depth_data = np.concatenate((depth_data[:, 0], depth_data[:, 1]), axis=2)
+color_data = np.concatenate((color_data[:, 0], color_data[:, 1]), axis=2)
+print(f"Shape of depth_data: {depth_data.shape}")
+print(f"Shape of color_data: {color_data.shape}")
+
+depth_ds = torch.from_numpy(normalize(depth_data))
+color_ds = torch.from_numpy(normalize(color_data))
+visual_ds = torch.from_numpy(np.nan_to_num(normalize(poses_data)))
+visual_ds
+# We then concatenate the depth and color datasets to produce the flattened tactile dataset:
+tactile_ds = torch.cat([depth_ds.unsqueeze(-1), color_ds], dim=-1)
+tactile_ds = torch.nan_to_num(tactile_ds)
+complete_ds = torch.cat([tactile_ds.reshape(tactile_ds.shape[0], -1), visual_ds], dim=1)
+complete_ds = torch.nan_to_num(complete_ds)
+tactile_ds.shape, complete_ds.shape
+### 4. Dataset visualisation (optional)
+# Only run this section to produce figures and plots for the project report.
+Z_PADDING = 0.2        # Adjust for visualisation of end poses
+
+
+def plot_ee_pose(pose_data, grasp_outcome, ax, orientation):
+    x, y, z, alpha, beta, gamma = pose_data
+    z -= Z_PADDING * 1.6
+
+    # create rotation matrix based on Euler angles
+    Rx = np.array([[1, 0, 0], [0, cos(alpha), sin(alpha)], [0, -sin(alpha), cos(alpha)]])
+    Ry = np.array([[cos(beta), 0, -sin(beta)], [0, 1, 0], [sin(beta), 0, cos(beta)]])
+    Rz = np.array([[cos(gamma), sin(gamma), 0], [-sin(gamma), cos(gamma), 0], [0, 0, 1]])
+    R = Rz.dot(Ry.dot(Rx))
+
+    # calculate endpoints of line based on orientation
+    vec = np.array([0, 0.015, 0])
+    vec_rotated1 = R.dot(vec)
+    endpoint1 = [x + vec_rotated1[0], y + vec_rotated1[1], z + vec_rotated1[2]]
+    
+    vec_rotated2 = R.dot(-vec)
+    endpoint2 = [x + vec_rotated2[0], y + vec_rotated2[1], z + vec_rotated2[2]]
+
+    # set midpoint to the actual point
+    midpoint = [x, y, z]
+
+    # plot line through point in orientation direction
+    ax.plot([endpoint1[0], endpoint2[0]], [endpoint1[1], endpoint2[1]], [endpoint1[2], endpoint2[2]], color='green' if grasp_outcome==1 else 'red', zorder=20)
+
+    # plot vertical lines starting from endpoints
+    ax.plot([endpoint1[0], endpoint1[0]], [endpoint1[1], endpoint1[1]], [endpoint1[2], endpoint1[2]-0.035], color='green' if grasp_outcome==1 else 'red', zorder=20)
+    ax.plot([endpoint2[0], endpoint2[0]], [endpoint2[1], endpoint2[1]], [endpoint2[2], endpoint2[2]-0.035], color='green' if grasp_outcome==1 else 'red', zorder=20)
+
+    # Display plot viewing orientation
+    ax.view_init(elev=orientation[0], azim=orientation[1], roll=orientation[2])
+
+
+# Draw block object
+def plot_3d_box(ax, orientation):
+    # Dimensions of the box object: (W=0.025, H=0.05, D=0.05)
+    # Dimensions for unit box: (0,0,0), (0,1,0), (1,0,0), (0,0,1)
+    cube_definition = [(-0.0125, -0.025, 0), (0.0125, -0.025, 0), (-0.0125, 0.0255, 0), (-0.0125, -0.025, 0.05)]
+    cube_definition_array = [np.array(list(item)) for item in cube_definition]
+    points = []
+    points += cube_definition_array
+    vectors = [
+        cube_definition_array[1] - cube_definition_array[0],
+        cube_definition_array[2] - cube_definition_array[0],
+        cube_definition_array[3] - cube_definition_array[0]
+    ]
+    points += [cube_definition_array[0] + vectors[0] + vectors[1]]
+    points += [cube_definition_array[0] + vectors[0] + vectors[2]]
+    points += [cube_definition_array[0] + vectors[1] + vectors[2]]
+    points += [cube_definition_array[0] + vectors[0] + vectors[1] + vectors[2]]
+    points = np.array(points)
+    edges = [
+        [points[0], points[3], points[5], points[1]],
+        [points[1], points[5], points[7], points[4]],
+        [points[4], points[2], points[6], points[7]],
+        [points[2], points[6], points[3], points[0]],
+        [points[0], points[2], points[4], points[1]],
+        [points[3], points[6], points[7], points[5]]
+    ]
+    faces = Poly3DCollection(edges, linewidths=1, edgecolors='k')
+    faces.set_facecolor((0,0,1,0.1))
+    faces.set_zorder(3)
+    ax.add_collection3d(faces)
+    # Plot the points themselves to force the scaling of the axes
+    ax.scatter(points[:,0], points[:,1], points[:,2], c=points[:,2], s=0)
+    ax.set_aspect('equal')
+    ax.view_init(elev=orientation[0], azim=orientation[1], roll=orientation[2])
+#### 4a. Visualise tactile and visual data for 1 successful and 1 unsuccessful grasp
+successful_grasps = np.where(grasp_outcomes_data == 1)[0]
+unsuccessful_grasps = np.where(grasp_outcomes_data == 0)[0]
+
+# Randomly select one index from each set
+successful_rand_idx = np.random.choice(successful_grasps)
+unsuccessful_rand_idx = np.random.choice(unsuccessful_grasps)
+
+rand_indices = np.array([successful_rand_idx, unsuccessful_rand_idx])
+
+
+# Note that the plots use the "..._data" datasets instead of the "..._ds" datasets since 
+# the "..._ds" datasets are already flattened for training
+for i in range(2):
+    fig = plt.figure(figsize=(14, 3))
+    # fig.suptitle("Successful grasp" if grasp_outcomes_data[rand_indices[i]].item() == 1.0 else "Unsuccessful grasp")
+    
+    ax1 = fig.add_subplot(1, 3, 1)
+    ax1.set_xlabel("Depth")
+    ax1.imshow(np.array(depth_data[rand_indices[i]]), cmap='gray')
+
+    ax2 = fig.add_subplot(1, 3, 2)
+    ax2.set_xlabel("Colour")
+    ax2.imshow(np.array(color_data[rand_indices[i]]) / 255., cmap='gray')
+    
+    ax3 = fig.add_subplot(1, 3, 3, projection='3d')
+    ax3.set_xlabel('x position')
+    ax3.set_ylabel('y position')
+    ax3.set_zlabel('z position')
+    ax3.set_xlim3d(-0.05, 0.05)
+    ax3.set_ylim3d(-0.05, 0.05)
+    ax3.set_zlim3d(0, 0.1)
+
+    ax3.spines['top'].set_visible(False)
+    ax3.spines['right'].set_visible(False)
+    ax3.spines['bottom'].set_visible(False)
+    ax3.spines['left'].set_visible(False)
+
+    pose_data = poses_data[rand_indices]
+    plot_ee_pose(pose_data=poses_data[rand_indices[i]], grasp_outcome=grasp_outcomes_data[rand_indices[i]], ax=ax3, orientation=(30, 45, 0))
+    plot_3d_box(ax3, orientation=(30, 45, 0))
+
+fig.subplots_adjust(wspace=0.3, hspace=0.3)
+plt.show()
+#### 4b. Visualise all end effector poses on box as skeleton hands
+# Create 3 plots: 1 with the box only, remaining 2 with all poses each at different viewing orientations
+for i in range(3):
+    fig = plt.figure(figsize=(6, 6))
+    ax = fig.add_subplot(111, projection='3d', computed_zorder=False)
+    
+    # Plot unit vectors
+    x_unit = np.array([0.1, 0, 0])
+    y_unit = np.array([0, 0.075, 0])
+    z_unit = np.array([0, 0, 0.125])
+    ax.plot([0, x_unit[0]], [0, x_unit[1]], [0, x_unit[2]], color='r')
+    ax.plot([0, y_unit[0]], [0, y_unit[1]], [0, y_unit[2]], color='g')
+    ax.plot([0, z_unit[0]], [0, z_unit[1]], [0, z_unit[2]], color='b')
+
+    ax.text(x_unit[0], x_unit[1], x_unit[2], 'X')
+    ax.text(y_unit[0], y_unit[1], y_unit[2], 'Y')
+    ax.text(z_unit[0], z_unit[1], z_unit[2], 'Z')
+
+    # Remove all the axis and their labels
+    ax.axis('off')
+    ax.set_aspect('equal')
+    plot_3d_box(ax, orientation=(15, 30, 0))
+    if i == 0:
+        ax.set_xlim3d(-0.05, 0.05)
+        ax.set_ylim3d(-0.05, 0.05)
+        ax.set_zlim3d(0, 0.1)
+    if i > 0:
+        ax.set_xlim3d(-0.05, 0.05)
+        ax.set_ylim3d(-0.05, 0.05)
+        ax.set_zlim3d(0, 0.1)
+        for i in range(poses_data.shape[0]):
+            plot_ee_pose(pose_data=poses_data[i], grasp_outcome=grasp_outcomes_data[i], ax=ax, orientation=(15, 30+90*(i-1), 0))
+### 5. Model training
+# We now train our Logistic Regression models on the 3 combinations of our data (tactile, visual, both):
+# - Raw data
+# - Principal Component Analysis - 2 main components
+# - Convolutional Neural Network processed data
+#### Prepare training and testing datasets
+X_tactile_train, X_tactile_test, y_tactile_train, y_tactile_test = train_test_split(tactile_ds.reshape(tactile_ds.shape[0], -1), grasp_outcomes_data, test_size=0.2, random_state=0)
+X_visual_train, X_visual_test, y_visual_train, y_visual_test = train_test_split(visual_ds, grasp_outcomes_data, test_size=0.2, random_state=0)
+X_complete_train, X_complete_test, y_complete_train, y_complete_test = train_test_split(complete_ds, grasp_outcomes_data, test_size=0.2, random_state=0)
+### 5.1 Raw data
+#### 5.1.1 Raw data (tactile only) + LR
+model_511 = LogisticRegression(random_state=0, max_iter=1000)
+model_511.fit(X_tactile_train, y_tactile_train)
+model_511_predictions = model_511.predict(X_tactile_test)
+#### 5.1.2 Raw data (visual only) + LR
+model_512 = LogisticRegression(random_state=0, max_iter=1000)
+model_512.fit(X_visual_train, y_visual_train)
+model_512_predictions = model_512.predict(X_visual_test)
+#### 5.1.3 Raw data (both) + LR
+model_513 = LogisticRegression(random_state=0, max_iter=1000)
+model_513.fit(X_complete_train, y_complete_train)
+model_513_predictions = model_513.predict(X_complete_test)
+### 5.3 CNN for dimensionality reduction
+# A simple convolutional neural network that extracts features from an input tensor
+class FeatureExtractorCNN(nn.Module):
+    def __init__(self):
+        super(FeatureExtractorCNN, self).__init__()
+        self.conv1 = nn.Conv2d(4, 8, kernel_size=3, stride=1, padding=1)
+        self.conv2 = nn.Conv2d(8, 16, kernel_size=3, stride=1, padding=1)
+        self.conv3 = nn.Conv2d(16, 32, kernel_size=3, stride=1, padding=1)
+
+        self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
+
+
+    def forward(self, x):
+        # print(f"Input size: {x.shape}")
+        x = self.conv1(x)
+        # print(f"Shape after conv1: {x.shape}")
+        x = nn.functional.relu(x)
+        x = self.pool(x)
+        # print(f"Shape after pool1: {x.shape}")
+
+        x = self.conv2(x)
+        # print(f"Shape after conv2: {x.shape}")
+        x = nn.functional.relu(x)
+        x = self.pool(x)
+        # print(f"Shape after pool2: {x.shape}")
+        
+        x = self.conv3(x)
+        # print(f"Shape after conv3: {x.shape}")
+        x = nn.functional.relu(x)
+        x = self.pool(x)
+        # print(f"Shape after pool3: {x.shape}")
+
+        return x
+# Preprocess data using CNN feature extraction
+cnn = FeatureExtractorCNN()
+cnn_tactile = torch.cat([cnn(img.float().permute(2,0,1)).unsqueeze(0) for img in tactile_ds])
+cnn_tactile = cnn_tactile.reshape(cnn_tactile.shape[0], -1)
+cnn_tactile.shape
+# We simply combine the cnn-processed tactile data (from Section 5.3.1) with the visual data
+cnn_complete_ds = torch.cat([cnn_tactile.reshape(cnn_tactile.shape[0], -1), visual_ds], dim=1)
+cnn_complete_ds.shape
+X_cnn_tactile_train, X_cnn_tactile_test, y_cnn_tactile_train, y_cnn_tactile_test = train_test_split(cnn_tactile.detach().numpy(), grasp_outcomes_data, test_size=0.2, random_state=0)
+X_cnn_complete_train, X_cnn_complete_test, y_cnn_complete_train, y_cnn_complete_test = train_test_split(cnn_complete_ds.detach().numpy(), grasp_outcomes_data, test_size=0.2, random_state=0)
+#### 5.3.1 CNN (tactile only) + LR
+model_531 = LogisticRegression(random_state=0, max_iter=1000)
+model_531.fit(X_cnn_tactile_train, y_cnn_tactile_train)
+model_531_predictions = model_531.predict(X_cnn_tactile_test)
+#### 5.3.2 CNN (visual only) + LR
+#### 5.3.3 CNN (both) + LR
+model_533 = LogisticRegression(random_state=0, max_iter=1000)
+model_533.fit(X_cnn_complete_train, y_cnn_complete_train)
+model_533_predictions = model_533.predict(X_cnn_complete_test)
+#### 5.3.4 CNN (tactile only) + PCA + LR
+def pca(tensor, k, verbose=False):
+    if len(tensor) == 3:
+        tensor = tensor.reshape((tensor.shape[0], -1))
+    
+    pca = PCA(n_components=k)
+    pca.fit(tensor)
+
+    variance = sum(pca.explained_variance_ratio_) * 100
+    # print(f"Variance captured for {k} components: {variance:.2f}%")
+
+    if verbose:
+        return pca.transform(tensor), k, variance
+    else:
+        return pca.transform(tensor)
+# We select $k$ principal components that correspond to 90% variance of the dataset.
+K = 0
+
+k_variances = []
+for i in range(1, 30):
+    pca_cnn_tactile_ds, k, variance = pca(cnn_tactile.detach().numpy(), k=i, verbose=True)
+    k_variances.append(variance)
+    if variance > 90:
+        print(f"Choose {k} components for CNN + tactile only dataset.")
+        K = k
+        break
+for k in range(0, K, 5):
+    if k > 0:
+        print(f"Variance for {k} components: {k_variances[k]:.2f}%")
+# Plot number of components against variance captured
+plt.plot(k_variances)
+plt.xlabel('Number of components ' + r'$k$')
+plt.ylabel('Variance (%)')
+plt.show()
+pca_cnn_tactile_ds = pca(cnn_tactile.detach().numpy(), k=5)
+X_pca_cnn_tactile_train, X_pca_cnn_tactile_test, y_pca_cnn_tactile_train, y_pca_cnn_tactile_test = train_test_split(pca_cnn_tactile_ds, grasp_outcomes_data, test_size=0.2, random_state=0)
+model_534 = LogisticRegression(random_state=0, max_iter=1000)
+model_534.fit(X_pca_cnn_tactile_train, y_pca_cnn_tactile_train)
+model_534_predictions = model_534.predict(X_pca_cnn_tactile_test)
+pca_cnn_complete_ds = pca(cnn_complete_ds.detach().numpy(), k=5)
+X_pca_cnn_complete_train, X_pca_cnn_complete_test, y_pca_cnn_complete_train, y_pca_cnn_complete_test = train_test_split(pca_cnn_complete_ds, grasp_outcomes_data, test_size=0.2, random_state=0)
+model_535 = LogisticRegression(random_state=0, max_iter=1000)
+model_535.fit(X_pca_cnn_complete_train, y_pca_cnn_complete_train)
+model_535_predictions = model_535.predict(X_pca_cnn_complete_test)
+### 5.4 Results
+def plot_confusion_matrices(model_data, fig_height):
+    fig, axn = plt.subplots(1, len(model_data), sharex=True, sharey=True, figsize=(12, fig_height))
+
+    for i, ax in enumerate(axn.flat):
+        try:
+            model_name = list(model_data.keys())[i]
+            model = model_data[model_name]
+            preds = model["preds"]
+            score = model["score"]
+            test_set = model["test_set"]
+
+            if score is not None and preds is not None and test_set is not None:
+                cm = confusion_matrix(test_set, preds)
+                sns.heatmap(cm, linewidths=1, ax=ax, annot=True, fmt='g')
+                ax.set_title(model_name + f": {score*100:.2f}%", fontsize=8)
+            else:
+                ax.set_title(model_name + "No results", fontsize=8)
+            continue
+        except IndexError:
+            pass
+model_data = {
+    "Raw (tactile only)": {"score": model_511.score(X_tactile_test, y_tactile_test), "preds": model_511_predictions, "test_set": y_tactile_test},
+    "Raw (visual only)": {"score": model_512.score(X_visual_test, y_visual_test), "preds": model_512_predictions, "test_set": y_visual_test},
+    "Raw (both)": {"score": model_513.score(X_complete_test, y_complete_test),"preds": model_513_predictions,"test_set": y_complete_test},
+}
+plot_confusion_matrices(model_data, fig_height=3)
+model_data = {
+    "CNN (tactile only)": {"score": model_531.score(X_cnn_tactile_test, y_cnn_tactile_test), "preds": model_531_predictions,"test_set": y_cnn_tactile_test},
+    "CNN (both)": {"score": model_533.score(X_cnn_complete_test, y_cnn_complete_test), "preds": model_533_predictions, "test_set": y_cnn_complete_test},
+    "CNN (tactile only) + PCA": {"score": model_534.score(X_pca_cnn_tactile_test, y_pca_cnn_tactile_test), "preds": model_534_predictions, "test_set": y_pca_cnn_tactile_test},
+    "CNN (both) + PCA": {"score": model_535.score(X_pca_cnn_complete_test, y_pca_cnn_complete_test), "preds": model_535_predictions, "test_set": y_pca_cnn_complete_test}
+}
+plot_confusion_matrices(model_data, fig_height=2)
+\end{lstlisting}
+\section{Proposed Model Training Code}
+\begin{lstlisting}
+## UCL COMP0029 Individual Project for Year 3 BSc
+### Robust Robotic Grasping Utilising Touch Sensing - Proposed Learning Framework Notebook
+# This notebook contains the essential code for the proposed Multilayer Perceptron (MLP) approach to grasp stability prediction. The whole notebook should take approximately 10 minutes to run.
+### 1. Load packages
+import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+
+import torch
+import torch.nn as nn
+import torch.nn.init as init
+import torch.optim as optim
+from torch.utils.data import Dataset, DataLoader
+from torchvision import transforms
+from PIL import Image
+import os
+import gc
+
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, ConfusionMatrixDisplay
+from sklearn.decomposition import PCA
+
+import seaborn as sns
+# Set device for `PyTorch` training
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device
+# PyTorch configs
+gc.collect()
+torch.cuda.empty_cache()
+torch.set_num_threads(2)
+np.errstate(invalid='ignore', divide='ignore')
+### 2. Load datasets from saved .npy files
+# To collect data for this experiment, you can run the "Collect Sensory Data" button in the Pybullet simulation. This generates a predefined number of Gaussian grasps randomly generated from a base hand pose. Each individual grasp is considered as an individual experiment, and the data collected from this experiment is split into four, each stored in its own dataset.
+
+# For all object models used in this experiment, each object has 4 datasets which include:
+# - `depth_ds.npy` which stores the depth tactile data from the mounted DIGIT sensors
+# - `color_ds.npy` which stores the colored (RGB) version of the depth tactile data from the mounted DIGIT sensors
+# - `poses_ds.npy` which stores the randomly-generated 6d hand poses from the simulation
+# - `outcomes_ds.npy` which stores the outcomes of each random pose
+# In this notebook, we will use the following dataset combinations:
+# - `tactile` only (depth + colour)
+# - `visual` with geometric features
+# - `multi-modal` consisting of `tactile` and `visual`
+# - `complete` consisting of `tactile` and `visual` with geometric features
+root = "../datasets/"
+object_names = ["block1", "block2", "block3", "cylinder1", "cylinder2", "cylinder3", "mustard_bottle1", "mustard_bottle2", "mustard_bottle3"]
+# Load `.npy` datasets via `np.load()`
+depth_data = np.empty((0, 2, 160, 120))
+color_data = np.empty((0, 2, 160, 120, 3))
+poses_data = np.empty((0, 6))
+grasp_outcomes_data = np.empty((0,))
+
+for object_name in object_names:
+    # Construct the relative paths of each dataset and load them into the notebook
+    depth_data_temp = np.load(root + object_name + "_ds/depth_ds.npy", mmap_mode='r')
+    colour_data_temp = np.load(root + object_name + "_ds/color_ds.npy", mmap_mode='r')
+    poses_data_temp = np.load(root + object_name + "_ds/poses_ds.npy", mmap_mode='r')
+    grasp_labels_temp = np.load(root + object_name + "_ds/grasp_outcomes.npy", mmap_mode='r')
+
+    depth_data = np.append(depth_data, depth_data_temp, axis=0)
+    color_data = np.append(color_data, colour_data_temp, axis=0)
+    poses_data = np.append(poses_data, poses_data_temp, axis=0)
+    grasp_outcomes_data = np.append(grasp_outcomes_data, grasp_labels_temp, axis=0)
+del depth_data_temp, colour_data_temp, poses_data_temp, grasp_labels_temp
+torch.cuda.empty_cache()
+# These datasets should all be in the form of $(N\times...)$ where $N$ is the number of examples:
+print(f"Shape of depth_data: {depth_data.shape}")
+print(f"Shape of color_data: {color_data.shape}")
+print(f"Shape of poses_data: {poses_data.shape}")
+print(f"Shape of grasp_outcomes_data: {grasp_outcomes_data.shape}")
+# Additionally, we confirm the number of successful and unsuccessful grasps recorded. This helps us in the next section to determine how many examples we should include for each class in order to produce a balanced dataset.
+print(f"# of sucessesful grasps: {(grasp_outcomes_data == 1).sum()}")
+print(f"# of unsuccessful grasps: {(grasp_outcomes_data == 0).sum()}")
+### 3. Preprocessing
+In this section, we create the required datasets specified from section 2, and normalise the datasets.
+#### 3.1 Normalization
+def normalize(arr):
+    # Normalize & standardize each column
+    mean = np.mean(arr, axis=0)
+    std = np.std(arr, axis=0)
+    
+    arr = (arr - mean) / std
+    arr = np.nan_to_num(arr, 0)
+    arr[np.isinf(arr)] = 0
+    return arr
+# Depth and colour data consists of pairs of tactile sensory readings. Thus, we concatenate each pair together into single images
+depth_data = np.concatenate((depth_data[:, 0], depth_data[:, 1]), axis=2)
+color_data = np.concatenate((color_data[:, 0], color_data[:, 1]), axis=2)
+depth_data = torch.from_numpy(normalize(depth_data))
+color_data = torch.from_numpy(normalize(color_data))
+visual_data = torch.from_numpy(np.nan_to_num(normalize(poses_data)))
+print(f"Shape of depth_ds: {depth_data.shape}")
+print(f"Shape of colour_ds: {color_data.shape}")
+print(f"Shape of visual_ds: {visual_data.shape}")
+# Create the tactile dataset
+tactile_data = torch.cat([depth_data.unsqueeze(-1), color_data], dim=-1)
+tactile_data = torch.nan_to_num(tactile_data)
+print(f"Shape of tactile_ds: {tactile_data.shape}")
+del depth_data, color_data, poses_data
+torch.cuda.empty_cache()
+#### Dimensionality reduction
+# A simple convolutional neural network that extracts features from an input tensor
+class FeatureExtractorCNN(nn.Module):
+    def __init__(self):
+        super(FeatureExtractorCNN, self).__init__()
+        self.conv1 = nn.Conv2d(4, 16, kernel_size=3, stride=1, padding=1)
+        self.conv2 = nn.Conv2d(16, 64, kernel_size=3, stride=1, padding=1)
+        self.conv3 = nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1)
+        self.conv4 = nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1)
+
+        self.pool = nn.MaxPool2d(kernel_size=3)
+
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = nn.functional.relu(x)
+        x = self.pool(x)
+
+        x = self.conv2(x)
+        x = nn.functional.relu(x)
+        x = self.pool(x)
+        
+        x = self.conv3(x)
+        x = nn.functional.relu(x)
+        x = self.pool(x)
+
+        x = self.conv4(x)
+        x = nn.functional.relu(x)
+        x = self.pool(x)
+
+        return x
+# Preprocess data using CNN feature extraction
+cnn = FeatureExtractorCNN()
+cnn_tactile = torch.cat([cnn(img.float().permute(2,0,1)).unsqueeze(0) for img in tactile_data])
+cnn_tactile = cnn_tactile.reshape(cnn_tactile.shape[0], -1)
+cnn_tactile.shape
+del tactile_data
+### 4. Testing different data representations
+# In our MLP model, there are two fully connected (dense) layers, each with an activation function (ReLU for the first layer and no activation for the second layer). The input size, hidden size, and output size are parameters that need to be specified when creating an instance of the MLP.
+class MLP(nn.Module):
+    def __init__(self, input_size, hidden_size, output_size):
+        super(MLP, self).__init__()
+        self.fc1 = nn.Linear(input_size, hidden_size)
+        self.fc2 = nn.Linear(hidden_size, hidden_size)
+        self.fc3 = nn.Linear(hidden_size, output_size)
+        self.relu = nn.ReLU()
+
+        self.criterion = nn.BCEWithLogitsLoss()
+        self.optimizer = optim.Adam(self.parameters())
+
+    def forward(self, x):
+        x = self.fc1(x)
+        x = self.relu(x)
+        x = self.fc2(x)
+        x = self.relu(x)
+        x = self.fc3(x)
+        return x
+        
+    def train_mlp(self, epochs, X_train, y_train):
+        self.losses = []
+        for i in range(epochs):
+            inputs = torch.from_numpy(X_train).float()
+            labels = torch.from_numpy(y_train).float().view(-1, 1)
+
+            # Zero the gradients
+            self.optimizer.zero_grad()
+
+            # Forward pass
+            preds = self(inputs)
+            loss = self.criterion(preds, labels)
+            self.losses.append(loss.item())
+
+            # Backward pass and optimization
+            loss.backward()
+            self.optimizer.step()
+
+            if i % 10 == 0:
+                torch.cuda.empty_cache()
+
+    def eval_mlp(self, X_test, y_test, verbose=False):
+        # Evaluate the performance of the model on the testing set
+        with torch.no_grad():
+            inputs = torch.from_numpy(X_test).float()
+            labels = torch.from_numpy(y_test).float().view(-1, 1)
+
+            # Forward pass
+            final_preds = self(inputs)
+            predicted = (final_preds > 0).float()
+            
+            # Confusion matrix
+            if verbose:
+                cm = confusion_matrix(y_test, predicted)
+                sns.heatmap(cm, linewidths=1, annot=True, fmt='g')
+
+            # Performance metrics
+            accuracy = round(accuracy_score(labels, predicted) * 100, 2)
+            precision = round(precision_score(labels, predicted) * 100, 2)
+            recall = round(recall_score(labels, predicted) * 100, 2)
+            f1 = round(f1_score(labels, predicted) * 100, 2)
+            return accuracy, precision, recall, f1
+    
+    def plot_losses(self):
+        plt.plot(self.losses)
+        plt.xlabel('Epochs')
+        plt.ylabel('Training Loss')
+        plt.show()
+#### 4a. Testing datatset combinations (CNN dimensionality-reduced) without geometric features
+def train_mlp_multitrial(dataset, grasp_outcomes_data, trials_count: int = 5, sampling=False):
+    performance_metrics = np.empty((0, 4))
+    dataset = dataset.detach().numpy() if isinstance(dataset, torch.Tensor) else dataset
+
+    for i in range(trials_count):
+        X_train, X_test, y_train, y_test = train_test_split(dataset, grasp_outcomes_data, test_size=0.2)
+        mlp = MLP(input_size=X_train.shape[1], hidden_size=64, output_size=1)
+        mlp.train_mlp(epochs=500, X_train=X_train, y_train=y_train)
+        accuracy, precision, recall, f1 = mlp.eval_mlp(X_test=X_test, y_test=y_test)
+        metrics_row = np.array([accuracy, precision, recall, f1]).reshape(1, 4)
+        performance_metrics = np.append(performance_metrics, metrics_row, axis=0)
+
+        torch.cuda.empty_cache()
+    return performance_metrics
+# Train Tactile-only dataset + CNN
+metrics = train_mlp_multitrial(cnn_tactile, grasp_outcomes_data, trials_count=5)
+print("Tactile-only MLP")
+print(f"Accuracy:{metrics[:, 0]}")
+print(f"Mean accuracy score: {np.mean(metrics[:, 0]):.2f} + {np.std(metrics[:, 0]):.2f}")
+print(f"Mean precision score: {np.mean(metrics[:, 1]):.2f}  + {np.std(metrics[:, 1]):.2f}")
+print(f"Mean recall score: {np.mean(metrics[:, 2]):.2f}  + {np.std(metrics[:, 2]):.2f}")
+print(f"Mean f1 score: {np.mean(metrics[:, 3]):.2f} + {np.std(metrics[:, 3]):.2f}")
+torch.cuda.empty_cache()
+# Train Visual-only dataset + CNN
+metrics = train_mlp_multitrial(visual_data, grasp_outcomes_data, trials_count=5)
+print("Visual-only MLP")
+print(f"Accuracy:{metrics[:, 0]}")
+print(f"Mean accuracy score: {np.mean(metrics[:, 0]):.2f} + {np.std(metrics[:, 0]):.2f}")
+print(f"Mean precision score: {np.mean(metrics[:, 1]):.2f}  + {np.std(metrics[:, 1]):.2f}")
+print(f"Mean recall score: {np.mean(metrics[:, 2]):.2f}  + {np.std(metrics[:, 2]):.2f}")
+print(f"Mean f1 score: {np.mean(metrics[:, 3]):.2f} + {np.std(metrics[:, 3]):.2f}")
+torch.cuda.empty_cache()
+# Train Multi-modal dataset (tactile + visual) + CNN
+# We simply combine the cnn-processed tactile data (from Section 5.3.1) with the visual data
+cnn_complete = torch.cat([cnn_tactile.reshape(cnn_tactile.shape[0], -1), visual_data], dim=1)
+metrics = train_mlp_multitrial(cnn_complete, grasp_outcomes_data, trials_count=5)
+print("Multi-modal MLP")
+print(f"Accuracy:{metrics[:, 0]}")
+print(f"Mean accuracy score: {np.mean(metrics[:, 0]):.2f} + {np.std(metrics[:, 0]):.2f}")
+print(f"Mean precision score: {np.mean(metrics[:, 1]):.2f}  + {np.std(metrics[:, 1]):.2f}")
+print(f"Mean recall score: {np.mean(metrics[:, 2]):.2f}  + {np.std(metrics[:, 2]):.2f}")
+print(f"Mean f1 score: {np.mean(metrics[:, 3]):.2f} + {np.std(metrics[:, 3]):.2f}")
+del cnn_complete
+torch.cuda.empty_cache()
+### 5. Determining impact of geometric features of objects on MLP accuracy
+# This section aims to determine the capability of the selected object features (principal components) in identifying primitive object classes.
+from sklearn.decomposition import PCA
+from sklearn.cluster import KMeans, SpectralClustering
+from sklearn.preprocessing import StandardScaler
+
+
+np.set_printoptions(precision=2, formatter={'float_kind': "{:.3f}".format})
+#### 5a. Clustering for object features using PCA
+# Loading object features
+### Object features
+block_features = np.array([
+    [0.025, 0.05, 0.05, 0., 0., 0., 0., 0., 0.],
+    [0.03, 0.025, 0.045, 0., 0., 0., 0., 0., 0.],
+    [0.05, 0.025, 0.04, 0., 0., 0., 0., 0., 0.],
+])
+
+cylinder_features = np.array([
+    [0.04, 0.04, 0.05, 950.21606561, 14540.28434464, 950.21606561, 14540.28434464, 950.21606561, 14540.28434464],
+    [0.045, 0.045, 0.035, 750.78800246, 11488.6197291, 750.78800246, 11488.6197291, 750.78800246, 11488.6197291],
+    [0.034, 0.034, 0.045, 1315.17794549, 20124.96103064, 1315.17794549, 20124.96103064, 1315.17794549, 20124.96103064]
+])
+
+bottle_features = np.array([
+    [0.06, 0.04, 0.04, 43195.64459266, 114198.0441697 , 45229.93706864, 135651.61794731, 75768.06626518,  83802.00991944],
+    [0.04, 0.06, 0.06, 68993.34322089, 220902.86884084, 75354.47923164, 239160.99530455, 109695.41304924, 147938.06047763],
+    [0.04, 0.06, 0.04, 61744.75459905, 168925.8805044 , 68143.84372052, 148775.07141178, 73102.67367022, 102953.40831915]
+])
+
+object_names = {0: 'cylinder', 1: 'block', 2: 'bottle'}
+# Feature transformation - concatenating features together
+object_features = (block_features, cylinder_features, bottle_features)
+features = np.concatenate(object_features)
+labels = np.array([0, 0, 0, 1, 1, 1, 2, 2, 2])
+# Standardize the data
+scaler = StandardScaler()
+features = scaler.fit_transform(features)
+# PCA
+def pca(data, k, verbose=True):
+    pca = PCA(n_components=k)
+    pca.fit(data)
+
+    if verbose:
+        print(f"Variance captured: {sum(pca.explained_variance_ratio_)*100:.2f}%")
+    return pca.transform(data)
+# Determine the number of components to use
+for i in range(1, 5):
+    pca_res = pca(features, k=i)
+### Plot 3-feature PCA results
+pca3d = pca(features, k=3)
+
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+
+colors = ['r', 'g', 'b']
+for i, c in zip(np.unique(labels), colors):
+    ax.scatter(pca3d[labels == i, 0], pca3d[labels == i, 1], pca3d[labels == i, 2], c=c, label=object_names[i])
+
+ax.set_xlabel('Component 1')
+ax.set_ylabel('Component 2')
+ax.set_zlabel('Component 3')
+ax.set_aspect('equal', 'box')
+ax.legend()
+plt.show()
+#### 5b. MLP: Dataset combination 4: Visual (EE pose and geometric features) + CNN
+blocks = np.repeat(np.concatenate(object_features), 160, axis=0)
+
+visual_data = np.concatenate((visual_data, blocks), axis=1)
+visual_data = torch.from_numpy(np.nan_to_num(normalize(visual_data)))
+visual_data.shape
+del object_features, blocks
+# Train Visual-only (EE pose + geometric features) + CNN
+metrics = train_mlp_multitrial(visual_data, grasp_outcomes_data, trials_count=5)
+print("Visual data (EE pose + geo) MLP")
+print(f"Accuracy:{metrics[:, 0]}")
+print(f"Mean accuracy score: {np.mean(metrics[:, 0]):.2f} + {np.std(metrics[:, 0]):.2f}")
+print(f"Mean precision score: {np.mean(metrics[:, 1]):.2f}  + {np.std(metrics[:, 1]):.2f}")
+print(f"Mean recall score: {np.mean(metrics[:, 2]):.2f}  + {np.std(metrics[:, 2]):.2f}")
+print(f"Mean f1 score: {np.mean(metrics[:, 3]):.2f} + {np.std(metrics[:, 3]):.2f}")
+#### 5c. MLP: Dataset combination 5: Tactile + Visual (EE pose and geometric features) + CNN
+torch.cuda.empty_cache()
+final_dataset = torch.cat((cnn_tactile, visual_data), dim=1)
+metrics = train_mlp_multitrial(final_dataset, grasp_outcomes_data, trials_count=5)
+print(f"Final dataset (no PCA) MLP")
+print(f"Accuracy:{metrics[:, 0]}")
+print(f"Mean accuracy score: {np.mean(metrics[:, 0]):.2f} + {np.std(metrics[:, 0]):.2f}")
+print(f"Mean precision score: {np.mean(metrics[:, 1]):.2f}  + {np.std(metrics[:, 1]):.2f}")
+print(f"Mean recall score: {np.mean(metrics[:, 2]):.2f}  + {np.std(metrics[:, 2]):.2f}")
+print(f"Mean f1 score: {np.mean(metrics[:, 3]):.2f} + {np.std(metrics[:, 3]):.2f}")
+del cnn_tactile
+#### 5d. MLP: Selecting number of components for PCA (with dataset combination 5)
+# We conduct the following experiment to determine the optimal value of $k$ for PCA:
+# 1. Train the MLP from $k=1$ to $k=20$
+# 2. Repeat 1 for 5 times to find the average accuracy for each $k$, and choose $k$ value for the highest mean accuracy
+MIN_K, MAX_K = 1, 30
+pca_accuracies_mean = []
+pca_accuracies_std = []
+for i in range(MIN_K, MAX_K+1):
+    transformed_dataset = pca(final_dataset.detach().numpy(), k=i, verbose=False)
+    transformed_dataset = torch.from_numpy(transformed_dataset)
+    metrics = train_mlp_multitrial(transformed_dataset, grasp_outcomes_data)
+    pca_accuracies_mean.append(np.mean(metrics[:, 0]))
+    pca_accuracies_std.append(np.std(metrics[:, 0]))
+    torch.cuda.empty_cache()
+    print(f"Completed PCA training for k={i} components")
+del transformed_dataset
+del visual_data
+# Calculate the average accuracies for each $k$
+pca_accuracies_mean = np.array(pca_accuracies_mean)
+pca_accuracies_std = np.array(pca_accuracies_std)
+K = pca_accuracies_mean.argmax(axis=0)
+print(f"Number of components for PCA: {K}")
+x = np.arange(MIN_K, MAX_K+1)
+plt.errorbar(x, pca_accuracies_mean, yerr=pca_accuracies_std, fmt='o', markersize=5, ecolor='red', capsize=3, capthick=1)
+plt.grid(True)
+plt.xlabel("Number of principal components")
+plt.xticks(np.arange(MIN_K, MAX_K+1, step=2))
+plt.ylabel("Mean MLP accuracy (%)")
+plt.title("Impact of Number of Principal Components on MLP Accuracy")
+plt.show()
+x = np.arange(MIN_K, MAX_K+1, step=1)
+plt.plot(x, pca_accuracies_mean)
+plt.fill_between(x, pca_accuracies_mean-pca_accuracies_std, pca_accuracies_mean+pca_accuracies_std, alpha=0.2)
+plt.grid(True)
+plt.xlabel("Number of principal components")
+plt.xticks(np.arange(MIN_K, MAX_K+1, step=2))
+plt.ylabel("Mean MLP accuracy (%)")
+plt.title("Impact of Number of Principal Components on MLP Accuracy")
+plt.show()
+top_accuracy_indices = np.argsort(pca_accuracies_mean)[-5:] 
+top_accuracies = pca_accuracies_mean[top_accuracy_indices]
+top_stds = pca_accuracies_std[top_accuracy_indices]
+
+print("Top 5 mean accuracies:", top_accuracies)
+print("Top 5 std accuracies:", top_stds)
+print("Corresponding indices:", top_accuracy_indices + 1)
+### 6. Experiments
+# We update the train_mlp_multitrial function to accomodate pre-defined training and testing datasets
+def train_mlp_multitrial2(X_train, X_test, y_train, y_test, trials_count: int = 5):
+    performance_metrics = np.empty((0, 4))
+
+    for i in range(trials_count):
+        mlp = MLP(input_size=X_train.shape[1], hidden_size=64, output_size=1)
+        mlp.train_mlp(epochs=500, X_train=X_train, y_train=y_train)
+        accuracy, precision, recall, f1 = mlp.eval_mlp(X_test=X_test, y_test=y_test)
+        metrics_row = np.array([accuracy, precision, recall, f1]).reshape(1, 4)
+        performance_metrics = np.append(performance_metrics, metrics_row, axis=0)
+
+        torch.cuda.empty_cache()
+    
+    return performance_metrics
+#### 6.1 Train MLP on 2 blocks, test on remaining block
+# Objective: see MLP's robustness
+combinations = [
+    [[1, 2], [3]],
+    [[1, 3], [2]],
+    [[2, 3], [1]]
+]
+
+exp1_accuracies_mean = []
+exp1_accuracies_std = []
+final_dataset = final_dataset.detach().numpy()
+
+for i in range(3):  # For each primitive object type (box, cylinder, bottle)
+    stidx = 480 * i # Starting index to slice final dataset
+    for combination in combinations:
+        training, testing = combination[0], combination[1]
+        X_train1 = final_dataset[(stidx + (training[0] - 1) * 160 + 1):(stidx + (training[0] * 160))]
+        X_train2 = final_dataset[(stidx + (training[1] - 1) * 160 + 1):(stidx + (training[1] * 160))]
+        X_train = np.vstack((X_train1, X_train2))
+
+        y_train1 = grasp_outcomes_data[(stidx + (training[0] - 1) * 160 + 1):(stidx + (training[0] * 160))]
+        y_train2 = grasp_outcomes_data[(stidx + (training[1] - 1) * 160 + 1):(stidx + (training[1] * 160))]
+        y_train = np.concatenate((y_train1, y_train2))
+        
+
+        X_test = final_dataset[(stidx + (testing[0] - 1) * 160 + 1):(stidx + (testing[0] * 160))]
+        y_test = grasp_outcomes_data[stidx + (testing[0] - 1) * 160 + 1:stidx + (testing[0] * 160)]
+        metrics = train_mlp_multitrial2(X_train, X_test, y_train, y_test)
+        exp1_accuracies_mean.append(np.mean(metrics[:, 0]))
+        exp1_accuracies_std.append(np.std(metrics[:, 0]))
+        torch.cuda.empty_cache()
+del X_train, X_test, y_train, y_test, training, testing, combination, combinations
+exp1_accuracies_mean = np.array(exp1_accuracies_mean)
+exp1_accuracies_std = np.array(exp1_accuracies_std)
+exp1_accuracies_mean
+exp1_accuracies_std
+#### 6.2 Train MLP on randomly sampled subset of all objects
+# Objective: see influence of dataset size on accuracy;
+# Randomly sample a dataset of the specified size without shuffling the dataset.
+def consistent_sampling(dataset1, dataset2, input_size):
+    num_rows = len(dataset1)
+    indices = np.random.choice(len(dataset1), input_size, replace=False)
+    samples1, samples2 = [], []
+    for i in indices:
+        samples1.append(dataset1[i])
+        samples2.append(dataset2[i])
+    
+    samples1 = np.stack(samples1, axis=0)
+    samples2 = np.stack(samples2, axis=0)
+    return samples1, samples2
+exp2_accuracies_mean = []
+exp2_accuracies_std = []
+
+for input_size in range(100, 1500, 100):
+    dataset, grasp_labels = consistent_sampling(final_dataset, grasp_outcomes_data, input_size=input_size)
+    metrics = train_mlp_multitrial(dataset, grasp_labels)
+    exp2_accuracies_mean.append(np.mean(metrics[:, 0]))
+    exp2_accuracies_std.append(np.std(metrics[:, 0]))
+exp2_accuracies_mean = np.array(exp2_accuracies_mean)
+exp2_accuracies_std = np.array(exp2_accuracies_std)
+x = np.arange(100, 1500, step=100)
+plt.plot(x, exp2_accuracies_mean)
+plt.fill_between(x, exp2_accuracies_mean-exp2_accuracies_std, exp2_accuracies_mean+exp2_accuracies_std, alpha=0.2)
+plt.grid(True)
+plt.xlabel("Sample size")
+plt.xticks(np.arange(100, 1500, step=100), rotation=45)
+plt.ylabel("Mean MLP Accuracy (%)")
+plt.title("Impact of Sample Size on MLP Performance")
+plt.show()
+\end{lstlisting}
 \end{document}
