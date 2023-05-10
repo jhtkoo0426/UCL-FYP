@@ -91,26 +91,14 @@ class ClutteredPushGrasp:
         self.jointObsButtonVal = 2.0
         self.baselineDataColButtonVal = 2.0
         self.mlpDataColButtonVal = 2.0
-        self.openGripperButtonVal = 2.0
-        self.closeGripperButtonVal = 2.0
         self.getObjectFeaturesButtonVal = 2.0
         self.resetSimulationButtonVal = 2.0
         self.fetch6dButtonVal = 2.0
-
-    def readOpenGripperButton(self):
-        if p.readUserDebugParameter(self.openGripperButton) >= self.openGripperButtonVal:
-            self.robot.open_gripper()
-        self.openGripperButtonVal = p.readUserDebugParameter(self.openGripperButton) + 1.0
     
     def readGetObjectFeaturesButton(self):
         if p.readUserDebugParameter(self.getObjectFeaturesButton) >= self.getObjectFeaturesButtonVal:
             object_geometric_features = self.getObjectGeometry(self.container.ID)
         self.getObjectFeaturesButtonVal = p.readUserDebugParameter(self.getObjectFeaturesButton)+ 1.0
-
-    def readCloseGripperButton(self):
-        if p.readUserDebugParameter(self.closeGripperButton) >= self.closeGripperButtonVal:
-            self.robot.close_gripper()
-        self.closeGripperButtonVal = p.readUserDebugParameter(self.closeGripperButton) + 1.0
 
     def readJointObsButton(self, angles):
         if p.readUserDebugParameter(self.jointObsButton) >= self.jointObsButtonVal:
@@ -543,8 +531,6 @@ class ClutteredPushGrasp:
         self.readJointObsButton(sixd)
         self.readBaselineDataCollectionButton()
         self.readMLPDataCollectionButton()
-        self.readOpenGripperButton()
-        self.readCloseGripperButton()
         self.readGetObjectFeaturesButton()
         self.readFetch6dButton(action[:-1])
         
@@ -588,12 +574,10 @@ class ClutteredPushGrasp:
         self.initButtonVals()
         self.resetSimulationButton  = p.addUserDebugParameter("Reset simulation", 1, 0, 1)
         self.jointObsButton = p.addUserDebugParameter("Get joint coordinates", 1, 0, 1)
-        self.baselineDataColButton = p.addUserDebugParameter("Collect data (baseline)", 1, 0, 1)
-        self.mlpDataColButton = p.addUserDebugParameter("Collect data (proposed)", 1, 0, 1)
-        self.openGripperButton = p.addUserDebugParameter("Open gripper", 1, 0, 1)
-        self.closeGripperButton = p.addUserDebugParameter("Close gripper", 1, 0, 1)
         self.getObjectFeaturesButton = p.addUserDebugParameter("Get object features", 1, 0, 1)
         self.fetch6dButton = p.addUserDebugParameter("Get end effector pose", 1, 0, 1)
+        self.baselineDataColButton = p.addUserDebugParameter("Collect data (baseline)", 1, 0, 1)
+        self.mlpDataColButton = p.addUserDebugParameter("Collect data (proposed)", 1, 0, 1)
 
     # Reset the whole simulation
     def reset_simulation(self):

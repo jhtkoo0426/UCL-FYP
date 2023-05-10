@@ -23,7 +23,7 @@ target_object:
   # object_name options:
   # Baseline: "block" only
   # MLP old dataset: ["block1", "block2", "block3", "cylinder1", "cylinder2", "cylinder_3", "bottle1", "bottle2", "bottle3"]
-  object_name: bottle2
+  object_name: block
   object_position: [0, 0, 0.25]
   global_scaling : 1.0
 
