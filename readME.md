@@ -13,23 +13,64 @@ https://user-images.githubusercontent.com/52330996/216103556-56d965ef-75c2-4b0a-
 Before compiling and testing the code from this repository, please ensure that your system has been properly configured with the following requirements:
 1. Linux Operating System (preferably Ubuntu 20.04). The code for this project was only developed and tested on Ubuntu 20.04. It is not guaranteed to compile and run fully functionally on other operating system and devices.
 2. Python 3.8.16
+3. The `virtualenv` package for creating Python virtual environments is installed.
 
 ## Deployment
 1. Clone the repository or download a zip file containing the repository code.
-2. Create a Python virtual environment with Python 3.8.16. Ensure that the virtual environment is created in the root directory of the project:
-3. Activate the virtual environment:
    ```
-   source fyp_env/activate
+   git clone https://github.com/uclzzjn7/UCL-FYP.git
    ```
-4. Install `PyTorch`:
+2. If you already have Python 3.8.16 installed on your OS, please skip to step 4.
+3. In a new terminal, run the following commands in sequence:
+   ```
+   sudo apt update
+   ```
+   ```
+   sudo apt install software-properties-common
+   ```
+   ```
+   sudo add-apt-repository ppa:deadsnakes/ppa
+   ```
+   ```
+   sudo apt-cache policy python3.8
+   ```
+   This should install Python 3.8.16.
+4. Find the root path of Python 3.8.16 in your OS:
+   ```
+   ls /usr/bin/python*
+   ```
+
+5. Create a Python virtual environment with Python 3.8.16.
+   ```
+   virtaulenv venv --python="<path of Python 3.8.16>"
+   ```
+   Assuming that the path of Python 3.8.16 is "/usr/bin/python3.8", then the command for creating a virtual environment should be:
+   ```
+   virtualenv venv --python="/usr/bin/python3.8"
+   ```
+   Ensure that the virtual environment is created in the root directory of the project:
+   ```
+   /docs
+   /src
+   /venv
+      /bin
+      activate
+      ...
+   ```
+6. Activate the virtual environment:
+   ```
+   source venv/bin/activate
+   ```
+7. Run the following
+8. Install `PyTorch`:
    ```
    pip3 install torch==1.13.1+cu116 torchaudio==0.13.1+cu116 torchvision==0.14.1+cu116 --extra-index-url https://download.pytorch.org/whl/cu116 --no-cache-dir
    ```
-5. Install all required Python packages:
+9.  Install all required Python packages:
    ```
    pip install -r requirements.txt
    ```
-6. Run the Pybullet simulation:
+10. Run the Pybullet simulation:
    ```
    python src/main.py
    ```
@@ -48,7 +89,9 @@ There are several core functionalities provided by our Pybullet simulation. Thes
   ```
 
 ## Training models
-The baseline and proposed models for this project are trained separately from the simulation code since it requires a significantly larger amount of computing power. The relevant code can be found in the Jupyter notebooks (with the `.ipynb` file extension) in the `models/baseline_model` or `models/mlp_model` directories. If this code needs to be assessed, please ensure that these notebooks are run with `cuda` enabled. Otherwise, there is a risk of insufficient memory allocation to training the models.
+The baseline and proposed models for this project are trained separately from the simulation code since it requires a significantly larger amount of computing power. The relevant code can be found in the Jupyter notebooks (with the `.ipynb` file extension) in the `models/baseline_model` or `models/mlp_model` directories. If this code needs to be assessed, please ensure that these notebooks are run with `cuda` enabled, and the correct Python interpreter is selected for running the notebook (Python 3.8.16). Otherwise, there is a risk of insufficient memory allocation to training the models.
+
+Before starting, please download the `datasets` folder from this link: [https://drive.google.com/drive/folders/1d14Ul5YTjX-6w56OCxLbCXTLicDE3qnB?usp=sharing](https://drive.google.com/drive/folders/1d14Ul5YTjX-6w56OCxLbCXTLicDE3qnB?usp=sharing). This folder contains all required datasets for training the models. Extract all the contents of the `datasets` folder to under the `src/` directory (i.e. `src/datasets/`).
 
 ## Credits
 This simulation was developed collaboratively with Jeffery Wei, a Master's 23' project student working with the Statistical Machine Learning Group at UCL.

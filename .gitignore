@@ -107,4 +107,4 @@ GitHub.sublime-settings
 .history
 
 # Numpy
-# *.npy
+*.npy
