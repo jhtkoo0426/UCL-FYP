@@ -149,12 +149,14 @@ In recent years, the combination of physical simulators and machine learning has
     \label{fig:1.1}
 \end{figure}
 
-However, little work has been done on increasing robustness in grasping systems that utilise multi-modal (tactile and visual) data. Robustness in robotic grasping is a crucial property for ensuring effective and reliable manipulation of objects in a wide range of scenarios. It refers to the ability of a robotic grasping system to perform successful grasps despite uncertainties and variations in the environment and object properties (geometric, physical). One of the primary challenges in robotic grasping is the wide variety of shapes and sizes that objects can come in. This can make it difficult for a robotic grasping system to determine the best approach for grasping, as well as to adjust its grasp strategy based on the object's properties. A robust system should be able to handle these variations and adjust its grasp strategy accordingly to ensure that the object is firmly held during manipulation. Another challenge is posed by uncertainties in the object's pose. Objects can be placed in various orientations and positions, making it challenging for a robot to determine the optimal grasping location. A robust system should be able to estimate the object's pose accurately and choose an appropriate grasp location to ensure that the object is grasped correctly. Furthermore, the environment in which a robot operates can change unpredictably, with variations in lighting conditions, surface textures, and other factors affecting the ability of a robotic grasping system to perform well. A robust system should be able to adapt to these changes and adjust its grasping strategy accordingly.\\
+However, little work has been done on increasing robustness in grasping systems that utilise multi-modal (tactile and visual) data. Robustness in robotic grasping is a crucial property for ensuring effective and reliable manipulation of objects in a wide range of scenarios. It refers to the ability of a robotic grasping system to perform successful grasps despite uncertainties and variations in the environment and object properties (geometric, physical). In addition, ideally our robotic grasping system should be trained on relatively simple models and datasets while preserving as much performance as possible.\\
+
+One of the primary challenges in robotic grasping is the wide variety of shapes and sizes that objects can come in. This can make it difficult for a robotic grasping system to determine the best approach for grasping, as well as to adjust its grasp strategy based on the object's properties. A robust system should be able to handle these variations and adjust its grasp strategy accordingly to ensure that the object is firmly held during manipulation. Another challenge is posed by uncertainties in the object's pose. Objects can be placed in various orientations and positions, making it challenging for a robot to determine the optimal grasping location. A robust system should be able to estimate the object's pose accurately and choose an appropriate grasp location to ensure that the object is grasped correctly. Furthermore, the environment in which a robot operates can change unpredictably, with variations in lighting conditions, surface textures, and other factors affecting the ability of a robotic grasping system to perform well. A robust system should be able to adapt to these changes and adjust its grasping strategy accordingly.\\
 
 
 We aim to take the best of both analytic (24) and data-driven methods \cite{berscheid2020selfsupervised, pinto2015supersizing} to develop robust and scalable grasping methods. Robustness in a robotic grasping system refers to its versatility of accurately recognising and grasping objects with varying geometric features (width, depth, curvature, etc) and its ability to successfully grasp the objects. Robustness is increasingly becoming a vital factor in the study of grasp stability and quality, however, incorporating robustness makes it practically difficult to design a single gripper that can effectively grasp all objects. As a result, researchers and engineers have developed dedicated grippers tailored to specific grasping tasks or types of objects.\\
 
-However, developing a robust and efficient grasping system presents several challenges. One major hurdle is the incorporation of touch sensing into robotic grasping, which is hindered by hardware limitations such as sensor sensitivity and cost, as well as difficulties in integrating tactile inputs into standard control schemes \cite{Calandra_2018}. Consequently, most robotic grasping research has focused on vision and depth as the primary input modalities \cite{Calandra_2018, de_Farias_2021}.
+Developing a robust and efficient grasping system presents several challenges. One major hurdle is the incorporation of touch sensing into robotic grasping, which is hindered by hardware limitations such as sensor sensitivity and cost, as well as difficulties in integrating tactile inputs into standard control schemes \cite{Calandra_2018}. Consequently, most robotic grasping research has focused on vision and depth as the primary input modalities \cite{Calandra_2018, de_Farias_2021}.\\
 
 However, vision-based grasping approaches have limitations in measuring and reacting to ongoing contact forces, which hinders the full potential benefits of interaction. As a result, these approaches mostly rely on pre-selecting a grasp configuration, such as location, orientation, and forces, before making contact with the object. Addressing these limitations and integrating tactile feedback could significantly improve robotic grasping, leading to more efficient and effective interactions between robots and the physical world.\\
 
@@ -364,14 +366,14 @@ To summarise, this section has explored several strategies that could potentiall
     \item Shape modelling: Representing objects and grasps in a common space enables transferable grasps to various objects. However, this may deteriorate with partial point cloud data, therefore the shape space must accommodate missing data while avoiding unrealistic shape reconstructions.
     \item Use of tactile sensing: Tactile sensing can improve grasp planners, for example, through reinforcement learning to support open-loop systems. It provides an in-depth local regrasping procedure to improve stability.
 \end{enumerate}
-Most studies we have investigated incorporates some combination of tactile and visual data for learning grasping policies or predicting grasp stability, but very few have been optimised for robust performance that considers a variety of object classes. Therefore, our work will primarily address the impact of various feature representations on the performance of our supervised-learning models. % achieving good robustness (consistent performance of the grasping policy towards different objects). 
+Most studies we have investigated incorporates some combination of tactile and visual data for learning grasping policies or predicting grasp stability, but very few have been optimised for high and robust performance. Therefore, our work primarily addresses the impact of various feature representations on the performance of our supervised-learning models to reduce the dimensionality of our datasets, while attempting to achieve good robustness across all known objects in our project. 
 
 
 
 %----------------------------------------------------------------------------------
-% Section 3: Preliminaries
+% Section 3: Preliminaries: Simulation and Data
 %----------------------------------------------------------------------------------
-\chapter{Preliminaries}
+\chapter{Preliminaries: Simulation and Data}
 \label{chap:3}
 In this chapter, we present the practical aspects of the project. We first provide an overview of the Pybullet simulation and its functionalities specific to the project.
 
@@ -684,7 +686,7 @@ To train the binary logistic regression classifier on the tactile sensory data a
 After preparing the datasets, the logistic regression (logit) classifier was trained using the three dataset combinations that were previously discussed in \hyperref[sec:4.4.1]{Section 4.4.1}. To further explore the dataset characteristics, a combination of dimensionality reduction techniques was applied to these datasets, as discussed in \hyperref[sec:4.4.2]{Section 4.4.2}. Specifically, the techniques used were ConvNet only and ConvNet with PCA (top $k$ principal components). The logit model was then trained on these variations of the datasets with the aim of selecting the model and dataset combination that achieves the best accuracy. This approach allowed us to thoroughly explore the impact of different dataset combinations and dimensionality reduction techniques on the performance of the logit classifier.
 
 
-\subsection{Summary of training results}\label{sec:4.5.1}
+\subsection{Summary of Training Results}\label{sec:4.5.1}
 \label{sec:4.5.1}
 \begin{table}[H]
     \centering
@@ -703,12 +705,15 @@ After preparing the datasets, the logistic regression (logit) classifier was tra
     \caption{Accuracy of LR model on dataset variations with N=200 samples}
     \label{tbl:4.2}
 \end{table}
-As previously discussed, the logistic regression model was trained on three different dataset segmentations and three pre-processing methods were applied (CNN and PCA techniques were not applied to the 6-dimensional visual-only data since it is sufficient for training in terms of dimensionality). The results, as presented in \hyperref[tbl:4.2]{Table 4.2}, indicate that although utilising ConvNets and/or PCA techniques did not have a significant impact on the accuracy of the logit model, the dimensionality of the datasets was significantly reduced by more than 90\% when dimensionality-reducing techniques were used.
+As previously discussed, the logistic regression model was trained using three distinct dataset segmentations, with the application of three pre-processing methods. It is noteworthy that the employment of CNN and PCA techniques was omitted for the 6-dimensional visual-only data, as its dimensionality suffices for training purposes.
 
 
-\subsection{Trade-off between accuracy and dimensionality}\label{sec:4.5.2}
-Compared to traditional techniques like PCA, CNNs can learn complex, non-linear relationships between the tactile and visual features and the grasp outcome. This is particularly useful when dealing with high-dimensional data, where PCA may not capture the underlying patterns in the data. Moreover, the ability of CNNs to learn hierarchical feature representations can make them more interpretable, as each layer captures increasingly complex and abstract features, leading to a better understanding of the underlying mechanisms of the problem.
+\subsection{Analysis of Training Results and Balancing the Trade-off Between Accuracy and Dimensionality}\label{sec:4.5.2}
+The outcomes as presented in \hyperref[tbl:4.2]{Table 4.2} reveal that the incorporation of PCA techniques did not yield a considerable impact on the accuracy of the logit model. This observation can potentially be attributed to two underlying factors: firstly, the application of PCA to the dataset may result in the elimination of pertinent features or the introduction of noise through the utilisation of said techniques; secondly, it is plausible that non-linear relationships exist among the variables. However, it is worth noting that PCA assumes linearity in the relationships among variables, thereby implying that its accuracy may be influenced by the inability to capture relevant patterns, thereby resulting in a decline in accuracy.\\
 
+This also explains why applying CNN alone preserves or even increases the accuracy of our model, since it can learn complex, non-linear relationships between the tactile and visual features and the grasp outcome. This is particularly useful when dealing with high-dimensional data, where PCA may not capture the underlying patterns in the data. Moreover, the ability of CNNs to learn hierarchical feature representations can make them more interpretable, as each layer captures increasingly complex and abstract features, leading to a better understanding of the underlying mechanisms of the problem.\\
+
+Nevertheless, the application of dimensionality-reducing techniques resulted in a significant reduction of dataset dimensionality by over 90\%. This demonstrates a well-balanced trade-off between the accuracy and dimensionality of our dataset.
 
 \section{Conclusion}\label{sec:4.6}
 Based on the results presented in \hyperref[tbl:4.2]{Table 4.2}, we have determined that using both tactile and visual data together produces the highest accuracy for our LR models. While raw data performed better than other pre-processing techniques, we recognise that the dimensionality of the data must also be considered. Therefore, we have found that extracting features from our dataset using a ConvNet and selecting only the top $k=5$ components provides comparable accuracy with significantly lower dimensionality.
@@ -739,9 +744,7 @@ There have been several academic studies addressing the problem of grasp stabili
 To solve the grasp detection problem, the authors used ResNet-50, a 50-layer deep residual model (see \ref{fig:5.1}) that incorporates residual layers to reformulate the mapping function between layers and overcome the challenge of learning an identity mapping. The authors introduced two different architectures for robotic grasp prediction: a uni-modal grasp predictor that uses only single-modality information such as RGB, and a multi-modal grasp predictor that uses multi-modal information such as RGB and depth.\\
 
 
-Mahler et al. \cite{mahler2017dexnet} have proposed a method for evaluating grasp quality using a CNN trained on RGB-D images and force measurements. RGB-D refers to a type of sensor that captures both colour (RGB) and depth (D) information about a scene. RGB-D sensors typically consist of a regular colour camera to capture RGB images and an additional depth sensor, such as a time-of-flight or structured light sensor, which provides a depth image. The combination of RGB and depth information can be particularly useful for robotics applications, as it allows the robot to perceive and reason about the 3D structure of the environment, and to distinguish between objects that are close together but at different depths.\\
-
-In this paper, the authors propose a method for evaluating grasp quality using a CNN trained on RGB-D images and force/torque measurements. The network takes as input an RGB-D image of the scene, along with the 6-dimensional force/torque measurements recorded during a grasp attempt. It then predicts a scalar value for each grasp, indicating its expected success rate. The CNN was trained on a dataset of over 10000 grasps on a variety of objects. However, a limitation of this approach is that it requires accurate force sensing during the grasp attempt, which may not be always feasible in practice. Additionally, the scalar success rate predicted by the network may not be as interpretable as other grasp stability metrics, such as the wrench space analysis or the friction cone model. Nonetheless, this paper represents an important step towards using neural networks to evaluate grasp quality in robotics applications.
+Mahler et al. \cite{mahler2017dexnet} have proposed a method for evaluating grasp quality using a CNN trained on RGB-D images and force measurements. RGB-D refers to a type of sensor that captures both colour (RGB) and depth (D) information about a scene. RGB-D sensors typically consist of a regular colour camera to capture RGB images and an additional depth sensor, such as a time-of-flight or structured light sensor, which provides a depth image. The combination of RGB and depth information can be particularly useful for robotics applications, as it allows the robot to perceive and reason about the 3D structure of the environment, and to distinguish between objects that are close together but at different depths. In the paper, the authors propose a method for evaluating grasp quality using a CNN trained on RGB-D images and force/torque measurements. The network takes as input an RGB-D image of the scene, along with the 6-dimensional force/torque measurements recorded during a grasp attempt. It then predicts a scalar value for each grasp, indicating its expected success rate. The CNN was trained on a dataset of over 10000 grasps on a variety of objects. However, a limitation of this approach is that it requires accurate force sensing during the grasp attempt, which may not be always feasible in practice. Additionally, the scalar success rate predicted by the network may not be as interpretable as other grasp stability metrics, such as the wrench space analysis or the friction cone model. Nonetheless, this paper represents an important step towards using neural networks to evaluate grasp quality in robotics applications.
 
 
 \newpage
@@ -820,7 +823,7 @@ We define our MLP model in PyTorch and tailor it to predict grasp stability labe
 
 
 \section{Experiments on Impacts of Various Features}\label{sec:5.3}
-In this section, we present the results of some additional experiments that evaluate the robustness of the MLP model to primitive object classes and the influence of sample size on the model's performance.
+In this section, we present the results of some additional experiments that evaluate the robustness of the MLP model to primitive object classes and the influence of sample size on the model's performance. All models are trained for 500 epochs.
 
 
 \subsection{Robustness of MLP Model to Primitive Object Classes}\label{sec:5.3.1}
@@ -841,6 +844,8 @@ To test the robustness of the MLP model to each primitive object class (rectangu
         Cylinder 1, Cylinder 2 & Cylinder 3 & 47.55\pm1.30 \\
         Cylinder 1, Cylinder 3 & Cylinder 2 & 61.13\pm1.66\\
         Cylinder 2, Cylinder 3 & Cylinder 1 & 61.76\pm3.17 \\
+        \midrule
+        Average & & 57.26\pm1.71 \\
         \bottomrule
     \end{tabular}
     \caption{Mean and standard deviation of MLP accuracy (\%) by object class across 5 trials}
@@ -873,7 +878,7 @@ The validation set was used to evaluate the performance of the trained MLP model
 
 
 \subsection{Evaluation of Results}\label{sec:5.4.1}
-Our model is primarily trained on the dataset consisting all data sources, that is, tactile and visual (end effector poses and geometric data). For comparison of its effectiveness, we also train it on other variations of the datasets. The results are as follows:
+Our model is primarily trained on the dataset consisting all data sources, that is, tactile and visual (end effector poses and geometric data). For comparison of its effectiveness, we also train it on other variations of the datasets for 500 epochs. The results are as follows:
 \begin{table}[H]
     \centering
     \small
@@ -889,7 +894,7 @@ Our model is primarily trained on the dataset consisting all data sources, that 
         F1 Score (\%)  & 73.01\pm1.58 & 62.75\pm3.23 & 62.32\pm1.61 & 74.54\pm2.60 & 75.91\pm1.84 \\
         \bottomrule
     \end{tabularx}
-    \caption{Performance of various MLP models (average across 5 trials)}
+    \caption{Performance of various MLP models (average across 5 trials), 500 epochs}
     \label{tbl:5.3}
 \end{table}
 The results indicated that adding object features to the dataset marginally improved the MLP model's predictive accuracy. Based on these results, we attempt to apply PCA to the complete dataset and reduce the input size to 5 principal components. \hyperref[fig:5.5]{Figure 5.5} shows the accuracies of our MLP model on varying numbers of principal components $k$ from applying PCA across 5 separate trials:
@@ -911,11 +916,11 @@ The results indicated that adding object features to the dataset marginally impr
     \caption{Top 5 values and corresponding indices for PCA accuracies obtained with different numbers of components ($k=1$ to $k=30$)}
     \label{tb:5.4}
 \end{table}
-Since this experimentation aims to balance the trade-off between dataset dimensionality and accuracy, we disregard the corresponding model for $k=28$ and conclude that $k=16$ principal components results in the attainment of the most elevated mean validation accuracy (76.25\% on average across five trials) utilising our MLP model. This selection represents a judicious choice, as it reduces the dimensionality of our dataset from (1440, 512) to (1440, 16), while concurrently preserving and even enhancing the general level of accuracy.
+Since this experimentation aims to balance the trade-off between dataset dimensionality and accuracy, we disregard the corresponding model for $k=28$ and conclude that $k=16$ principal components results in the attainment of the most elevated mean validation accuracy (76.25\% on average across 5 trials) utilising our MLP model. This selection represents a judicious choice, as it reduces the dimensionality of our dataset from (1440, 512) to (1440, 16), while preserving and even enhancing the general level of accuracy.
 
 
 \subsection{Limitations}\label{sec:5.4.2}
-This study was subject to a limitation that warrants acknowledgement, specifically, the relatively modest sample size of the dataset we collected. This shortcoming may have exerted an impact on the accuracy of our findings. The source of this limitation is primarily attributed to the data collection pipeline in Pybullet, which demands a substantial amount of time to gather adequate data for the purpose of training. This arises from our approach of generating random hand configurations for grasping, and imposing constraints on the collection process to yield a balanced dataset (namely, an equal number of successful and unsuccessful grasps).\\
+This study was subject to the relatively modest sample size of the dataset we collected. This shortcoming may have exerted an impact on the accuracy of our findings. The source of this limitation is primarily attributed to the data collection pipeline in Pybullet, which demands a substantial amount of time to gather adequate data for the purpose of training. This arises from our approach of generating random hand configurations for grasping, and imposing constraints on the collection process to yield a balanced dataset (namely, an equal number of successful and unsuccessful grasps).\\
 
 As a reference point, we include in the following table a summary of the outcomes of several exemplary studies in the realm of grasp stability prediction, for the purpose of benchmarking our model's performance.
 
@@ -935,9 +940,11 @@ As a reference point, we include in the following table a summary of the outcome
         \textbf{Our work} & \textbf{Tactile, vision} & \textbf{1,440} & \textbf{9} & \textbf{MLP} & \textbf{76.3$\pm$0.66}\\
         \bottomrule
     \end{tabular}
-    \caption{Comparison of performance of various academic works on grasp stability prediction}
+    \caption{A comparison of performance of various grasp stability prediction models}
     \label{tbl:5.5}
 \end{table}
+
+Furthermore, Pybullet simulations may not perfectly emulate the complexity and variability of real-world scenarios. Although Pybullet provides a robust physics engine, it may lack certain nuances and intricacies that exist in real environments, such as variations in material properties, surface roughness, or lighting conditions. Consequently, the tactile data collected in the simulation may not fully capture the range of tactile interactions and sensory feedback observed in reality. Moreover, the compliance, elasticity and noise characteristics of the DIGIT tactile sensors may not  be adequately modelled in the simulation, further limiting the authenticity of the tactile data acquired.
 
 
 \section{Conclusion}\label{sec:5.5}
@@ -1024,1075 +1031,869 @@ There are several core functionalities provided by our Pybullet simulation. Thes
 
 
 \chapter{Code Listing}\label{apdx:3}
-This section documents the simulation code for the project only. The complete repository, training datasets and guaranteed working code can be found via \hyperref[]{this link}.
-\section{simulation.py}
-\begin{lstlisting}{python}
-import time
-import os
+Due to the code listing page limit, this section only documents the intriguing bits of code snippets for the project. The complete code base with the simulation code, training datasets, etc. can be found via \hyperref[]{this link}.
 
+\section{Baseline Model Training Code}
+\begin{lstlisting}
+## UCL COMP0029 Individual Project for Year 3 BSc
+### Robust Robotic Grasping Utilising Touch Sensing - Baseline Approach Notebook
+### This notebook contains the code for developing a baseline approach to grasping using classifiers: given some combinations of tactile data, end effector poses relative to the robot hand (visual data), etc., determine whether these constraints will produce a successful/unsuccessful grasp.
+### 1. Load packages
 import numpy as np
-import pybullet as p
-import pybullet_data
-import tacto
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
-from utilities import Models, Camera
-from tqdm import tqdm
-from thing import Thing
-from scipy.spatial import cKDTree
+import torch
+import torch.nn as nn
+import torch.optim as optim
+import torch.nn.init as init
+import gc
 
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, confusion_matrix, ConfusionMatrixDisplay
+from sklearn.decomposition import PCA
 
+from math import sin, cos
 
-class ClutteredPushGrasp:
-    # Global constants
-    SIMULATION_STEP_DELAY = 1 / 25000.
+import seaborn as sns
+# Set device for `PyTorch` training
+# Use GPU if available, else CPU
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device
+# Empty PyTorch cache
+gc.collect()
+torch.cuda.empty_cache()
+# Set numpy seed
+np.random.seed(seed=1)
+### 2. Load datasets from saved .npy files
+# To collect data for this experiment, you can run the "Collect Sensory Data" button in the Pybullet simulation. This generates a predefined number of Gaussian grasps randomly generated from a base hand pose. Each individual grasp is considered as an individual experiment, and the data collected from this experiment is split into four, each stored in its own dataset.
 
+# For all object models used in this experiment, each object has 4 datasets which include:
+# - `depth_ds.npy` which stores the depth tactile data from the mounted DIGIT sensors
+# - `color_ds.npy` which stores the colored (RGB) version of the depth tactile data from the mounted DIGIT sensors
+# - `poses_ds.npy` which stores the randomly-generated 6d hand poses from the simulation
+# - `outcomes_ds.npy` which stores the outcomes of each random pose
+root = "../models/baseline_model/"
+object_name = "block"      # object_name should be in [bottle, block, mug]
 
-    def __init__(self, robot, models: Models, camera=None, vis=False) -> None:
-        self.robot = robot
-        self.vis = vis
-
-        if self.vis:
-            self.p_bar = tqdm(ncols=0, disable=False)
-        self.camera = camera
-
-        # Define Pybullet simulation environment
-        # p.GUI for a simulation w/ GUI, p.DIRECT for a headless simulation
-        self.physicsClient = p.connect(p.GUI if self.vis else p.DIRECT)
-        p.setAdditionalSearchPath(pybullet_data.getDataPath())
-        p.setGravity(0, 0, -9.8)
-        self.planeID = p.loadURDF("plane.urdf")
-
-        # Import the robot
-        self.robot.load()
-        self.robot.step_simulation = self.step_simulation
-
-        # Prepare parameters
-        self.resetUserDebugParameters()
-        self.robot.load_digit_parm()        # Read the parameters.yaml file to load robot parameters
-
-        # Mount DIGIT tactile sensors and cameras
-        self.digits = tacto.Sensor(**self.robot.tacto_info, background = self.robot.bg)
-        p.resetDebugVisualizerCamera(**self.robot.camera_info)
-        self.digits.add_camera(self.robot.id, self.robot.link_ID)
-
-        # Load the target object defined in the parameters.yaml file (or other objects later into the envrionment)
-        self.object_name        = self.robot.object_info["object_name"]
-        self.object_position    = self.robot.object_info["object_position"]
-        self.global_scaling     = self.robot.object_info["global_scaling"]
-        self.container = Thing(self.object_name, self.object_position, self.global_scaling)
-
-        # Load the specified object to the DIGIT tactile sensors
-        self.digits.add_object(self.container.urdf_path, self.container.ID, self.container.objectScale)
-
-        # Load robot parameters
-        self.Z_PADDING          = self.robot.robot_info["z_padding"]
-        self.VELOCITY_SCALE     = self.robot.robot_info["velocity_scale"]
-
-        # Load data collection parameters
-        self.RANDOM_POSES_COUNT = self.robot.data_info["poses_count"]
-
-    # Hooks to pybullet.stepSimulation()
-    def step_simulation(self):
-        p.stepSimulation()
-        if self.vis:
-            time.sleep(self.SIMULATION_STEP_DELAY)
-            self.p_bar.update(1)
-
-    # Auxiliary function for step_simulation with predetermined step size
-    def fixed_step_sim(self, step_size):
-        for _ in range(step_size):
-            self.step_simulation()
-
-    # Read the values of the sliders in the simulation GUI
-    def read_debug_parameter(self):   
-        # read the value of task parameter        
-        x = p.readUserDebugParameter(self.xin)        
-        y = p.readUserDebugParameter(self.yin)        
-        z = p.readUserDebugParameter(self.zin)       
-        roll = p.readUserDebugParameter(self.rollId)        
-        pitch = p.readUserDebugParameter(self.pitchId)        
-        yaw = p.readUserDebugParameter(self.yawId)        
-        gripper_opening_length = p.readUserDebugParameter(self.gripper_opening_length_control)
-        return x, y, z, roll, pitch, yaw, gripper_opening_length
-
-    # Initialize simulation GUI button values
-    def initButtonVals(self):
-        self.jointObsButtonVal = 2.0
-        self.baselineDataColButtonVal = 2.0
-        self.mlpDataColButtonVal = 2.0
-        self.getObjectFeaturesButtonVal = 2.0
-        self.resetSimulationButtonVal = 2.0
-        self.fetch6dButtonVal = 2.0
+depth_data = np.load(root + object_name + "/depth_ds.npy")
+color_data = np.load(root + object_name + "/color_ds.npy")
+poses_data = np.load(root + object_name + "/poses_ds.npy")
+grasp_outcomes_data = np.load(root + object_name + "/grasp_outcomes.npy")
+# These datasets should all be in the form of $(N\times...)$ where $N$ is the number of examples:
+print(f"Shape of depth_data: {depth_data.shape}")
+print(f"Shape of color_data: {color_data.shape}")
+print(f"Shape of poses_data: {poses_data.shape}")
+print(f"Shape of grasp_outcomes_data: {grasp_outcomes_data.shape}")
+# Additionally, we confirm the number of successful and unsuccessful grasps recorded. This helps us in the next section to determine how many examples we should include for each class in order to produce a balanced dataset.
+print(f"# of sucessesful grasps: {(grasp_outcomes_data == 1).sum()}")
+print(f"# of unsuccessful grasps: {(grasp_outcomes_data == 0).sum()}")
+### 3. Data preprocessing
+# We will train a logistic regression classifier on 3 combinations of data:
+# - **Tactile** only: concatenated and flattened depth and color data
+# - **Visual** only: 6D end effector poses consisting of position (x,y,z) and orientation (r,p,y) data
+# - **Both**: concatenated and flattened tactile and visual data
+# We define some reusable functions for later:
+def normalize(arr):
+    # Normalize & standardize each column
+    mean = np.mean(arr, axis=0)
+    std = np.std(arr, axis=0)
     
-    def readGetObjectFeaturesButton(self):
-        if p.readUserDebugParameter(self.getObjectFeaturesButton) >= self.getObjectFeaturesButtonVal:
-            object_geometric_features = self.getObjectGeometry(self.container.ID)
-        self.getObjectFeaturesButtonVal = p.readUserDebugParameter(self.getObjectFeaturesButton)+ 1.0
+    arr = (arr - mean) / std
+    arr = np.nan_to_num(arr, 0)
+    arr[np.isinf(arr)] = 0
+    return arr
+# Since each tactile reading (depth and color) is a pair of images (one on each finger), we concatenate them together as a single 160x240 image.
+depth_data = np.concatenate((depth_data[:, 0], depth_data[:, 1]), axis=2)
+color_data = np.concatenate((color_data[:, 0], color_data[:, 1]), axis=2)
+print(f"Shape of depth_data: {depth_data.shape}")
+print(f"Shape of color_data: {color_data.shape}")
 
-    def readJointObsButton(self, angles):
-        if p.readUserDebugParameter(self.jointObsButton) >= self.jointObsButtonVal:
-            print(f"Joint angles (length={len(angles)}): {angles}")
-        self.jointObsButtonVal = p.readUserDebugParameter(self.jointObsButton) + 1.0
+depth_ds = torch.from_numpy(normalize(depth_data))
+color_ds = torch.from_numpy(normalize(color_data))
+visual_ds = torch.from_numpy(np.nan_to_num(normalize(poses_data)))
+visual_ds
+# We then concatenate the depth and color datasets to produce the flattened tactile dataset:
+tactile_ds = torch.cat([depth_ds.unsqueeze(-1), color_ds], dim=-1)
+tactile_ds = torch.nan_to_num(tactile_ds)
+complete_ds = torch.cat([tactile_ds.reshape(tactile_ds.shape[0], -1), visual_ds], dim=1)
+complete_ds = torch.nan_to_num(complete_ds)
+tactile_ds.shape, complete_ds.shape
+### 4. Dataset visualisation (optional)
+# Only run this section to produce figures and plots for the project report.
+Z_PADDING = 0.2        # Adjust for visualisation of end poses
+
+
+def plot_ee_pose(pose_data, grasp_outcome, ax, orientation):
+    x, y, z, alpha, beta, gamma = pose_data
+    z -= Z_PADDING * 1.6
+
+    # create rotation matrix based on Euler angles
+    Rx = np.array([[1, 0, 0], [0, cos(alpha), sin(alpha)], [0, -sin(alpha), cos(alpha)]])
+    Ry = np.array([[cos(beta), 0, -sin(beta)], [0, 1, 0], [sin(beta), 0, cos(beta)]])
+    Rz = np.array([[cos(gamma), sin(gamma), 0], [-sin(gamma), cos(gamma), 0], [0, 0, 1]])
+    R = Rz.dot(Ry.dot(Rx))
+
+    # calculate endpoints of line based on orientation
+    vec = np.array([0, 0.015, 0])
+    vec_rotated1 = R.dot(vec)
+    endpoint1 = [x + vec_rotated1[0], y + vec_rotated1[1], z + vec_rotated1[2]]
     
-    def readResetSimulationButton(self):
-        if p.readUserDebugParameter(self.resetSimulationButton) >= self.resetSimulationButtonVal:
-            self.reset_simulation()
-        self.resetSimulationButtonVal = p.readUserDebugParameter(self.resetSimulationButton) + 1.0
+    vec_rotated2 = R.dot(-vec)
+    endpoint2 = [x + vec_rotated2[0], y + vec_rotated2[1], z + vec_rotated2[2]]
+
+    # set midpoint to the actual point
+    midpoint = [x, y, z]
+
+    # plot line through point in orientation direction
+    ax.plot([endpoint1[0], endpoint2[0]], [endpoint1[1], endpoint2[1]], [endpoint1[2], endpoint2[2]], color='green' if grasp_outcome==1 else 'red', zorder=20)
+
+    # plot vertical lines starting from endpoints
+    ax.plot([endpoint1[0], endpoint1[0]], [endpoint1[1], endpoint1[1]], [endpoint1[2], endpoint1[2]-0.035], color='green' if grasp_outcome==1 else 'red', zorder=20)
+    ax.plot([endpoint2[0], endpoint2[0]], [endpoint2[1], endpoint2[1]], [endpoint2[2], endpoint2[2]-0.035], color='green' if grasp_outcome==1 else 'red', zorder=20)
+
+    # Display plot viewing orientation
+    ax.view_init(elev=orientation[0], azim=orientation[1], roll=orientation[2])
+
+
+# Draw block object
+def plot_3d_box(ax, orientation):
+    # Dimensions of the box object: (W=0.025, H=0.05, D=0.05)
+    # Dimensions for unit box: (0,0,0), (0,1,0), (1,0,0), (0,0,1)
+    cube_definition = [(-0.0125, -0.025, 0), (0.0125, -0.025, 0), (-0.0125, 0.0255, 0), (-0.0125, -0.025, 0.05)]
+    cube_definition_array = [np.array(list(item)) for item in cube_definition]
+    points = []
+    points += cube_definition_array
+    vectors = [
+        cube_definition_array[1] - cube_definition_array[0],
+        cube_definition_array[2] - cube_definition_array[0],
+        cube_definition_array[3] - cube_definition_array[0]
+    ]
+    points += [cube_definition_array[0] + vectors[0] + vectors[1]]
+    points += [cube_definition_array[0] + vectors[0] + vectors[2]]
+    points += [cube_definition_array[0] + vectors[1] + vectors[2]]
+    points += [cube_definition_array[0] + vectors[0] + vectors[1] + vectors[2]]
+    points = np.array(points)
+    edges = [
+        [points[0], points[3], points[5], points[1]],
+        [points[1], points[5], points[7], points[4]],
+        [points[4], points[2], points[6], points[7]],
+        [points[2], points[6], points[3], points[0]],
+        [points[0], points[2], points[4], points[1]],
+        [points[3], points[6], points[7], points[5]]
+    ]
+    faces = Poly3DCollection(edges, linewidths=1, edgecolors='k')
+    faces.set_facecolor((0,0,1,0.1))
+    faces.set_zorder(3)
+    ax.add_collection3d(faces)
+    # Plot the points themselves to force the scaling of the axes
+    ax.scatter(points[:,0], points[:,1], points[:,2], c=points[:,2], s=0)
+    ax.set_aspect('equal')
+    ax.view_init(elev=orientation[0], azim=orientation[1], roll=orientation[2])
+#### 4a. Visualise tactile and visual data for 1 successful and 1 unsuccessful grasp
+successful_grasps = np.where(grasp_outcomes_data == 1)[0]
+unsuccessful_grasps = np.where(grasp_outcomes_data == 0)[0]
+
+# Randomly select one index from each set
+successful_rand_idx = np.random.choice(successful_grasps)
+unsuccessful_rand_idx = np.random.choice(unsuccessful_grasps)
+
+rand_indices = np.array([successful_rand_idx, unsuccessful_rand_idx])
+
+
+# Note that the plots use the "..._data" datasets instead of the "..._ds" datasets since 
+# the "..._ds" datasets are already flattened for training
+for i in range(2):
+    fig = plt.figure(figsize=(14, 3))
+    # fig.suptitle("Successful grasp" if grasp_outcomes_data[rand_indices[i]].item() == 1.0 else "Unsuccessful grasp")
     
-    def readBaselineDataCollectionButton(self):
-        if p.readUserDebugParameter(self.baselineDataColButton) >= self.baselineDataColButtonVal:
-            self.collect_data()
-        self.baselineDataColButtonVal = p.readUserDebugParameter(self.baselineDataColButton) + 1.0
+    ax1 = fig.add_subplot(1, 3, 1)
+    ax1.set_xlabel("Depth")
+    ax1.imshow(np.array(depth_data[rand_indices[i]]), cmap='gray')
 
-    def readMLPDataCollectionButton(self):
-        if p.readUserDebugParameter(self.mlpDataColButton) >= self.mlpDataColButtonVal:
-            self.collect_data_mlp()
-        self.mlpDataColButtonVal = p.readUserDebugParameter(self.mlpDataColButton) + 1.0
+    ax2 = fig.add_subplot(1, 3, 2)
+    ax2.set_xlabel("Colour")
+    ax2.imshow(np.array(color_data[rand_indices[i]]) / 255., cmap='gray')
     
-    def readFetch6dButton(self, action):        
-        if p.readUserDebugParameter(self.fetch6dButton) >= self.fetch6dButtonVal:           
-            print(f"End effector 6D pose: {action}")        
-        self.fetch6dButtonVal = p.readUserDebugParameter(self.fetch6dButton) + 1.0
+    ax3 = fig.add_subplot(1, 3, 3, projection='3d')
+    ax3.set_xlabel('x position')
+    ax3.set_ylabel('y position')
+    ax3.set_zlabel('z position')
+    ax3.set_xlim3d(-0.05, 0.05)
+    ax3.set_ylim3d(-0.05, 0.05)
+    ax3.set_zlim3d(0, 0.1)
 
+    ax3.spines['top'].set_visible(False)
+    ax3.spines['right'].set_visible(False)
+    ax3.spines['bottom'].set_visible(False)
+    ax3.spines['left'].set_visible(False)
 
-    # HELPER FUNCTIONS FOR SIMULATION
-    def gripperCollisionDetection(self):
-        """
-        Determines if the gripper is in contact with an object.
-        """
+    pose_data = poses_data[rand_indices]
+    plot_ee_pose(pose_data=poses_data[rand_indices[i]], grasp_outcome=grasp_outcomes_data[rand_indices[i]], ax=ax3, orientation=(30, 45, 0))
+    plot_3d_box(ax3, orientation=(30, 45, 0))
 
-        # linkIndex=13, 19 for DIGIT sensor on left and right finger respectively
-        contact_points_left_sensor = p.getContactPoints(self.robot.id, self.container.ID, linkIndexA=13, linkIndexB=-1)
-        contact_points_right_sensor = p.getContactPoints(self.robot.id, self.container.ID, linkIndexA=19, linkIndexB=-1)
-        return len(contact_points_left_sensor+contact_points_right_sensor) > 0
+fig.subplots_adjust(wspace=0.3, hspace=0.3)
+plt.show()
+#### 4b. Visualise all end effector poses on box as skeleton hands
+# Create 3 plots: 1 with the box only, remaining 2 with all poses each at different viewing orientations
+for i in range(3):
+    fig = plt.figure(figsize=(6, 6))
+    ax = fig.add_subplot(111, projection='3d', computed_zorder=False)
     
-    def isTactileReadingsValid(self, depth, color):
-        """
-        Determines if the given depth and color tactile data provide any meaningful results, i.e. the mean is above a 
-        certain threshold as a sanity check.
+    # Plot unit vectors
+    x_unit = np.array([0.1, 0, 0])
+    y_unit = np.array([0, 0.075, 0])
+    z_unit = np.array([0, 0, 0.125])
+    ax.plot([0, x_unit[0]], [0, x_unit[1]], [0, x_unit[2]], color='r')
+    ax.plot([0, y_unit[0]], [0, y_unit[1]], [0, y_unit[2]], color='g')
+    ax.plot([0, z_unit[0]], [0, z_unit[1]], [0, z_unit[2]], color='b')
 
-        We use a threshold of 1e-3 to determine the minimal acceptable mean for the tactile data
-        """
-        av_d0, av_d1 = np.mean(depth[0]), np.mean(depth[1])         # Mean of depth data for each finger
-        av_c0, av_c1 = np.mean(color[0]), np.mean(color[1])         # Mean of color data for each finger
+    ax.text(x_unit[0], x_unit[1], x_unit[2], 'X')
+    ax.text(y_unit[0], y_unit[1], y_unit[2], 'Y')
+    ax.text(z_unit[0], z_unit[1], z_unit[2], 'Z')
+
+    # Remove all the axis and their labels
+    ax.axis('off')
+    ax.set_aspect('equal')
+    plot_3d_box(ax, orientation=(15, 30, 0))
+    if i == 0:
+        ax.set_xlim3d(-0.05, 0.05)
+        ax.set_ylim3d(-0.05, 0.05)
+        ax.set_zlim3d(0, 0.1)
+    if i > 0:
+        ax.set_xlim3d(-0.05, 0.05)
+        ax.set_ylim3d(-0.05, 0.05)
+        ax.set_zlim3d(0, 0.1)
+        for i in range(poses_data.shape[0]):
+            plot_ee_pose(pose_data=poses_data[i], grasp_outcome=grasp_outcomes_data[i], ax=ax, orientation=(15, 30+90*(i-1), 0))
+### 5. Model training
+# We now train our Logistic Regression models on the 3 combinations of our data (tactile, visual, both):
+# - Raw data
+# - Principal Component Analysis - 2 main components
+# - Convolutional Neural Network processed data
+#### Prepare training and testing datasets
+X_tactile_train, X_tactile_test, y_tactile_train, y_tactile_test = train_test_split(tactile_ds.reshape(tactile_ds.shape[0], -1), grasp_outcomes_data, test_size=0.2, random_state=0)
+X_visual_train, X_visual_test, y_visual_train, y_visual_test = train_test_split(visual_ds, grasp_outcomes_data, test_size=0.2, random_state=0)
+X_complete_train, X_complete_test, y_complete_train, y_complete_test = train_test_split(complete_ds, grasp_outcomes_data, test_size=0.2, random_state=0)
+### 5.1 Raw data
+#### 5.1.1 Raw data (tactile only) + LR
+model_511 = LogisticRegression(random_state=0, max_iter=1000)
+model_511.fit(X_tactile_train, y_tactile_train)
+model_511_predictions = model_511.predict(X_tactile_test)
+#### 5.1.2 Raw data (visual only) + LR
+model_512 = LogisticRegression(random_state=0, max_iter=1000)
+model_512.fit(X_visual_train, y_visual_train)
+model_512_predictions = model_512.predict(X_visual_test)
+#### 5.1.3 Raw data (both) + LR
+model_513 = LogisticRegression(random_state=0, max_iter=1000)
+model_513.fit(X_complete_train, y_complete_train)
+model_513_predictions = model_513.predict(X_complete_test)
+### 5.3 CNN for dimensionality reduction
+# A simple convolutional neural network that extracts features from an input tensor
+class FeatureExtractorCNN(nn.Module):
+    def __init__(self):
+        super(FeatureExtractorCNN, self).__init__()
+        self.conv1 = nn.Conv2d(4, 8, kernel_size=3, stride=1, padding=1)
+        self.conv2 = nn.Conv2d(8, 16, kernel_size=3, stride=1, padding=1)
+        self.conv3 = nn.Conv2d(16, 32, kernel_size=3, stride=1, padding=1)
+
+        self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
+
+
+    def forward(self, x):
+        # print(f"Input size: {x.shape}")
+        x = self.conv1(x)
+        # print(f"Shape after conv1: {x.shape}")
+        x = nn.functional.relu(x)
+        x = self.pool(x)
+        # print(f"Shape after pool1: {x.shape}")
+
+        x = self.conv2(x)
+        # print(f"Shape after conv2: {x.shape}")
+        x = nn.functional.relu(x)
+        x = self.pool(x)
+        # print(f"Shape after pool2: {x.shape}")
         
-        # Additionally, we scale av_d0 and av_d1 to the range (0, 255) to match the range
-        # of color data
-        av_d0, av_d1 = av_d0 * 255, av_d1 * 255
-        return all(i >= 1e-3 for i in [av_d0, av_d1, av_c0, av_c1])
+        x = self.conv3(x)
+        # print(f"Shape after conv3: {x.shape}")
+        x = nn.functional.relu(x)
+        x = self.pool(x)
+        # print(f"Shape after pool3: {x.shape}")
+
+        return x
+# Preprocess data using CNN feature extraction
+cnn = FeatureExtractorCNN()
+cnn_tactile = torch.cat([cnn(img.float().permute(2,0,1)).unsqueeze(0) for img in tactile_ds])
+cnn_tactile = cnn_tactile.reshape(cnn_tactile.shape[0], -1)
+cnn_tactile.shape
+# We simply combine the cnn-processed tactile data (from Section 5.3.1) with the visual data
+cnn_complete_ds = torch.cat([cnn_tactile.reshape(cnn_tactile.shape[0], -1), visual_ds], dim=1)
+cnn_complete_ds.shape
+X_cnn_tactile_train, X_cnn_tactile_test, y_cnn_tactile_train, y_cnn_tactile_test = train_test_split(cnn_tactile.detach().numpy(), grasp_outcomes_data, test_size=0.2, random_state=0)
+X_cnn_complete_train, X_cnn_complete_test, y_cnn_complete_train, y_cnn_complete_test = train_test_split(cnn_complete_ds.detach().numpy(), grasp_outcomes_data, test_size=0.2, random_state=0)
+#### 5.3.1 CNN (tactile only) + LR
+model_531 = LogisticRegression(random_state=0, max_iter=1000)
+model_531.fit(X_cnn_tactile_train, y_cnn_tactile_train)
+model_531_predictions = model_531.predict(X_cnn_tactile_test)
+#### 5.3.2 CNN (visual only) + LR
+#### 5.3.3 CNN (both) + LR
+model_533 = LogisticRegression(random_state=0, max_iter=1000)
+model_533.fit(X_cnn_complete_train, y_cnn_complete_train)
+model_533_predictions = model_533.predict(X_cnn_complete_test)
+#### 5.3.4 CNN (tactile only) + PCA + LR
+def pca(tensor, k, verbose=False):
+    if len(tensor) == 3:
+        tensor = tensor.reshape((tensor.shape[0], -1))
     
-    # HELPER FUNCTIONS FOR DATA COLLECTION PIPELINE
-    # Generate random poses by applying Gaussian noise to a base pose(s)
-    def generateGaussianNoisePose(self, pose, object_name):
-        """
-        Generates a random end effector pose following a Gaussian distribution.
-        
-        @returns random_poses: filled array of generated end effector poses
-        """
-        
-        # Apply 6d gaussian noise to base hand pose
-        sixd_noise = {
-            # Baseline noise
-            "block": np.insert(np.random.normal(0, 1, 5), 1, 0),
+    pca = PCA(n_components=k)
+    pca.fit(tensor)
 
-            # MLP noise
-            "block1": np.random.normal(0, 1, 6),
-            "block2": np.random.normal(0, 1, 6),
-            "block3": np.random.normal(0, 1, 6),
-            "cylinder1": np.random.normal(0, 1, 6),
-            "cylinder2": np.random.normal(0, 1, 6),
-            "cylinder3": np.random.normal(0, 1, 6),
-            "mustard_bottle1": np.random.normal(0, 1, 6),
-            "mustard_bottle2": np.random.normal(0, 1, 6),
-            "mustard_bottle3": np.random.normal(0, 1, 6),
-            "bottle1": np.random.normal(0, 1, 6),
-            "bottle2": np.random.normal(0, 1, 6),
-            "bottle3": np.random.normal(0, 1, 6),
-        }
-        
-        # Rescale generated poses to fit scale of simulation
-        noisy_poses = pose + sixd_noise[object_name] * 0.01
-        noisy_poses[2] += self.Z_PADDING
-        return noisy_poses
-    
-    def execute_pose(self, grasp_pose):
-        """
-        Executes a grasp given a specific hand pose
+    variance = sum(pca.explained_variance_ratio_) * 100
+    # print(f"Variance captured for {k} components: {variance:.2f}%")
 
-        @params grasp_pose: 6d numpy array of an end effector pose (cartesian coordinates (x, y, z) &
-          euler angles (r, p, y))
-        """
+    if verbose:
+        return pca.transform(tensor), k, variance
+    else:
+        return pca.transform(tensor)
+# We select $k$ principal components that correspond to 90% variance of the dataset.
+K = 0
 
-        # 1. Move arm to pose and prepare gripper
-        self.robot.manipulate_ee(grasp_pose, 'end', self.VELOCITY_SCALE)
+k_variances = []
+for i in range(1, 30):
+    pca_cnn_tactile_ds, k, variance = pca(cnn_tactile.detach().numpy(), k=i, verbose=True)
+    k_variances.append(variance)
+    if variance > 90:
+        print(f"Choose {k} components for CNN + tactile only dataset.")
+        K = k
+        break
+for k in range(0, K, 5):
+    if k > 0:
+        print(f"Variance for {k} components: {k_variances[k]:.2f}%")
+# Plot number of components against variance captured
+plt.plot(k_variances)
+plt.xlabel('Number of components ' + r'$k$')
+plt.ylabel('Variance (%)')
+plt.show()
+pca_cnn_tactile_ds = pca(cnn_tactile.detach().numpy(), k=5)
+X_pca_cnn_tactile_train, X_pca_cnn_tactile_test, y_pca_cnn_tactile_train, y_pca_cnn_tactile_test = train_test_split(pca_cnn_tactile_ds, grasp_outcomes_data, test_size=0.2, random_state=0)
+model_534 = LogisticRegression(random_state=0, max_iter=1000)
+model_534.fit(X_pca_cnn_tactile_train, y_pca_cnn_tactile_train)
+model_534_predictions = model_534.predict(X_pca_cnn_tactile_test)
+pca_cnn_complete_ds = pca(cnn_complete_ds.detach().numpy(), k=5)
+X_pca_cnn_complete_train, X_pca_cnn_complete_test, y_pca_cnn_complete_train, y_pca_cnn_complete_test = train_test_split(pca_cnn_complete_ds, grasp_outcomes_data, test_size=0.2, random_state=0)
+model_535 = LogisticRegression(random_state=0, max_iter=1000)
+model_535.fit(X_pca_cnn_complete_train, y_pca_cnn_complete_train)
+model_535_predictions = model_535.predict(X_pca_cnn_complete_test)
+### 5.4 Results
+def plot_confusion_matrices(model_data, fig_height):
+    fig, axn = plt.subplots(1, len(model_data), sharex=True, sharey=True, figsize=(12, fig_height))
 
-        # 1b. [Temporary fix - Reset object in case the gripper collides with the object unexpectedly]
-        self.fixed_step_sim(500)
-        self.container.resetObject()
-        self.fixed_step_sim(1000)
-
-        self.robot.open_gripper()
-        self.fixed_step_sim(500)
-
-        # 2. Lower the arm by z=2
-        lower_sixd_pose = grasp_pose.copy()
-        lower_sixd_pose[2] -= self.Z_PADDING
-        self.robot.manipulate_ee(lower_sixd_pose, 'end', self.VELOCITY_SCALE)
-        self.fixed_step_sim(500)
-
-        # 3. Close gripper to perform grasp
-        self.robot.close_gripper()
-        self.fixed_step_sim(200)
-
-        # 4. Determine if gripper is in stable contact with object (measure over 500 steps)
-        isGripperInContactTimeframe1 = self.gripperCollisionDetection()
-        self.fixed_step_sim(500)
-        isGripperInContactTimeframe2 = self.gripperCollisionDetection()
-
-        # 5. Gripper contact is stable - record grasp and tactile data
-        if isGripperInContactTimeframe1 is True and isGripperInContactTimeframe2 is True:
-            # 6. Record depth and color tactile data
-            self.digit_step()
-            self.fixed_step_sim(200)
-            color = np.asarray(self.color)      # (2, 160, 120, 3)
-            depth = np.asarray(self.depth)      # (2, 160, 120)
-
-            # 7. Tactile data sanity check
-            if self.isTactileReadingsValid(depth, color) is True:
-                # 7. Lift object for 5s to determine successful vs unsuccessful grasp
-                initial_object_z_pos = self.container.getPos()[2]
-                self.robot.manipulate_ee(grasp_pose, 'end', self.VELOCITY_SCALE)
-                self.fixed_step_sim(200)
-
-                # 8. Record success/failure by determining if object moved after 1500 steps
-                self.fixed_step_sim(750)
-                final_object_z_pos = self.container.getPos()[2]
-
-                # 9. Determine grasp success
-                grasp_outcome = True if final_object_z_pos - initial_object_z_pos > 0 else False
-                return (depth, color, grasp_outcome)
-        
-        # After grasp execution, release object and move robot to specific pose to prevent collision
-        # self.robot.open_gripper()
-        # self.robot.manipulate_ee(grasp_pose, 'end', self.VELOCITY_SCALE)
-        return None
-
-    def save_dataset(self, dataset_filename, folder_name, dataset):
-        CURR_DIR = os.getcwd()
-        TARGET_DIR = "./src/" + folder_name
-
-        dataset_path = os.path.join(CURR_DIR, TARGET_DIR, dataset_filename)
-        np.save(dataset_path, dataset)
-        print(f"Dataset saved to {dataset_path}")
-
-    def collect_data(self):
-        """
-        This function executes a data collection loop by generating N gaussian-distributed end effector poses,
-        then collecting the corresponding DIGIT tactile sensor readings on each finger of the gripper (as the 
-        tactile data) as well as the end effector poses (as the visual data).
-
-        The collected data is then used for stability classification in which the project aims to find the
-        best representation of this data. This serves as the basis for further work on learning a generative
-        model.
-        """      
-
-        # Arrays to populate when collecting data
-        end_effector_poses = np.empty((0, 6))                # End effector is a 6D structure
-        tactile_depth_data = np.empty((0, 2, 160, 120))      # Depth data (160x120) per finger (x2)
-        tactile_color_data = np.empty((0, 2, 160, 120, 3))   # Color data (160x120x3) per finger (x2)
-        grasp_outcomes     = np.empty(0)
-
-        # Counters for logging
-        success_count = 0
-        failure_count = 0
-
-        # Base hand poses for different objects will vary as a result of manual trials on these objects.
-        base_hand_poses = {
-            "block": [(0.0, -0.014147371053695679, 0.19894737422466278, -3.140000104904175, 1.570796251296997, 1.5707963705062866),
-                (0.0, -0.0047158002853393555, 0.19894737422466278, -3.140000104904175, 1.570796251296997, 1.5707963705062866),
-                (0.0, 0.021221041679382324, 0.19894737422466278, -3.140000104904175, 1.570796251296997, 1.5707963705062866),]
-        }
-
+    for i, ax in enumerate(axn.flat):
         try:
-            object_hand_poses = base_hand_poses[self.object_name]
-            for seed_pose in object_hand_poses:
-                print(f"Starting seed pose simulation: {seed_pose}")
+            model_name = list(model_data.keys())[i]
+            model = model_data[model_name]
+            preds = model["preds"]
+            score = model["score"]
+            test_set = model["test_set"]
 
-                while success_count < self.RANDOM_POSES_COUNT or failure_count < self.RANDOM_POSES_COUNT:
-                    # Reset robot and arm only
-                    self.reset_simulation()
-                    self.fixed_step_sim(1000)
-                    noisy_pose = self.generateGaussianNoisePose(seed_pose, self.object_name)
-                    grasp_data = self.execute_pose(noisy_pose)
-
-                    if grasp_data is not None:
-                        depth, color, grasp_is_good = grasp_data
-
-                        # Only record the grasp data if the tactile data is valid
-                        if depth is None or color is None:
-                            print(f"Not saving grasp data to dataset :(")
-                        else:
-                            if grasp_is_good is True and success_count < self.RANDOM_POSES_COUNT:
-                                # Save recorded data to corresponding datasets
-                                end_effector_poses = np.append(end_effector_poses, np.array([noisy_pose]), axis=0)
-                                tactile_depth_data = np.append(tactile_depth_data, np.array([depth]), axis=0)
-                                tactile_color_data = np.append(tactile_color_data, np.array([color]), axis=0)
-                                grasp_outcomes = np.append(grasp_outcomes, np.ones(shape=(1,)), axis=0)
-                                success_count += 1
-                                print(f"Data analysed and saved - Successes: {success_count} | Failures: {failure_count}")
-                            elif grasp_is_good is False and failure_count < self.RANDOM_POSES_COUNT:
-                                # Save recorded data to corresponding datasets
-                                end_effector_poses = np.append(end_effector_poses, np.array([noisy_pose]), axis=0)
-                                tactile_depth_data = np.append(tactile_depth_data, np.array([depth]), axis=0)
-                                tactile_color_data = np.append(tactile_color_data, np.array([color]), axis=0)
-                                grasp_outcomes = np.append(grasp_outcomes, np.zeros(shape=(1,)), axis=0)
-                                failure_count += 1
-                                print(f"Data analysed and saved - Successes: {success_count} | Failures: {failure_count}")
-                            print(end_effector_poses.shape)
-
-                # Reset counters
-                success_count = 0
-                failure_count = 0
-
-            folder_name = "baseline_model"
-            # Save collected data into .npy files for future loading
-            self.save_dataset("depth_ds.npy", folder_name, tactile_depth_data)
-            self.save_dataset("color_ds.npy", folder_name, tactile_color_data)
-            self.save_dataset("poses_ds.npy", folder_name, end_effector_poses)
-            self.save_dataset("grasp_outcomes.npy", folder_name, grasp_outcomes)
-
-        except KeyError:
-            print("Baseline model only permits object_name = block. Update the parameters.yaml file and change the 'object_name' parameter to block.")
-
-        
-    def collect_data_mlp(self):
-        print("MLP data collection started...", flush=True)
-        poses = self.load_mlp_poses()
-
-        # Counters for logging
-        success_count = 0
-        failure_count = 0
-        total_poses = 0
-
-        SEED_POSE_COUNT = 20
-
-        end_effector_poses = np.empty((0, 6))                             # End effector is a 6D structure
-        tactile_depth_data = np.empty((0, 2, 160, 120))                   # Depth data (160x120) per finger (x2)
-        tactile_color_data = np.empty((0, 2, 160, 120, 3))                # Color data (160x120x3) per finger (x2)
-        grasp_outcomes     = np.empty(0)
-
-        for seed_pose in poses[self.object_name]:
-            print(f"Starting seed pose simulation: {seed_pose}")
-
-            # We need 10 good and 10 bad grasps per seed pose
-            while success_count < SEED_POSE_COUNT or failure_count < SEED_POSE_COUNT:
-                # 11. Reset robot and arm only
-                self.reset_simulation()
-                self.fixed_step_sim(1000)
-                noisy_pose = self.generateGaussianNoisePose(seed_pose, self.object_name)
-                grasp_data = self.execute_pose(noisy_pose)
-
-                if grasp_data is not None:
-                    depth, color, grasp_is_good = grasp_data
-
-                    # Record data if tactile data is valid
-                    if depth is None or color is None:
-                        print(f"Not saving grasp data to dataset :(")
-                    else:
-                        if grasp_is_good is True and success_count < SEED_POSE_COUNT:
-                            # Save recorded data to corresponding datasets
-                            end_effector_poses = np.append(end_effector_poses, np.array([noisy_pose]), axis=0)
-                            tactile_depth_data = np.append(tactile_depth_data, np.array([depth]), axis=0)
-                            tactile_color_data = np.append(tactile_color_data, np.array([color]), axis=0)
-                            grasp_outcomes = np.append(grasp_outcomes, np.ones(shape=(1,)), axis=0)
-                            success_count += 1
-                            total_poses += 1
-                            print(f"Data saved - Successes: {success_count} | Failures: {failure_count} | Total: {total_poses}")
-                        elif grasp_is_good is False and failure_count < SEED_POSE_COUNT:
-                            # Save recorded data to corresponding datasets
-                            end_effector_poses = np.append(end_effector_poses, np.array([noisy_pose]), axis=0)
-                            tactile_depth_data = np.append(tactile_depth_data, np.array([depth]), axis=0)
-                            tactile_color_data = np.append(tactile_color_data, np.array([color]), axis=0)
-                            grasp_outcomes = np.append(grasp_outcomes, np.zeros(shape=(1,)), axis=0)
-                            failure_count += 1
-                            total_poses += 1
-                            print(f"Data saved - Successes: {success_count} | Failures: {failure_count} | Total: {total_poses}")
-                        print(end_effector_poses.shape)
-
-            print("Collected enough data for seed pose. Moving to next pose")
-
-            # Reset counters
-            success_count = 0
-            failure_count = 0
-
-        # Save collected data into .npy files for future loading
-        # folder_name = "datasets"
-        folder_name = "new_datasets"
-        file_path = f"{self.object_name}_ds/"
-        self.save_dataset(file_path + "depth_ds.npy", folder_name, tactile_depth_data)
-        self.save_dataset(file_path + "color_ds.npy", folder_name, tactile_color_data)
-        self.save_dataset(file_path + "poses_ds.npy", folder_name, end_effector_poses)
-        self.save_dataset(file_path + "grasp_outcomes.npy", folder_name, grasp_outcomes)
-            
-
-    def load_mlp_poses(self):
-        # Manually-selected end effector poses
-        poses = {
-            "block1": [
-                (0.0, -0.014147371053695679, 0.17894737422466278, -3.140000104904175, 1.570796251296997, 1.5707963705062866),
-                (0.0, -0.0047158002853393555, 0.17894737422466278, -3.140000104904175, 1.570796251296997, 1.5707963705062866),
-                (0.0, 0.021221041679382324, 0.17894737422466278, -3.140000104904175, 1.570796251296997, 1.5707963705062866),
-                (0.0, 0.0, 0.1894736886024475, -1.5865263938903809, 1.570796251296997, 1.5707963705062866)
-            ],
-            "block2": [
-                (0.0, -0.016505271196365356, 0.17894737422466278, 0.0, 1.570796251296997, 1.5707963705062866),
-                (0.0, 0.014147371053695679, 0.17894737422466278, 0.0, 1.570796251296997, 1.5707963705062866),
-                (0.0, -0.12261052429676056, 0.10526315867900848, 0.0, 0.4957895278930664, 1.5707963705062866),
-                (0.0825263261795044, 0.011789485812187195, 0.13684210181236267, 0.0, 2.3136842250823975, 0.11574292182922363)
-            ],
-            "block3": [
-                (-0.007073685526847839, 0.0, 0.16842105984687805, 0.0, 1.570796251296997, 0.0),
-                (0.06837895512580872, 0.0, 0.15263158082962036, 0.09915781021118164, 2.0823161602020264, 0.0),
-                (-0.1414736807346344, 0.0070736706256866455, 0.06842105090618134, -0.09915804862976074, 0.4627368450164795, -0.049604058265686035),
-                (0.0, -0.10138948261737823, 0.08947368711233139, 3.140000104904175, 0.7602105140686035, 1.5707963705062866),
-            ],
-            "cylinder1": [
-                (0.0, 0.0, 0.17894737422466278, 0.0, 1.570796251296997, 1.5707963705062866),
-                (0.0, -0.10138948261737823, 0.1473684161901474, 0.0, 0.8263156414031982, 1.5707963705062866),
-                (-0.1178947389125824, 0.0, 0.11578947305679321, 0.0, 0.5618946552276611, -0.049604058265686035),
-                (-0.1296842098236084, 0.0, 0.08421052992343903, -3.140000104904175, 0.33052611351013184, -0.033069491386413574)
-            ],
-            "cylinder2": [
-                (0.0, -0.0589473694562912, 0.15789473056793213, 0.0, 1.1898949146270752, 1.5707963705062866),
-                (0.0, -0.09903157502412796, 0.12105263024568558, 0.0, 0.7932631969451904, 1.5707963705062866),
-                (-0.1061052605509758, -0.016505271196365356, 0.11052631586790085, 0.0, 0.6280002593994141, 0.14881229400634766),
-                (0.08016842603683472, 0.009431585669517517, 0.15263158082962036, 0.0, 2.148421049118042, 0.13227760791778564)
-            ],
-            "cylinder3": [
-                (0.0, 0.0, 0.17368420958518982, 0.0, 1.570796251296997, 1.5707963705062866),
-                (0.0, -0.10374736785888672, 0.13684210181236267, 0.0, 0.7271578311920166, 1.5707963705062866),
-                (-0.10846316814422607, -0.04008421301841736, 0.10526315867900848, 0.0, 0.594947099685669, 0.34722864627838135),
-                (-0.10846316814422607, 0.0, 0.11578947305679321, 0.0, 0.7271578311920166, 0.03306937217712402)
-            ],
-            "bottle1": [
-                (0.0, 0.0, 0.24736842513084412, 2.6442105770111084, 1.570796251296997, 1.5707963705062866),
-                (0.009431585669517517, -0.13204210996627808, 0.1473684161901474, 0.0, 0.4627368450164795, 1.5707963705062866),
-                (0.009431585669517517, -0.12261052429676056, 0.22631579637527466, 0.0, 0.7602105140686035, 1.5707963705062866),
-                (0.009431585669517517, -0.12261052429676056, 0.16842105984687805, 0.0, 0.7602105140686035, 1.5707963705062866),
-            ],
-            "bottle2": [
-                (0.009431585669517517, -0.009431570768356323, 0.21578946709632874, 2.3797895908355713, 1.570796251296997, 1.5707963705062866),
-                (-0.08016842603683472, 0.04951578378677368, 0.17368420958518982, 0.0, 0.7932631969451904, -0.5952491760253906),
-                (-0.09667368233203888, 0.05658945441246033, 0.1473684161901474, 0.0, 0.594947099685669, -0.5291104316711426),
-                (-0.08488421142101288, 0.05423158407211304, 0.1473684161901474, -0.033052682876586914, 0.7271578311920166, -0.5787144899368286)
-            ],
-            "bottle3": [
-                (0.0, 0.0, 0.24736842513084412, 2.2806313037872314, 1.570796251296997, 1.5707963705062866),
-                (-0.06366315484046936, 0.08724209666252136, 0.16842105984687805, 0.0, 0.5288419723510742, -0.7771308422088623),
-                (-0.056589484214782715, 0.09903159737586975, 0.15789473056793213, 0.0, 0.4957895278930664, -0.8928737640380859),
-                (0.08016842603683472, -0.07781052589416504, 0.1894736886024475, 0.0, 2.478947401046753, -0.6779226064682007)
-            ],
-        }
-        return poses
-
-
-    # HELPER FUNCTIONS FOR MLP MODEL
-    # Calculate the curvature of a rigid body using the principal curvature estimation algorithm
-    # This function only works for meshes that include a .obj file.
-    def getRigidBodyCurvature(self, body_id, k):
-        mesh_data = p.getMeshData(body_id)
-        # Convert the mesh data to a numpy array
-        indices, vertices = np.array(mesh_data[0]), np.array(mesh_data[1])
-
-        if indices > 0:
-            # Compute the principal curvatures at each vertex
-            curvatures = np.zeros((len(vertices), 2))
-            tree = cKDTree(vertices)
-            for i, vertex in enumerate(vertices):
-                # Find the 10 nearest neighbors to the current vertex
-                _, indices = tree.query(vertex, k=10)
-                neighbors = vertices[indices, :]
-
-                # Compute the covariance matrix of the neighbors
-                centroid = np.mean(neighbors, axis=0)
-                centered = neighbors - centroid
-                cov = np.dot(centered.T, centered)
-
-                # Compute the eigenvalues and eigenvectors of the covariance matrix
-                eigenvalues, eigenvectors = np.linalg.eigh(cov)
-
-                # Sort the eigenvalues in descending order
-                indices = eigenvalues.argsort()[::-1]
-                eigenvalues = eigenvalues[indices]
-                eigenvectors = eigenvectors[:, indices]
-
-                # Compute the principal curvatures as the reciprocals of the eigenvalues
-                curvatures[i] = np.abs(1.0 / eigenvalues[:2])
-            
-            # Get the top k eigenvalues
-            return curvatures[:k]
-        else:
-            return np.zeros((k, 2))
-    
-
-    # Get geometric features of an object
-    def getObjectGeometry(self, body_id):
-        curvature_data = self.getRigidBodyCurvature(body_id, k=3).flatten()
-        return curvature_data
-
-
-    # CORE FUNCTIONS FOR RUNNING THE SIMULATION
-    def step(self, action, control_method='joint'):
-        """
-        action: (x, y, z, roll, pitch, yaw, gripper_opening_length) for End Effector Position Control
-                (a1, a2, a3, a4, a5, a6, a7, gripper_opening_length) for Joint Position Control
-        control_method:  'end' for end effector position control
-                         'joint' for joint position control
-        """
-
-        self.robot.manipulate_ee(action[:-1], control_method)
-        self.robot.move_gripper(action[-1])
-
-        # in the step simulation, get the joint orientation
-        sixd = self.robot.get_joint_obs()
-
-        self.readResetSimulationButton()
-        self.readJointObsButton(sixd)
-        self.readBaselineDataCollectionButton()
-        self.readMLPDataCollectionButton()
-        self.readGetObjectFeaturesButton()
-        self.readFetch6dButton(action[:-1])
-        
-        self.digit_step()
-        self.fixed_step_sim(1000)
-        
-        return self.get_observation()
-
-    def digit_step(self):
-        self.color, self.depth = self.digits.render()
-        self.digits.updateGUI(self.color, self.depth)
-
-
-    def get_observation(self):
-        obs = dict()
-        if isinstance(self.camera, Camera):
-            rgb, depth, seg = self.camera.shot()
-            obs.update(dict(rgb=rgb, depth=depth, seg=seg))
-        else:
-            assert self.camera is None
-        obs.update(self.robot.get_joint_obs())
-
-        return obs
-
-    def reset(self):
-        self.robot.reset()
-        return self.get_observation()
-    
-    # Reset user-defined parameters (GUI slider values)
-    def resetUserDebugParameters(self):
-        # Re-initialize sliders        
-        self.xin = p.addUserDebugParameter("x", -0.224, 0.224, 0)
-        self.yin = p.addUserDebugParameter("y", -0.224, 0.224, 0)
-        self.zin = p.addUserDebugParameter("z", 0, 1., 0.5)
-        self.rollId = p.addUserDebugParameter("roll", -3.14, 3.14, 0)
-        self.pitchId = p.addUserDebugParameter("pitch", -3.14, 3.14, np.pi/2)
-        self.yawId = p.addUserDebugParameter("yaw", -np.pi/2, np.pi/2, np.pi/2)
-        self.gripper_opening_length_control = p.addUserDebugParameter("Gripper opening length", 0, self.robot.gripper_range[1], self.robot.gripper_range[1])
-        
-        # Re-initialize simulation buttons
-        self.initButtonVals()
-        self.resetSimulationButton  = p.addUserDebugParameter("Reset simulation", 1, 0, 1)
-        self.jointObsButton = p.addUserDebugParameter("Get joint coordinates", 1, 0, 1)
-        self.getObjectFeaturesButton = p.addUserDebugParameter("Get object features", 1, 0, 1)
-        self.fetch6dButton = p.addUserDebugParameter("Get end effector pose", 1, 0, 1)
-        self.baselineDataColButton = p.addUserDebugParameter("Collect data (baseline)", 1, 0, 1)
-        self.mlpDataColButton = p.addUserDebugParameter("Collect data (proposed)", 1, 0, 1)
-
-    # Reset the whole simulation
-    def reset_simulation(self):
-        # Remove sliders and buttons
-        p.removeAllUserParameters()
-
-        # Re-initialize sliders and buttons
-        self.resetUserDebugParameters()
-
-        self.robot.reset()
-        self.container.resetObject()
-
-    def close(self):
-        p.disconnect(self.physicsClient)
+            if score is not None and preds is not None and test_set is not None:
+                cm = confusion_matrix(test_set, preds)
+                sns.heatmap(cm, linewidths=1, ax=ax, annot=True, fmt='g')
+                ax.set_title(model_name + f": {score*100:.2f}%", fontsize=8)
+            else:
+                ax.set_title(model_name + "No results", fontsize=8)
+            continue
+        except IndexError:
+            pass
+model_data = {
+    "Raw (tactile only)": {"score": model_511.score(X_tactile_test, y_tactile_test), "preds": model_511_predictions, "test_set": y_tactile_test},
+    "Raw (visual only)": {"score": model_512.score(X_visual_test, y_visual_test), "preds": model_512_predictions, "test_set": y_visual_test},
+    "Raw (both)": {"score": model_513.score(X_complete_test, y_complete_test),"preds": model_513_predictions,"test_set": y_complete_test},
+}
+plot_confusion_matrices(model_data, fig_height=3)
+model_data = {
+    "CNN (tactile only)": {"score": model_531.score(X_cnn_tactile_test, y_cnn_tactile_test), "preds": model_531_predictions,"test_set": y_cnn_tactile_test},
+    "CNN (both)": {"score": model_533.score(X_cnn_complete_test, y_cnn_complete_test), "preds": model_533_predictions, "test_set": y_cnn_complete_test},
+    "CNN (tactile only) + PCA": {"score": model_534.score(X_pca_cnn_tactile_test, y_pca_cnn_tactile_test), "preds": model_534_predictions, "test_set": y_pca_cnn_tactile_test},
+    "CNN (both) + PCA": {"score": model_535.score(X_pca_cnn_complete_test, y_pca_cnn_complete_test), "preds": model_535_predictions, "test_set": y_pca_cnn_complete_test}
+}
+plot_confusion_matrices(model_data, fig_height=2)
 \end{lstlisting}
-
-\section{main.py}
+\section{Proposed Model Training Code}
 \begin{lstlisting}
-    import os
-    import numpy as np
-    import pybullet as p
-    from env import ClutteredPushGrasp
-    from robot import UR5Robotiq85
-    from utilities import YCBModels, Camera
-    
-    
-    def run_simulation():
-        ycb_models = YCBModels(os.path.join('./data/ycb', '**', 'textured-decmp.obj'))  # Load YCB models
-        camera = Camera((1, 1, 1), (0, 0, 0), (0, 0, 1), 0.1, 5, (320, 320), 40)        # Initialize camera
-        robot = UR5Robotiq85((0, 0.5, 0), (0, 0, 0))                                    # Initialize robot
-    
-        # Initialize simulation environment
-        env = ClutteredPushGrasp(robot, ycb_models, camera, vis=True)
-        env.reset()
-        env.container.resetObject()
-    
-        while True:
-            env.step(env.read_debug_parameter(), 'end')
-            env.digit_step()
-    
-    
-    if __name__ == '__main__':
-        run_simulation()
-\end{lstlisting}
-
-\section{robot.py}
-\begin{lstlisting}
-import pybullet as p
-import math
-from collections import namedtuple
-import yaml
-import cv2
-
-class RobotBase(object):
-    """
-    The base class for robots
-    """
-
-    def __init__(self, pos, ori):
-        """
-        Arguments:
-            pos: [x y z]
-            ori: [r p y]
-
-        Attributes:
-            id: Int, the ID of the robot
-            eef_id: Int, the ID of the End-Effector
-            arm_num_dofs: Int, the number of DoFs of the arm
-                i.e., the IK for the EE will consider the first `arm_num_dofs` controllable (non-Fixed) joints
-            joints: List, a list of joint info
-            controllable_joints: List of Ints, IDs for all controllable joints
-            arm_controllable_joints: List of Ints, IDs for all controllable joints on the arm (that is, the first `arm_num_dofs` of controllable joints)
-
-            ---
-            For null-space IK
-            ---
-            arm_lower_limits: List, the lower limits for all controllable joints on the arm
-            arm_upper_limits: List
-            arm_joint_ranges: List
-            arm_rest_poses: List, the rest position for all controllable joints on the arm
-
-            gripper_range: List[Min, Max]
-        """
-        self.base_pos = pos
-        self.base_ori = p.getQuaternionFromEuler(ori)
-
-        # Load the background of the digit sensor
-        self.bg = cv2.imread("./src/bg_digit_240_320.jpg")
-        self.digit_RGB_img = []
-        self.digit_depth_img = []
-        self.sensor_pos = []        # compute the camera matrix...
-        self.gripper_range = [0, 0.085]
-
-    def load(self):
-        self.__init_robot__()
-        self.__parse_joint_info__()
-        self.__post_load__()
-        # print(self.joints)
-
-    # Read and load parameters from the parameters.yaml file 
-    def load_digit_parm(self):
-        with open("./src/parameters.yaml", 'r') as f:
-            file_data = yaml.load(f, Loader=yaml.FullLoader)
-
-        self.tacto_info     = file_data['tacto']
-        self.camera_info    = file_data['pybullet_camera']
-        self.panel_info     = file_data["object_control_panel"]
-        self.link_ID        = file_data["digit_link_id"]
-        self.object_info    = file_data["target_object"]
-        self.robot_info     = file_data["robot"]
-        self.data_info      = file_data["data_collection"]
-
-
-    def step_simulation(self):
-        raise RuntimeError('`step_simulation` method of RobotBase Class should be hooked by the environment.')
-
-    def __parse_joint_info__(self):
-        numJoints = p.getNumJoints(self.id)
-        jointInfo = namedtuple('jointInfo', 
-            ['id','name','type','damping','friction','lowerLimit','upperLimit','maxForce','maxVelocity','controllable'])
-        self.joints = []
-        self.controllable_joints = []
-        for i in range(numJoints):
-            info = p.getJointInfo(self.id, i)
-            jointID = info[0]
-            jointName = info[1].decode("utf-8")
-            jointType = info[2]  # JOINT_REVOLUTE, JOINT_PRISMATIC, JOINT_SPHERICAL, JOINT_PLANAR, JOINT_FIXED
-            jointDamping = info[6]
-            jointFriction = info[7]
-            jointLowerLimit = info[8]
-            jointUpperLimit = info[9]
-            jointMaxForce = info[10]
-            jointMaxVelocity = info[11]
-            controllable = (jointType != p.JOINT_FIXED)
-            if controllable:
-                self.controllable_joints.append(jointID)
-                p.setJointMotorControl2(self.id, jointID, p.VELOCITY_CONTROL, targetVelocity=0, force=0)
-            info = jointInfo(jointID,jointName,jointType,jointDamping,jointFriction,jointLowerLimit,
-                            jointUpperLimit,jointMaxForce,jointMaxVelocity,controllable)
-            self.joints.append(info)
-
-        ### Digit joint has id, 13 and 19
-
-        assert len(self.controllable_joints) >= self.arm_num_dofs
-        self.arm_controllable_joints = self.controllable_joints[:self.arm_num_dofs]
-
-        self.arm_lower_limits = [info.lowerLimit for info in self.joints if info.controllable][:self.arm_num_dofs]
-        self.arm_upper_limits = [info.upperLimit for info in self.joints if info.controllable][:self.arm_num_dofs]
-        self.arm_joint_ranges = [info.upperLimit - info.lowerLimit for info in self.joints if info.controllable][:self.arm_num_dofs]
-
-    def __init_robot__(self):
-        raise NotImplementedError
-    
-    def __post_load__(self):
-        pass
-
-    def reset(self):
-        self.reset_arm()
-        self.reset_gripper()
-
-    def reset_arm(self):
-        """
-        reset to rest poses
-        """
-        
-        for rest_pose, joint_id in zip(self.arm_rest_poses, self.arm_controllable_joints):
-            p.resetJointState(self.id, joint_id, rest_pose)
-
-        # Wait for a few steps
-        for _ in range(10):
-            self.step_simulation()
-
-    def reset_gripper(self):
-        self.open_gripper()
-
-    def open_gripper(self):
-        self.move_gripper(self.gripper_range[1])
-
-    def close_gripper(self):
-        self.move_gripper(self.gripper_range[0])
-
-    def manipulate_ee(self, action, control_method, velocity_scale=1):
-        assert control_method in ('joint', 'end')
-        if control_method == 'end':
-            x, y, z, roll, pitch, yaw = action
-            pos = (x, y, z)
-            orn = p.getQuaternionFromEuler((roll, pitch, yaw))
-            joint_poses = p.calculateInverseKinematics(self.id, self.eef_id, pos, orn,
-                                                       self.arm_lower_limits, self.arm_upper_limits, self.arm_joint_ranges,
-                                                       maxNumIterations=100)
-        elif control_method == 'joint':
-            assert len(action) == self.arm_num_dofs
-            joint_poses = action
-        # arm
-        for i, joint_id in enumerate(self.arm_controllable_joints):
-            p.setJointMotorControl2(self.id, joint_id, p.POSITION_CONTROL, joint_poses[i],
-                                    force=self.joints[joint_id].maxForce, maxVelocity=self.joints[joint_id].maxVelocity * velocity_scale)
-
-    def move_gripper(self, open_length):
-        raise NotImplementedError
-
-    def get_joint_obs(self):
-        positions = []
-        velocities = []
-        for joint_id in self.controllable_joints:
-            joint_states = p.getJointState(self.id, joint_id)
-            pos, vel = joint_states[0], joint_states[1]
-            positions.append(pos)
-            velocities.append(vel)
-        ee_pos = p.getLinkState(self.id, self.eef_id)[0]
-        return dict(positions=positions, velocities=velocities, ee_pos=ee_pos)
-
-
-class UR5Robotiq85(RobotBase):
-    def __init_robot__(self):
-        self.eef_id = 7
-        self.arm_num_dofs = 6
-        self.arm_rest_poses = [-1.5690622952052096, -1.5446774605904932, 1.343946009733127, -1.3708613585093699,
-                               -1.5707970583733368, 0.0009377758247187636]
-        self.id = p.loadURDF('./src/urdf/robots/ur5_robotiq_85_digit.urdf', self.base_pos, self.base_ori, useFixedBase=True, flags=p.URDF_ENABLE_CACHED_GRAPHICS_SHAPES)
-        self.gripper_range = [0, 0.085]
-    
-    def __post_load__(self):
-        # To control the gripper
-        mimic_parent_name = 'finger_joint'
-        mimic_children_names = {'right_outer_knuckle_joint': 1,
-                                'left_inner_knuckle_joint': 1,
-                                'right_inner_knuckle_joint': 1,
-                                'left_inner_finger_joint': -1,
-                                'right_inner_finger_joint': -1}
-        self.__setup_mimic_joints__(mimic_parent_name, mimic_children_names)
-
-    def __setup_mimic_joints__(self, mimic_parent_name, mimic_children_names):
-        self.mimic_parent_id = [joint.id for joint in self.joints if joint.name == mimic_parent_name][0]
-        self.mimic_child_multiplier = {joint.id: mimic_children_names[joint.name] for joint in self.joints if joint.name in mimic_children_names}
-
-        for joint_id, multiplier in self.mimic_child_multiplier.items():
-            c = p.createConstraint(self.id, self.mimic_parent_id,
-                                   self.id, joint_id,
-                                   jointType=p.JOINT_GEAR,
-                                   jointAxis=[0, 1, 0],
-                                   parentFramePosition=[0, 0, 0],
-                                   childFramePosition=[0, 0, 0])
-            p.changeConstraint(c, gearRatio=-multiplier, maxForce=100, erp=1)  # Note: the mysterious `erp` is of EXTREME importance
-
-    def move_gripper(self, open_length):
-        # open_length = np.clip(open_length, *self.gripper_range)
-        open_angle = 0.715 - math.asin((open_length - 0.010) / 0.1143)  # angle calculation
-        # Control the mimic gripper joint(s)
-        p.setJointMotorControl2(self.id, self.mimic_parent_id, p.POSITION_CONTROL, targetPosition=open_angle,
-                                force=self.joints[self.mimic_parent_id].maxForce, maxVelocity=self.joints[self.mimic_parent_id].maxVelocity)
-\end{lstlisting}
-\section{thing.py}
-\begin{lstlisting}
-"""
-Class for defining & initializing object meshes in Pybullet simulations.
-"""
-
-import pybullet as p
-
-
-class Thing:
-    def __init__(self, name, position, globalScaling):
-        self.name = name
-        self.initPos = position
-        self.objectScale = globalScaling    # also defined in the arg85.yaml file, for shrinking the size of the mug
-        self.initOrientation = p.getQuaternionFromEuler([0,0,0])
-        self.urdf_path = "./src/urdf/objects/"
-
-        if name == "block" or name == "block1":
-            self.urdf_path += "blocks/block1/block1.urdf"
-        elif name == "block2":
-            self.urdf_path += "blocks/block2/block2.urdf"
-        elif name == "block3":
-            self.urdf_path += "blocks/block3/block3.urdf"
-        elif name == "cylinder1":
-            self.urdf_path += "cylinders/cylinder1/cylinder1.urdf"
-        elif name == "cylinder2":
-            self.urdf_path += "cylinders/cylinder2/cylinder2.urdf"
-        elif name == "cylinder3":
-            self.urdf_path += "cylinders/cylinder3/cylinder3.urdf"
-        elif name == "bottle1":
-            self.urdf_path += "bottles/bottle1/bottle1.urdf"
-        elif name == "bottle2":
-            self.urdf_path += "bottles/bottle2/bottle2.urdf"
-        elif name == "bottle3":
-            self.urdf_path += "bottles/bottle3/bottle3.urdf"
-
-        id = p.loadURDF(self.urdf_path, self.initPos, self.initOrientation, useFixedBase=False, globalScaling=self.objectScale)
-        self.setID(id)
-        self.resetVelocity()
-
-    def setInitPos(self,pos):
-        self.initPos=pos
-
-    def getInitPos(self):
-        return self.initPos
-
-    def setID(self,ID):
-        self.ID=ID
-
-    def getPos(self):
-        bpao=p.getBasePositionAndOrientation(self.ID)
-        return bpao[0]
-
-    def setHeight(self,height):
-        self.height=height
-
-    def getHeight(self):
-        return self.height
-
-    def setWidth(self,width):
-        self.width=width
-
-    def getWidth(self):
-        return self.width
-
-    def setInitOrientation(self, quat):
-        self.initOrientation=quat
-    
-    def resetVelocity(self):
-        p.resetBaseVelocity(self.ID, [0, 0, 0], [0, 0, 0])
-    
-    def resetObject(self):
-        pos = (0, 0, 0)
-        orn = p.getQuaternionFromEuler([0,0,0])
-        p.resetBasePositionAndOrientation(self.ID, pos, orn)
-        self.resetVelocity()
-
-    def getInitOrientation(self):
-        return self.initOrientation 
-\end{lstlisting}
-\section{utilities.py}
-\begin{lstlisting}
-import pybullet as p
-import glob
+## UCL COMP0029 Individual Project for Year 3 BSc
+### Robust Robotic Grasping Utilising Touch Sensing - Proposed Learning Framework Notebook
+# This notebook contains the essential code for the proposed Multilayer Perceptron (MLP) approach to grasp stability prediction. The whole notebook should take approximately 10 minutes to run.
+### 1. Load packages
 import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+
+import torch
+import torch.nn as nn
+import torch.nn.init as init
+import torch.optim as optim
+from torch.utils.data import Dataset, DataLoader
+from torchvision import transforms
+from PIL import Image
+import os
+import gc
+
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, ConfusionMatrixDisplay
+from sklearn.decomposition import PCA
+
+import seaborn as sns
+# Set device for `PyTorch` training
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device
+# PyTorch configs
+gc.collect()
+torch.cuda.empty_cache()
+torch.set_num_threads(2)
+np.errstate(invalid='ignore', divide='ignore')
+### 2. Load datasets from saved .npy files
+# To collect data for this experiment, you can run the "Collect Sensory Data" button in the Pybullet simulation. This generates a predefined number of Gaussian grasps randomly generated from a base hand pose. Each individual grasp is considered as an individual experiment, and the data collected from this experiment is split into four, each stored in its own dataset.
+
+# For all object models used in this experiment, each object has 4 datasets which include:
+# - `depth_ds.npy` which stores the depth tactile data from the mounted DIGIT sensors
+# - `color_ds.npy` which stores the colored (RGB) version of the depth tactile data from the mounted DIGIT sensors
+# - `poses_ds.npy` which stores the randomly-generated 6d hand poses from the simulation
+# - `outcomes_ds.npy` which stores the outcomes of each random pose
+# In this notebook, we will use the following dataset combinations:
+# - `tactile` only (depth + colour)
+# - `visual` with geometric features
+# - `multi-modal` consisting of `tactile` and `visual`
+# - `complete` consisting of `tactile` and `visual` with geometric features
+root = "../datasets/"
+object_names = ["block1", "block2", "block3", "cylinder1", "cylinder2", "cylinder3", "mustard_bottle1", "mustard_bottle2", "mustard_bottle3"]
+# Load `.npy` datasets via `np.load()`
+depth_data = np.empty((0, 2, 160, 120))
+color_data = np.empty((0, 2, 160, 120, 3))
+poses_data = np.empty((0, 6))
+grasp_outcomes_data = np.empty((0,))
+
+for object_name in object_names:
+    # Construct the relative paths of each dataset and load them into the notebook
+    depth_data_temp = np.load(root + object_name + "_ds/depth_ds.npy", mmap_mode='r')
+    colour_data_temp = np.load(root + object_name + "_ds/color_ds.npy", mmap_mode='r')
+    poses_data_temp = np.load(root + object_name + "_ds/poses_ds.npy", mmap_mode='r')
+    grasp_labels_temp = np.load(root + object_name + "_ds/grasp_outcomes.npy", mmap_mode='r')
+
+    depth_data = np.append(depth_data, depth_data_temp, axis=0)
+    color_data = np.append(color_data, colour_data_temp, axis=0)
+    poses_data = np.append(poses_data, poses_data_temp, axis=0)
+    grasp_outcomes_data = np.append(grasp_outcomes_data, grasp_labels_temp, axis=0)
+del depth_data_temp, colour_data_temp, poses_data_temp, grasp_labels_temp
+torch.cuda.empty_cache()
+# These datasets should all be in the form of $(N\times...)$ where $N$ is the number of examples:
+print(f"Shape of depth_data: {depth_data.shape}")
+print(f"Shape of color_data: {color_data.shape}")
+print(f"Shape of poses_data: {poses_data.shape}")
+print(f"Shape of grasp_outcomes_data: {grasp_outcomes_data.shape}")
+# Additionally, we confirm the number of successful and unsuccessful grasps recorded. This helps us in the next section to determine how many examples we should include for each class in order to produce a balanced dataset.
+print(f"# of sucessesful grasps: {(grasp_outcomes_data == 1).sum()}")
+print(f"# of unsuccessful grasps: {(grasp_outcomes_data == 0).sum()}")
+### 3. Preprocessing
+In this section, we create the required datasets specified from section 2, and normalise the datasets.
+#### 3.1 Normalization
+def normalize(arr):
+    # Normalize & standardize each column
+    mean = np.mean(arr, axis=0)
+    std = np.std(arr, axis=0)
+    
+    arr = (arr - mean) / std
+    arr = np.nan_to_num(arr, 0)
+    arr[np.isinf(arr)] = 0
+    return arr
+# Depth and colour data consists of pairs of tactile sensory readings. Thus, we concatenate each pair together into single images
+depth_data = np.concatenate((depth_data[:, 0], depth_data[:, 1]), axis=2)
+color_data = np.concatenate((color_data[:, 0], color_data[:, 1]), axis=2)
+depth_data = torch.from_numpy(normalize(depth_data))
+color_data = torch.from_numpy(normalize(color_data))
+visual_data = torch.from_numpy(np.nan_to_num(normalize(poses_data)))
+print(f"Shape of depth_ds: {depth_data.shape}")
+print(f"Shape of colour_ds: {color_data.shape}")
+print(f"Shape of visual_ds: {visual_data.shape}")
+# Create the tactile dataset
+tactile_data = torch.cat([depth_data.unsqueeze(-1), color_data], dim=-1)
+tactile_data = torch.nan_to_num(tactile_data)
+print(f"Shape of tactile_ds: {tactile_data.shape}")
+del depth_data, color_data, poses_data
+torch.cuda.empty_cache()
+#### Dimensionality reduction
+# A simple convolutional neural network that extracts features from an input tensor
+class FeatureExtractorCNN(nn.Module):
+    def __init__(self):
+        super(FeatureExtractorCNN, self).__init__()
+        self.conv1 = nn.Conv2d(4, 16, kernel_size=3, stride=1, padding=1)
+        self.conv2 = nn.Conv2d(16, 64, kernel_size=3, stride=1, padding=1)
+        self.conv3 = nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1)
+        self.conv4 = nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1)
+
+        self.pool = nn.MaxPool2d(kernel_size=3)
 
 
-class Models:
-    def load_objects(self):
-        raise NotImplementedError
+    def forward(self, x):
+        x = self.conv1(x)
+        x = nn.functional.relu(x)
+        x = self.pool(x)
 
-    def __len__(self):
-        raise NotImplementedError
+        x = self.conv2(x)
+        x = nn.functional.relu(x)
+        x = self.pool(x)
+        
+        x = self.conv3(x)
+        x = nn.functional.relu(x)
+        x = self.pool(x)
 
-    def __getitem__(self, item):
-        return NotImplementedError
+        x = self.conv4(x)
+        x = nn.functional.relu(x)
+        x = self.pool(x)
+
+        return x
+# Preprocess data using CNN feature extraction
+cnn = FeatureExtractorCNN()
+cnn_tactile = torch.cat([cnn(img.float().permute(2,0,1)).unsqueeze(0) for img in tactile_data])
+cnn_tactile = cnn_tactile.reshape(cnn_tactile.shape[0], -1)
+cnn_tactile.shape
+del tactile_data
+### 4. Testing different data representations
+# In our MLP model, there are two fully connected (dense) layers, each with an activation function (ReLU for the first layer and no activation for the second layer). The input size, hidden size, and output size are parameters that need to be specified when creating an instance of the MLP.
+class MLP(nn.Module):
+    def __init__(self, input_size, hidden_size, output_size):
+        super(MLP, self).__init__()
+        self.fc1 = nn.Linear(input_size, hidden_size)
+        self.fc2 = nn.Linear(hidden_size, hidden_size)
+        self.fc3 = nn.Linear(hidden_size, output_size)
+        self.relu = nn.ReLU()
+
+        self.criterion = nn.BCEWithLogitsLoss()
+        self.optimizer = optim.Adam(self.parameters())
+
+    def forward(self, x):
+        x = self.fc1(x)
+        x = self.relu(x)
+        x = self.fc2(x)
+        x = self.relu(x)
+        x = self.fc3(x)
+        return x
+        
+    def train_mlp(self, epochs, X_train, y_train):
+        self.losses = []
+        for i in range(epochs):
+            inputs = torch.from_numpy(X_train).float()
+            labels = torch.from_numpy(y_train).float().view(-1, 1)
+
+            # Zero the gradients
+            self.optimizer.zero_grad()
+
+            # Forward pass
+            preds = self(inputs)
+            loss = self.criterion(preds, labels)
+            self.losses.append(loss.item())
+
+            # Backward pass and optimization
+            loss.backward()
+            self.optimizer.step()
+
+            if i % 10 == 0:
+                torch.cuda.empty_cache()
+
+    def eval_mlp(self, X_test, y_test, verbose=False):
+        # Evaluate the performance of the model on the testing set
+        with torch.no_grad():
+            inputs = torch.from_numpy(X_test).float()
+            labels = torch.from_numpy(y_test).float().view(-1, 1)
+
+            # Forward pass
+            final_preds = self(inputs)
+            predicted = (final_preds > 0).float()
+            
+            # Confusion matrix
+            if verbose:
+                cm = confusion_matrix(y_test, predicted)
+                sns.heatmap(cm, linewidths=1, annot=True, fmt='g')
+
+            # Performance metrics
+            accuracy = round(accuracy_score(labels, predicted) * 100, 2)
+            precision = round(precision_score(labels, predicted) * 100, 2)
+            recall = round(recall_score(labels, predicted) * 100, 2)
+            f1 = round(f1_score(labels, predicted) * 100, 2)
+            return accuracy, precision, recall, f1
+    
+    def plot_losses(self):
+        plt.plot(self.losses)
+        plt.xlabel('Epochs')
+        plt.ylabel('Training Loss')
+        plt.show()
+#### 4a. Testing datatset combinations (CNN dimensionality-reduced) without geometric features
+def train_mlp_multitrial(dataset, grasp_outcomes_data, trials_count: int = 5, sampling=False):
+    performance_metrics = np.empty((0, 4))
+    dataset = dataset.detach().numpy() if isinstance(dataset, torch.Tensor) else dataset
+
+    for i in range(trials_count):
+        X_train, X_test, y_train, y_test = train_test_split(dataset, grasp_outcomes_data, test_size=0.2)
+        mlp = MLP(input_size=X_train.shape[1], hidden_size=64, output_size=1)
+        mlp.train_mlp(epochs=500, X_train=X_train, y_train=y_train)
+        accuracy, precision, recall, f1 = mlp.eval_mlp(X_test=X_test, y_test=y_test)
+        metrics_row = np.array([accuracy, precision, recall, f1]).reshape(1, 4)
+        performance_metrics = np.append(performance_metrics, metrics_row, axis=0)
+
+        torch.cuda.empty_cache()
+    return performance_metrics
+# Train Tactile-only dataset + CNN
+metrics = train_mlp_multitrial(cnn_tactile, grasp_outcomes_data, trials_count=5)
+print("Tactile-only MLP")
+print(f"Accuracy:{metrics[:, 0]}")
+print(f"Mean accuracy score: {np.mean(metrics[:, 0]):.2f} + {np.std(metrics[:, 0]):.2f}")
+print(f"Mean precision score: {np.mean(metrics[:, 1]):.2f}  + {np.std(metrics[:, 1]):.2f}")
+print(f"Mean recall score: {np.mean(metrics[:, 2]):.2f}  + {np.std(metrics[:, 2]):.2f}")
+print(f"Mean f1 score: {np.mean(metrics[:, 3]):.2f} + {np.std(metrics[:, 3]):.2f}")
+torch.cuda.empty_cache()
+# Train Visual-only dataset + CNN
+metrics = train_mlp_multitrial(visual_data, grasp_outcomes_data, trials_count=5)
+print("Visual-only MLP")
+print(f"Accuracy:{metrics[:, 0]}")
+print(f"Mean accuracy score: {np.mean(metrics[:, 0]):.2f} + {np.std(metrics[:, 0]):.2f}")
+print(f"Mean precision score: {np.mean(metrics[:, 1]):.2f}  + {np.std(metrics[:, 1]):.2f}")
+print(f"Mean recall score: {np.mean(metrics[:, 2]):.2f}  + {np.std(metrics[:, 2]):.2f}")
+print(f"Mean f1 score: {np.mean(metrics[:, 3]):.2f} + {np.std(metrics[:, 3]):.2f}")
+torch.cuda.empty_cache()
+# Train Multi-modal dataset (tactile + visual) + CNN
+# We simply combine the cnn-processed tactile data (from Section 5.3.1) with the visual data
+cnn_complete = torch.cat([cnn_tactile.reshape(cnn_tactile.shape[0], -1), visual_data], dim=1)
+metrics = train_mlp_multitrial(cnn_complete, grasp_outcomes_data, trials_count=5)
+print("Multi-modal MLP")
+print(f"Accuracy:{metrics[:, 0]}")
+print(f"Mean accuracy score: {np.mean(metrics[:, 0]):.2f} + {np.std(metrics[:, 0]):.2f}")
+print(f"Mean precision score: {np.mean(metrics[:, 1]):.2f}  + {np.std(metrics[:, 1]):.2f}")
+print(f"Mean recall score: {np.mean(metrics[:, 2]):.2f}  + {np.std(metrics[:, 2]):.2f}")
+print(f"Mean f1 score: {np.mean(metrics[:, 3]):.2f} + {np.std(metrics[:, 3]):.2f}")
+del cnn_complete
+torch.cuda.empty_cache()
+### 5. Determining impact of geometric features of objects on MLP accuracy
+# This section aims to determine the capability of the selected object features (principal components) in identifying primitive object classes.
+from sklearn.decomposition import PCA
+from sklearn.cluster import KMeans, SpectralClustering
+from sklearn.preprocessing import StandardScaler
 
 
-class YCBModels(Models):
-    def __init__(self, root, selected_names: tuple = ()):
-        self.obj_files = glob.glob(root)
-        self.selected_names = selected_names
+np.set_printoptions(precision=2, formatter={'float_kind': "{:.3f}".format})
+#### 5a. Clustering for object features using PCA
+# Loading object features
+### Object features
+block_features = np.array([
+    [0.025, 0.05, 0.05, 0., 0., 0., 0., 0., 0.],
+    [0.03, 0.025, 0.045, 0., 0., 0., 0., 0., 0.],
+    [0.05, 0.025, 0.04, 0., 0., 0., 0., 0., 0.],
+])
 
-        self.visual_shapes = []
-        self.collision_shapes = []
+cylinder_features = np.array([
+    [0.04, 0.04, 0.05, 950.21606561, 14540.28434464, 950.21606561, 14540.28434464, 950.21606561, 14540.28434464],
+    [0.045, 0.045, 0.035, 750.78800246, 11488.6197291, 750.78800246, 11488.6197291, 750.78800246, 11488.6197291],
+    [0.034, 0.034, 0.045, 1315.17794549, 20124.96103064, 1315.17794549, 20124.96103064, 1315.17794549, 20124.96103064]
+])
 
-    def load_objects(self):
-        shift = [0, 0, 0]
-        mesh_scale = [1, 1, 1]
+bottle_features = np.array([
+    [0.06, 0.04, 0.04, 43195.64459266, 114198.0441697 , 45229.93706864, 135651.61794731, 75768.06626518,  83802.00991944],
+    [0.04, 0.06, 0.06, 68993.34322089, 220902.86884084, 75354.47923164, 239160.99530455, 109695.41304924, 147938.06047763],
+    [0.04, 0.06, 0.04, 61744.75459905, 168925.8805044 , 68143.84372052, 148775.07141178, 73102.67367022, 102953.40831915]
+])
 
-        for filename in self.obj_files:
-            # Check selected_names
-            if self.selected_names:
-                in_selected = False
-                for name in self.selected_names:
-                    if name in filename:
-                        in_selected = True
-                if not in_selected:
-                    continue
-            print('Loading %s' % filename)
-            self.collision_shapes.append(
-                p.createCollisionShape(shapeType=p.GEOM_MESH,
-                                       fileName=filename,
-                                       collisionFramePosition=shift,
-                                       meshScale=mesh_scale))
-            self.visual_shapes.append(
-                p.createVisualShape(shapeType=p.GEOM_MESH,
-                                    fileName=filename,
-                                    visualFramePosition=shift,
-                                    meshScale=mesh_scale))
+object_names = {0: 'cylinder', 1: 'block', 2: 'bottle'}
+# Feature transformation - concatenating features together
+object_features = (block_features, cylinder_features, bottle_features)
+features = np.concatenate(object_features)
+labels = np.array([0, 0, 0, 1, 1, 1, 2, 2, 2])
+# Standardize the data
+scaler = StandardScaler()
+features = scaler.fit_transform(features)
+# PCA
+def pca(data, k, verbose=True):
+    pca = PCA(n_components=k)
+    pca.fit(data)
 
-    def __len__(self):
-        return len(self.collision_shapes)
+    if verbose:
+        print(f"Variance captured: {sum(pca.explained_variance_ratio_)*100:.2f}%")
+    return pca.transform(data)
+# Determine the number of components to use
+for i in range(1, 5):
+    pca_res = pca(features, k=i)
+### Plot 3-feature PCA results
+pca3d = pca(features, k=3)
 
-    def __getitem__(self, idx):
-        return self.visual_shapes[idx], self.collision_shapes[idx]
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
 
+colors = ['r', 'g', 'b']
+for i, c in zip(np.unique(labels), colors):
+    ax.scatter(pca3d[labels == i, 0], pca3d[labels == i, 1], pca3d[labels == i, 2], c=c, label=object_names[i])
 
-class Camera:
-    def __init__(self, cam_pos, cam_tar, cam_up_vector, near, far, size, fov):
-        self.width, self.height = size
-        self.near, self.far = near, far
-        self.fov = fov
+ax.set_xlabel('Component 1')
+ax.set_ylabel('Component 2')
+ax.set_zlabel('Component 3')
+ax.set_aspect('equal', 'box')
+ax.legend()
+plt.show()
+#### 5b. MLP: Dataset combination 4: Visual (EE pose and geometric features) + CNN
+blocks = np.repeat(np.concatenate(object_features), 160, axis=0)
 
-        aspect = self.width / self.height
-        self.view_matrix = p.computeViewMatrix(cam_pos, cam_tar, cam_up_vector)
-        self.projection_matrix = p.computeProjectionMatrixFOV(self.fov, aspect, self.near, self.far)
+visual_data = np.concatenate((visual_data, blocks), axis=1)
+visual_data = torch.from_numpy(np.nan_to_num(normalize(visual_data)))
+visual_data.shape
+del object_features, blocks
+# Train Visual-only (EE pose + geometric features) + CNN
+metrics = train_mlp_multitrial(visual_data, grasp_outcomes_data, trials_count=5)
+print("Visual data (EE pose + geo) MLP")
+print(f"Accuracy:{metrics[:, 0]}")
+print(f"Mean accuracy score: {np.mean(metrics[:, 0]):.2f} + {np.std(metrics[:, 0]):.2f}")
+print(f"Mean precision score: {np.mean(metrics[:, 1]):.2f}  + {np.std(metrics[:, 1]):.2f}")
+print(f"Mean recall score: {np.mean(metrics[:, 2]):.2f}  + {np.std(metrics[:, 2]):.2f}")
+print(f"Mean f1 score: {np.mean(metrics[:, 3]):.2f} + {np.std(metrics[:, 3]):.2f}")
+#### 5c. MLP: Dataset combination 5: Tactile + Visual (EE pose and geometric features) + CNN
+torch.cuda.empty_cache()
+final_dataset = torch.cat((cnn_tactile, visual_data), dim=1)
+metrics = train_mlp_multitrial(final_dataset, grasp_outcomes_data, trials_count=5)
+print(f"Final dataset (no PCA) MLP")
+print(f"Accuracy:{metrics[:, 0]}")
+print(f"Mean accuracy score: {np.mean(metrics[:, 0]):.2f} + {np.std(metrics[:, 0]):.2f}")
+print(f"Mean precision score: {np.mean(metrics[:, 1]):.2f}  + {np.std(metrics[:, 1]):.2f}")
+print(f"Mean recall score: {np.mean(metrics[:, 2]):.2f}  + {np.std(metrics[:, 2]):.2f}")
+print(f"Mean f1 score: {np.mean(metrics[:, 3]):.2f} + {np.std(metrics[:, 3]):.2f}")
+del cnn_tactile
+#### 5d. MLP: Selecting number of components for PCA (with dataset combination 5)
+# We conduct the following experiment to determine the optimal value of $k$ for PCA:
+# 1. Train the MLP from $k=1$ to $k=20$
+# 2. Repeat 1 for 5 times to find the average accuracy for each $k$, and choose $k$ value for the highest mean accuracy
+MIN_K, MAX_K = 1, 30
+pca_accuracies_mean = []
+pca_accuracies_std = []
+for i in range(MIN_K, MAX_K+1):
+    transformed_dataset = pca(final_dataset.detach().numpy(), k=i, verbose=False)
+    transformed_dataset = torch.from_numpy(transformed_dataset)
+    metrics = train_mlp_multitrial(transformed_dataset, grasp_outcomes_data)
+    pca_accuracies_mean.append(np.mean(metrics[:, 0]))
+    pca_accuracies_std.append(np.std(metrics[:, 0]))
+    torch.cuda.empty_cache()
+    print(f"Completed PCA training for k={i} components")
+del transformed_dataset
+del visual_data
+# Calculate the average accuracies for each $k$
+pca_accuracies_mean = np.array(pca_accuracies_mean)
+pca_accuracies_std = np.array(pca_accuracies_std)
+K = pca_accuracies_mean.argmax(axis=0)
+print(f"Number of components for PCA: {K}")
+x = np.arange(MIN_K, MAX_K+1)
+plt.errorbar(x, pca_accuracies_mean, yerr=pca_accuracies_std, fmt='o', markersize=5, ecolor='red', capsize=3, capthick=1)
+plt.grid(True)
+plt.xlabel("Number of principal components")
+plt.xticks(np.arange(MIN_K, MAX_K+1, step=2))
+plt.ylabel("Mean MLP accuracy (%)")
+plt.title("Impact of Number of Principal Components on MLP Accuracy")
+plt.show()
+x = np.arange(MIN_K, MAX_K+1, step=1)
+plt.plot(x, pca_accuracies_mean)
+plt.fill_between(x, pca_accuracies_mean-pca_accuracies_std, pca_accuracies_mean+pca_accuracies_std, alpha=0.2)
+plt.grid(True)
+plt.xlabel("Number of principal components")
+plt.xticks(np.arange(MIN_K, MAX_K+1, step=2))
+plt.ylabel("Mean MLP accuracy (%)")
+plt.title("Impact of Number of Principal Components on MLP Accuracy")
+plt.show()
+top_accuracy_indices = np.argsort(pca_accuracies_mean)[-5:] 
+top_accuracies = pca_accuracies_mean[top_accuracy_indices]
+top_stds = pca_accuracies_std[top_accuracy_indices]
 
-        _view_matrix = np.array(self.view_matrix).reshape((4, 4), order='F')
-        _projection_matrix = np.array(self.projection_matrix).reshape((4, 4), order='F')
-        self.tran_pix_world = np.linalg.inv(_projection_matrix @ _view_matrix)
+print("Top 5 mean accuracies:", top_accuracies)
+print("Top 5 std accuracies:", top_stds)
+print("Corresponding indices:", top_accuracy_indices + 1)
+### 6. Experiments
+# We update the train_mlp_multitrial function to accomodate pre-defined training and testing datasets
+def train_mlp_multitrial2(X_train, X_test, y_train, y_test, trials_count: int = 5):
+    performance_metrics = np.empty((0, 4))
 
-    def rgbd_2_world(self, w, h, d):
-        x = (2 * w - self.width) / self.width
-        y = -(2 * h - self.height) / self.height
-        z = 2 * d - 1
-        pix_pos = np.array((x, y, z, 1))
-        position = self.tran_pix_world @ pix_pos
-        position /= position[3]
+    for i in range(trials_count):
+        mlp = MLP(input_size=X_train.shape[1], hidden_size=64, output_size=1)
+        mlp.train_mlp(epochs=500, X_train=X_train, y_train=y_train)
+        accuracy, precision, recall, f1 = mlp.eval_mlp(X_test=X_test, y_test=y_test)
+        metrics_row = np.array([accuracy, precision, recall, f1]).reshape(1, 4)
+        performance_metrics = np.append(performance_metrics, metrics_row, axis=0)
 
-        return position[:3]
+        torch.cuda.empty_cache()
+    
+    return performance_metrics
+#### 6.1 Train MLP on 2 blocks, test on remaining block
+# Objective: see MLP's robustness
+combinations = [
+    [[1, 2], [3]],
+    [[1, 3], [2]],
+    [[2, 3], [1]]
+]
 
-    def shot(self):
-        # Get depth values using the OpenGL renderer
-        _w, _h, rgb, depth, seg = p.getCameraImage(self.width, self.height,
-                                                   self.view_matrix, self.projection_matrix,
-                                                   )
-        return rgb, depth, seg
+exp1_accuracies_mean = []
+exp1_accuracies_std = []
+final_dataset = final_dataset.detach().numpy()
 
-    def rgbd_2_world_batch(self, depth):
-        # reference: https://stackoverflow.com/a/62247245
-        x = (2 * np.arange(0, self.width) - self.width) / self.width
-        x = np.repeat(x[None, :], self.height, axis=0)
-        y = -(2 * np.arange(0, self.height) - self.height) / self.height
-        y = np.repeat(y[:, None], self.width, axis=1)
-        z = 2 * depth - 1
+for i in range(3):  # For each primitive object type (box, cylinder, bottle)
+    stidx = 480 * i # Starting index to slice final dataset
+    for combination in combinations:
+        training, testing = combination[0], combination[1]
+        X_train1 = final_dataset[(stidx + (training[0] - 1) * 160 + 1):(stidx + (training[0] * 160))]
+        X_train2 = final_dataset[(stidx + (training[1] - 1) * 160 + 1):(stidx + (training[1] * 160))]
+        X_train = np.vstack((X_train1, X_train2))
 
-        pix_pos = np.array([x.flatten(), y.flatten(), z.flatten(), np.ones_like(z.flatten())]).T
-        position = self.tran_pix_world @ pix_pos.T
-        position = position.T
-        position[:, :] /= position[:, 3:4]
-        return position[:, :3].reshape(*x.shape, -1)
+        y_train1 = grasp_outcomes_data[(stidx + (training[0] - 1) * 160 + 1):(stidx + (training[0] * 160))]
+        y_train2 = grasp_outcomes_data[(stidx + (training[1] - 1) * 160 + 1):(stidx + (training[1] * 160))]
+        y_train = np.concatenate((y_train1, y_train2))
+        
 
+        X_test = final_dataset[(stidx + (testing[0] - 1) * 160 + 1):(stidx + (testing[0] * 160))]
+        y_test = grasp_outcomes_data[stidx + (testing[0] - 1) * 160 + 1:stidx + (testing[0] * 160)]
+        metrics = train_mlp_multitrial2(X_train, X_test, y_train, y_test)
+        exp1_accuracies_mean.append(np.mean(metrics[:, 0]))
+        exp1_accuracies_std.append(np.std(metrics[:, 0]))
+        torch.cuda.empty_cache()
+del X_train, X_test, y_train, y_test, training, testing, combination, combinations
+exp1_accuracies_mean = np.array(exp1_accuracies_mean)
+exp1_accuracies_std = np.array(exp1_accuracies_std)
+exp1_accuracies_mean
+exp1_accuracies_std
+#### 6.2 Train MLP on randomly sampled subset of all objects
+# Objective: see influence of dataset size on accuracy;
+# Randomly sample a dataset of the specified size without shuffling the dataset.
+def consistent_sampling(dataset1, dataset2, input_size):
+    num_rows = len(dataset1)
+    indices = np.random.choice(len(dataset1), input_size, replace=False)
+    samples1, samples2 = [], []
+    for i in indices:
+        samples1.append(dataset1[i])
+        samples2.append(dataset2[i])
+    
+    samples1 = np.stack(samples1, axis=0)
+    samples2 = np.stack(samples2, axis=0)
+    return samples1, samples2
+exp2_accuracies_mean = []
+exp2_accuracies_std = []
+
+for input_size in range(100, 1500, 100):
+    dataset, grasp_labels = consistent_sampling(final_dataset, grasp_outcomes_data, input_size=input_size)
+    metrics = train_mlp_multitrial(dataset, grasp_labels)
+    exp2_accuracies_mean.append(np.mean(metrics[:, 0]))
+    exp2_accuracies_std.append(np.std(metrics[:, 0]))
+exp2_accuracies_mean = np.array(exp2_accuracies_mean)
+exp2_accuracies_std = np.array(exp2_accuracies_std)
+x = np.arange(100, 1500, step=100)
+plt.plot(x, exp2_accuracies_mean)
+plt.fill_between(x, exp2_accuracies_mean-exp2_accuracies_std, exp2_accuracies_mean+exp2_accuracies_std, alpha=0.2)
+plt.grid(True)
+plt.xlabel("Sample size")
+plt.xticks(np.arange(100, 1500, step=100), rotation=45)
+plt.ylabel("Mean MLP Accuracy (%)")
+plt.title("Impact of Sample Size on MLP Performance")
+plt.show()
 \end{lstlisting}
-\section{parameters.yaml}
-\begin{lstlisting}
-# id of the links that are digits
-digit_link_id: [13, 19]
-
-pybullet_camera:
-  cameraDistance: 0.4
-  cameraYaw: 45.
-  cameraPitch: -45.
-  cameraTargetPosition: [0, 0, 0]
-
-tacto:
-  width: 120
-  height: 160
-  visualize_gui: True
-
-object_control_panel:
-  slider_params:
-    position_low: [-0.3, -0.3, 0]
-    position_high: [0.3, 0.3, 0.3]
-
-# Neccesary parameters of the target object;
-# The global scaling is used to shrink the size of the object
-target_object:
-  # object_name options:
-  # Baseline: "block" only
-  # MLP old dataset: ["block1", "block2", "block3", "cylinder1", "cylinder2", "cylinder_3", "bottle1", "bottle2", "bottle3"]
-  object_name: block
-  object_position: [0, 0, 0.25]
-  global_scaling : 1.0
-
-simulation:
-  camera_pos : [0.5, 1, 0.7]
-  camera_pos_2 : [1.5, -1, 0.7]
-
-  pitch : -20.0
-  yaw : 0
-  roll : 0
-  fov : 30
-
-# Parameters for data collection
-data_collection:
-  poses_count: 10
-
-# Parameters to adjust for robot
-robot:
-  z_padding: 0.2        # Prevents the robot from colliding with the object when moving to it
-  velocity_scale: 0.15    # Scales the robot's speed in simulation
-\end{lstlisting}
-
-
-
 \end{document}
