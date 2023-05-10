@@ -986,32 +986,77 @@ Given that neural networks can predict other grasping properties, such as force 
 
 \chapter{System Manual}\label{apdx:2}
 \section{Prerequisites}\label{apdx:2.1}
-We recommend downloading the zip file containing all relevant code for this project separately either from the submission or \hyperref[]{this link}. The repository is anonymous.\\
-
-Before compiling and testing the listed code in \hyperref[apdx:3]{Appendix 3}, please ensure that your system has been properly configured with the following requirements:
+We recommend downloading the zip file containing all relevant code for this project separately either from the submission or \hyperref[]{this link}. The repository is anonymous. Before compiling and testing the listed code in \hyperref[apdx:3]{Appendix 3}, please ensure that your system has been properly configured with the following requirements:
 \begin{enumerate}
     \item Linux Operating System (preferably Ubuntu 20.04). The code for this project was only developed and tested on Ubuntu 20.04. It is not guaranteed to compile and run fully functionally on other operating system and devices.
+    \item Python 3.8.16 is installed.
+    \item The \verb|virtualenv| package for creating Python virtual environments is installed.
 \end{enumerate}
 
 \section{Code Deployment}\label{apdx:2.2}
 Please follow these steps to deploy the project code:
 \begin{enumerate}
-    \item Clone the repository or download a zip file containing the repository code.
-    \item Create a Python virtual environment with Python 3.8.16. Ensure that the virtual environment is created in the root directory of the project:
+    \item Clone the repository from \href{https://github.com/uclzzjn7/UCL-FYP.git}{https://github.com/uclzzjn7/UCL-FYP.git} or download a zip file containing the repository code.
+
+    \item If you already have Python 3.8.16 installed on your OS, please skip to step 4.
+    
+    \item In a new terminal, run the following commands in sequence:
+    \begin{lstlisting}
+        sudo apt update
+    \end{lstlisting}
+    \begin{lstlisting}
+        sudo apt install software-properties-common
+    \end{lstlisting}
+    \begin{lstlisting}
+        sudo add-apt-repository ppa:deadsnakes/ppa
+    \end{lstlisting}
+    \begin{lstlisting}
+        sudo apt-cache policy python3.8
+    \end{lstlisting}
+    This should install Python 3.8.16.
+
+    \item Find the root path of Python 3.8.16 in your OS:
+    \begin{lstlisting}
+        ls /usr/bin/python*
+    \end{lstlisting}
+
+    \item Create a Python virtual environment with Python 3.8.16:
+    \begin{lstlisting}
+        virtaulenv venv --python="<path of Python 3.8.16>"
+    \end{lstlisting}
+    Assuming that the path of Python 3.8.16 is "/usr/bin/python3.8", then the command for creating a virtual environment should be:
+    \begin{lstlisting}
+        virtualenv venv --python="/usr/bin/python3.8"
+    \end{lstlisting}
+    Ensure that the virtual environment is created in the root directory of the project:
+    \begin{lstlisting}
+        /docs
+        /src
+        /venv
+            /bin
+            activate
+            ...
+    \end{lstlisting}
+
     \item Activate the virtual environment:
-    % \begin{lstlisting}
-    % source fyp_env/activate
-    % \end{lstlisting}
-    
-    % \item Install all required Python packages:
-    % \begin{lstlisting}
-    % pip install requirements.txt
-    % \end{lstlisting}
-    
-    % \item Run the Pybullet simulation:
-    % \begin{lstlisting}
-    % python src/main.py
-    % \end{lstlisting}
+    \begin{lstlisting}
+        source venv/bin/activate
+    \end{lstlisting}
+
+    \item Install \verb|PyTorch|:
+    \begin{lstlisting}
+        pip3 install torch==1.13.1+cu116 torchaudio==0.13.1+cu116 torchvision==0.14.1+cu116 --extra-index-url https://download.pytorch.org/whl/cu116 --no-cache-dir
+    \end{lstlisting}
+
+    \item Install all required Python packages:
+    \begin{lstlisting}
+        pip install -r requirements.txt
+    \end{lstlisting}
+
+    \item Run the Pybullet simulation:
+    \begin{lstlisting}
+        python src/main.py
+    \end{lstlisting}
 \end{enumerate}
 
 \section{Using the Simulation}\label{apdx:2.3}
@@ -1023,15 +1068,24 @@ There are several core functionalities provided by our Pybullet simulation. Thes
     \item \textbf{Get object features}: Retrieves the object features of the created object mesh in the simulation. Currently this function returns the 3 principal curvatures of the object, one for each dimension (width, height, depth).
     \item \textbf{Collect data (baseline)}: Data collection pipeline to collect data for the baseline approach. To run this function, please ensure the \verb|object_name| property is set to \verb|block| in the \verb|parameters.yaml| file. This function will not work for any other object name since manually-selected end effector poses were only collected for block.
     \item \textbf{Collect data (proposed)}: Data collection pipeline to collect data for the proposed approach (MLP). To run this function, please ensure the \verb|object_name| property is set to one of the following in the \verb|parameters.yaml| file:
-    % \begin{lstlisting}
-    %     object_name: block1/block2/block3/bottle1/bottle2/bottle3/
-    %     cylinder1/cylinder2/cylinder3
-    % \end{lstlisting}
+    \begin{lstlisting}
+        object_name: block1/block2/block3/bottle1/bottle2/bottle3/
+        cylinder1/cylinder2/cylinder3
+    \end{lstlisting}
 \end{itemize}
+
+\vspace{-0.2cm}
+\section{Training Models}\label{apdx:2.4}
+The baseline and proposed models for this project are trained separately from the simulation code since it requires a significantly larger amount of computing power. Before training, please download the \verb|datasets| folder from this link:\\
+\noindent \href{https://drive.google.com/drive/folders/1d14Ul5YTjX-6w56OCxLbCXTLicDE3qnB?usp=sharing}{https://drive.google.com/drive/folders/1d14Ul5YTjX-6w56OCxLbCXTLicDE3qnB?usp=sharing}\\
+\noindent This folder contains all required datasets for training the models. Extract all the contents of the \verb|datasets| folder to under the \verb|src/| directory (i.e. \verb|src/datasets/|).\\
+
+The relevant code for training can be found in the Jupyter notebooks (with the \verb|.ipynb| file extension) in the \verb|models/baseline_model| or \verb|models/mlp_model| directories. If this code needs to be assessed, please ensure that these notebooks are run with \verb|cuda| enabled, and the correct Python interpreter is selected for running the notebook (Python 3.8.16). Otherwise, there is a risk of insufficient memory allocation to training the models.
+
 
 
 \chapter{Code Listing}\label{apdx:3}
-Due to the code listing page limit, this section only documents the intriguing bits of code snippets for the project. The complete code base with the simulation code, training datasets, etc. can be found via \hyperref[]{this link}.
+Due to the code listing page limit, this section only documents the intriguing bits of code snippets for the project. The complete code base with the simulation code, training datasets, etc. can be found via \href{https://github.com/uclzzjn7/UCL-FYP.git}{https://github.com/uclzzjn7/UCL-FYP.git}.
 
 \section{Baseline Model Training Code}
 \begin{lstlisting}
