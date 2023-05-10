@@ -8,9 +8,7 @@ import tacto
 
 from utilities import Models, Camera
 from tqdm import tqdm
-from pointCloud import getPointCloud
 from thing import Thing
-import matplotlib.pyplot as plt
 from scipy.spatial import cKDTree
 
 
@@ -90,7 +88,6 @@ class ClutteredPushGrasp:
 
     # Initialize simulation GUI button values
     def initButtonVals(self):
-        self.pointCloudButtonVal = 2.0
         self.jointObsButtonVal = 2.0
         self.baselineDataColButtonVal = 2.0
         self.mlpDataColButtonVal = 2.0
@@ -100,13 +97,6 @@ class ClutteredPushGrasp:
         self.resetSimulationButtonVal = 2.0
         self.fetch6dButtonVal = 2.0
 
-    # READ USER DEBUG PARAMETERS (BUTTONS IN GUI) AND EXECUTE CORRRESPONDING ACTIONS
-    def readPointCloudButton(self):
-        if p.readUserDebugParameter(self.pointCloudButton) >= self.pointCloudButtonVal:
-            pcl = getPointCloud(target = self.robot.object_info["object_position"])
-            self.robot.setPointcloud(pcl)
-        self.pointCloudButtonVal = p.readUserDebugParameter(self.pointCloudButton) + 1.0
-    
     def readOpenGripperButton(self):
         if p.readUserDebugParameter(self.openGripperButton) >= self.openGripperButtonVal:
             self.robot.open_gripper()
@@ -183,7 +173,6 @@ class ClutteredPushGrasp:
         @returns random_poses: filled array of generated end effector poses
         """
         
-
         # Apply 6d gaussian noise to base hand pose
         sixd_noise = {
             # Baseline noise
@@ -204,6 +193,7 @@ class ClutteredPushGrasp:
             "bottle3": np.random.normal(0, 1, 6),
         }
         
+        # Rescale generated poses to fit scale of simulation
         noisy_poses = pose + sixd_noise[object_name] * 0.01
         noisy_poses[2] += self.Z_PADDING
         return noisy_poses
@@ -306,52 +296,58 @@ class ClutteredPushGrasp:
                 (0.0, 0.021221041679382324, 0.19894737422466278, -3.140000104904175, 1.570796251296997, 1.5707963705062866),]
         }
 
-        for seed_pose in base_hand_poses[self.object_name]:
-            print(f"Starting seed pose simulation: {seed_pose}")
+        try:
+            object_hand_poses = base_hand_poses[self.object_name]
+            for seed_pose in object_hand_poses:
+                print(f"Starting seed pose simulation: {seed_pose}")
 
-            while success_count < self.RANDOM_POSES_COUNT or failure_count < self.RANDOM_POSES_COUNT:
-                # Reset robot and arm only
-                self.reset_simulation()
-                self.fixed_step_sim(1000)
-                noisy_pose = self.generateGaussianNoisePose(seed_pose, self.object_name)
-                grasp_data = self.execute_pose(noisy_pose)
+                while success_count < self.RANDOM_POSES_COUNT or failure_count < self.RANDOM_POSES_COUNT:
+                    # Reset robot and arm only
+                    self.reset_simulation()
+                    self.fixed_step_sim(1000)
+                    noisy_pose = self.generateGaussianNoisePose(seed_pose, self.object_name)
+                    grasp_data = self.execute_pose(noisy_pose)
 
-                if grasp_data is not None:
-                    depth, color, grasp_is_good = grasp_data
+                    if grasp_data is not None:
+                        depth, color, grasp_is_good = grasp_data
 
-                    # Only record the grasp data if the tactile data is valid
-                    if depth is None or color is None:
-                        print(f"Not saving grasp data to dataset :(")
-                    else:
-                        if grasp_is_good is True and success_count < self.RANDOM_POSES_COUNT:
-                            # Save recorded data to corresponding datasets
-                            end_effector_poses = np.append(end_effector_poses, np.array([noisy_pose]), axis=0)
-                            tactile_depth_data = np.append(tactile_depth_data, np.array([depth]), axis=0)
-                            tactile_color_data = np.append(tactile_color_data, np.array([color]), axis=0)
-                            grasp_outcomes = np.append(grasp_outcomes, np.ones(shape=(1,)), axis=0)
-                            success_count += 1
-                            print(f"Data analysed and saved - Successes: {success_count} | Failures: {failure_count}")
-                        elif grasp_is_good is False and failure_count < self.RANDOM_POSES_COUNT:
-                            # Save recorded data to corresponding datasets
-                            end_effector_poses = np.append(end_effector_poses, np.array([noisy_pose]), axis=0)
-                            tactile_depth_data = np.append(tactile_depth_data, np.array([depth]), axis=0)
-                            tactile_color_data = np.append(tactile_color_data, np.array([color]), axis=0)
-                            grasp_outcomes = np.append(grasp_outcomes, np.zeros(shape=(1,)), axis=0)
-                            failure_count += 1
-                            print(f"Data analysed and saved - Successes: {success_count} | Failures: {failure_count}")
-                        print(end_effector_poses.shape)
+                        # Only record the grasp data if the tactile data is valid
+                        if depth is None or color is None:
+                            print(f"Not saving grasp data to dataset :(")
+                        else:
+                            if grasp_is_good is True and success_count < self.RANDOM_POSES_COUNT:
+                                # Save recorded data to corresponding datasets
+                                end_effector_poses = np.append(end_effector_poses, np.array([noisy_pose]), axis=0)
+                                tactile_depth_data = np.append(tactile_depth_data, np.array([depth]), axis=0)
+                                tactile_color_data = np.append(tactile_color_data, np.array([color]), axis=0)
+                                grasp_outcomes = np.append(grasp_outcomes, np.ones(shape=(1,)), axis=0)
+                                success_count += 1
+                                print(f"Data analysed and saved - Successes: {success_count} | Failures: {failure_count}")
+                            elif grasp_is_good is False and failure_count < self.RANDOM_POSES_COUNT:
+                                # Save recorded data to corresponding datasets
+                                end_effector_poses = np.append(end_effector_poses, np.array([noisy_pose]), axis=0)
+                                tactile_depth_data = np.append(tactile_depth_data, np.array([depth]), axis=0)
+                                tactile_color_data = np.append(tactile_color_data, np.array([color]), axis=0)
+                                grasp_outcomes = np.append(grasp_outcomes, np.zeros(shape=(1,)), axis=0)
+                                failure_count += 1
+                                print(f"Data analysed and saved - Successes: {success_count} | Failures: {failure_count}")
+                            print(end_effector_poses.shape)
 
-            # Reset counters
-            success_count = 0
-            failure_count = 0
+                # Reset counters
+                success_count = 0
+                failure_count = 0
 
-        folder_name = "baseline_model"
-        # Save collected data into .npy files for future loading
-        self.save_dataset("depth_ds.npy", folder_name, tactile_depth_data)
-        self.save_dataset("color_ds.npy", folder_name, tactile_color_data)
-        self.save_dataset("poses_ds.npy", folder_name, end_effector_poses)
-        self.save_dataset("grasp_outcomes.npy", folder_name, grasp_outcomes)
+            folder_name = "baseline_model"
+            # Save collected data into .npy files for future loading
+            self.save_dataset("depth_ds.npy", folder_name, tactile_depth_data)
+            self.save_dataset("color_ds.npy", folder_name, tactile_color_data)
+            self.save_dataset("poses_ds.npy", folder_name, end_effector_poses)
+            self.save_dataset("grasp_outcomes.npy", folder_name, grasp_outcomes)
 
+        except KeyError:
+            print("Baseline model only permits object_name = block. Update the parameters.yaml file and change the 'object_name' parameter to block.")
+
+        
     def collect_data_mlp(self):
         print("MLP data collection started...", flush=True)
         poses = self.load_mlp_poses()
@@ -423,6 +419,7 @@ class ClutteredPushGrasp:
             
 
     def load_mlp_poses(self):
+        # Manually-selected end effector poses
         poses = {
             "block1": [
                 (0.0, -0.014147371053695679, 0.17894737422466278, -3.140000104904175, 1.570796251296997, 1.5707963705062866),
@@ -460,47 +457,25 @@ class ClutteredPushGrasp:
                 (-0.10846316814422607, -0.04008421301841736, 0.10526315867900848, 0.0, 0.594947099685669, 0.34722864627838135),
                 (-0.10846316814422607, 0.0, 0.11578947305679321, 0.0, 0.7271578311920166, 0.03306937217712402)
             ],
-            "mustard_bottle1": [
+            "bottle1": [
                 (0.0, 0.0, 0.24736842513084412, 2.6442105770111084, 1.570796251296997, 1.5707963705062866),
                 (0.009431585669517517, -0.13204210996627808, 0.1473684161901474, 0.0, 0.4627368450164795, 1.5707963705062866),
                 (0.009431585669517517, -0.12261052429676056, 0.22631579637527466, 0.0, 0.7602105140686035, 1.5707963705062866),
                 (0.009431585669517517, -0.12261052429676056, 0.16842105984687805, 0.0, 0.7602105140686035, 1.5707963705062866),
             ],
-            "mustard_bottle2": [
+            "bottle2": [
                 (0.009431585669517517, -0.009431570768356323, 0.21578946709632874, 2.3797895908355713, 1.570796251296997, 1.5707963705062866),
                 (-0.08016842603683472, 0.04951578378677368, 0.17368420958518982, 0.0, 0.7932631969451904, -0.5952491760253906),
                 (-0.09667368233203888, 0.05658945441246033, 0.1473684161901474, 0.0, 0.594947099685669, -0.5291104316711426),
                 (-0.08488421142101288, 0.05423158407211304, 0.1473684161901474, -0.033052682876586914, 0.7271578311920166, -0.5787144899368286)
             ],
-            "mustard_bottle3": [
+            "bottle3": [
                 (0.0, 0.0, 0.24736842513084412, 2.2806313037872314, 1.570796251296997, 1.5707963705062866),
                 (-0.06366315484046936, 0.08724209666252136, 0.16842105984687805, 0.0, 0.5288419723510742, -0.7771308422088623),
                 (-0.056589484214782715, 0.09903159737586975, 0.15789473056793213, 0.0, 0.4957895278930664, -0.8928737640380859),
                 (0.08016842603683472, -0.07781052589416504, 0.1894736886024475, 0.0, 2.478947401046753, -0.6779226064682007)
             ],
         }
-
-        # new_ds:
-        # poses = {
-        #     "block1": [
-        #         (0.0, 0.0, 0.27368420362472534, 0.0, 1.570796251296997, 1.5707963705062866)
-        #     ],
-        #     "block2": [],
-        #     "block3": [],
-        #     "cylinder1": [],
-        #     "cylinder2": [],
-        #     "cylinder3": [],
-        #     "bottle1": [
-        #         (0.0, 0.009431585669517517, 0.2526315748691559, 2.5450527667999268, 1.570796251296997, 1.5707963705062866),
-        #         (0.0, -0.0707368403673172, 0.21052631735801697, -0.2644209861755371, 0.9915788173675537, 1.5707963705062866),
-        #         (0.0, -0.12496842443943024, 0.14210526645183563, -0.2644209861755371, 0.39663171768188477, 1.5707963705062866),
-        #     ],
-        #     "bottle2": [
-        #         (0.0, -0.11317894607782364, 0.1315789520740509, 0.0, 0.5288419723510742, 1.5707963705062866),
-        #         (-0.12261052429676056, -0.014147371053695679, 0.12631578743457794, 0.0, 0.4296844005584717, 0.11574292182922363),
-        #         (0.0, 0.0, 0.19473683834075928, 0.0, 1.570796251296997, 1.5707963705062866),
-        #     ]
-        # }
         return poses
 
 
@@ -546,7 +521,6 @@ class ClutteredPushGrasp:
     # Get geometric features of an object
     def getObjectGeometry(self, body_id):
         curvature_data = self.getRigidBodyCurvature(body_id, k=3).flatten()
-        print(curvature_data)
         return curvature_data
 
 
@@ -565,8 +539,6 @@ class ClutteredPushGrasp:
         # in the step simulation, get the joint orientation
         sixd = self.robot.get_joint_obs()
 
-        # in the step simulation, read the point cloud
-        self.readPointCloudButton()
         self.readResetSimulationButton()
         self.readJointObsButton(sixd)
         self.readBaselineDataCollectionButton()
@@ -615,7 +587,6 @@ class ClutteredPushGrasp:
         # Re-initialize simulation buttons
         self.initButtonVals()
         self.resetSimulationButton  = p.addUserDebugParameter("Reset simulation", 1, 0, 1)
-        self.pointCloudButton = p.addUserDebugParameter("Get point cloud", 1, 0, 1)
         self.jointObsButton = p.addUserDebugParameter("Get joint coordinates", 1, 0, 1)
         self.baselineDataColButton = p.addUserDebugParameter("Collect data (baseline)", 1, 0, 1)
         self.mlpDataColButton = p.addUserDebugParameter("Collect data (proposed)", 1, 0, 1)

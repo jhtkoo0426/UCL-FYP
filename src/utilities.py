@@ -1,11 +1,5 @@
 import pybullet as p
 import glob
-from collections import namedtuple
-from attrdict import AttrDict
-import functools
-import torch
-import cv2
-from scipy import ndimage
 import numpy as np
 
 
@@ -102,8 +96,5 @@ class Camera:
         pix_pos = np.array([x.flatten(), y.flatten(), z.flatten(), np.ones_like(z.flatten())]).T
         position = self.tran_pix_world @ pix_pos.T
         position = position.T
-        # print(position)
-
         position[:, :] /= position[:, 3:4]
-
         return position[:, :3].reshape(*x.shape, -1)

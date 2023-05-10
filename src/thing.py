@@ -3,25 +3,15 @@ Class for defining & initializing object meshes in Pybullet simulations.
 """
 
 import pybullet as p
-import os
-import pybullet_data
 
 
 class Thing:
     def __init__(self, name, position, globalScaling):
-
         self.name = name
         self.initPos = position
         self.objectScale = globalScaling    # also defined in the arg85.yaml file, for shrinking the size of the mug
         self.initOrientation = p.getQuaternionFromEuler([0,0,0])
-
-        """
-        for better organization, should move the urdf path to the arg85 yaml file as well...
-        """
-
-        # root = "./src/urdf/objects/"
-        root = "./src/urdf/new_dataset/"
-        self.urdf_path = root
+        self.urdf_path = "./src/urdf/objects/"
 
         if name == "block" or name == "block1":
             self.urdf_path += "blocks/block1/block1.urdf"
@@ -41,14 +31,7 @@ class Thing:
             self.urdf_path += "bottles/bottle2/bottle2.urdf"
         elif name == "bottle3":
             self.urdf_path += "bottles/bottle3/bottle3.urdf"
-        elif name == "mustard_bottle1":
-            self.urdf_path += "bottles/bottle1/mustard_bottle1.urdf"
-        elif name == "mustard_bottle2":
-            self.urdf_path += "bottles/bottle2/mustard_bottle2.urdf"
-        elif name == "mustard_bottle3":
-            self.urdf_path += "bottles/bottle3/mustard_bottle3.urdf"
 
-        print(self.urdf_path)
         id = p.loadURDF(self.urdf_path, self.initPos, self.initOrientation, useFixedBase=False, globalScaling=self.objectScale)
         self.setID(id)
         self.resetVelocity()

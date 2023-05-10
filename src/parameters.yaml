@@ -22,11 +22,7 @@ object_control_panel:
 target_object:
   # object_name options:
   # Baseline: "block" only
-  # MLP old dataset: ["block1", "block2", "block3", "cylinder1", "cylinder2", "cylinder_3", "mustard_bottle1", "mustard_bottle2", "mustard_bottle3"]
-  # MLP new dataset: ["block1", "block2", "block3", "cylinder1", "cylinder2", "cylinder_3", "bottle1", "bottle2", "bottle3"]
-  # block1 = 003 cracker box, block2 = 004 sugar box, block3 = 008 pudding box
-  # bottle1 = 021 bleach cleanser, bottle2 = 022 windex bottle, bottle3 = 006 mustard bottle
-  # cylinder1 = 001 chips can, cylinder2 = 002 master chef can, cylinder3 = 005 tomato soup can
+  # MLP old dataset: ["block1", "block2", "block3", "cylinder1", "cylinder2", "cylinder_3", "bottle1", "bottle2", "bottle3"]
   object_name: bottle2
   object_position: [0, 0, 0.25]
   global_scaling : 1.0
