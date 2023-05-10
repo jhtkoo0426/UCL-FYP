@@ -16,9 +16,9 @@ Before compiling and testing the code from this repository, please ensure that y
 3. The `virtualenv` package for creating Python virtual environments is installed.
 
 ## Deployment
-1. Clone the repository or download a zip file containing the repository code.
+1. Clone the repository from [https://github.com/uclzzjn7/UCL-FYP.git](https://github.com/uclzzjn7/UCL-FYP.git) or download a zip file containing the repository code.
    ```
-   git clone https://github.com/uclzzjn7/UCL-FYP.git
+   https://github.com/uclzzjn7/UCL-FYP.git
    ```
 2. If you already have Python 3.8.16 installed on your OS, please skip to step 4.
 3. In a new terminal, run the following commands in sequence:
