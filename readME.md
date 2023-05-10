@@ -21,11 +21,15 @@ Before compiling and testing the code from this repository, please ensure that y
    ```
    source fyp_env/activate
    ```
-4. Install all required Python packages:
+4. Install `PyTorch`:
    ```
-   pip install requirements.txt
+   pip3 install torch==1.13.1+cu116 torchaudio==0.13.1+cu116 torchvision==0.14.1+cu116 --extra-index-url https://download.pytorch.org/whl/cu116 --no-cache-dir
    ```
-5. Run the Pybullet simulation:
+5. Install all required Python packages:
+   ```
+   pip install -r requirements.txt
+   ```
+6. Run the Pybullet simulation:
    ```
    python src/main.py
    ```
