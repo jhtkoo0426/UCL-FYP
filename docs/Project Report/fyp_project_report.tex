@@ -17,6 +17,30 @@
 % Links
 \usepackage{hyperref}
 
+% Code
+% \usepackage{fancyvrb}
+\usepackage{listings}
+\usepackage[dvipsnames]{xcolor}
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+\lstset{frame=tb,
+  language=Python,
+  aboveskip=3mm,
+  belowskip=3mm,
+  showstringspaces=false,
+  columns=flexible,
+  basicstyle={\small\ttfamily},
+  numbers=none,
+  numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  stringstyle=\color{mauve},
+  breaklines=true,
+  breakatwhitespace=true,
+  tabsize=3
+}
+
 % Lists
 \usepackage{enumitem}
 
@@ -25,7 +49,7 @@
 \usepackage{subfig}
 \usepackage{caption}
 \usepackage{rotating}
-\captionsetup[figure]{font=small,labelfont=Small}
+\captionsetup[figure]{font=small,labelfont=small}
 
 % Equations% Equations & Theorems
 \usepackage{amssymb}
@@ -50,7 +74,7 @@
     \centering
     \Huge Robust Robotic Grasping \\ Utilising Touch Sensing
 \end{adjustwidth}}
-\\
+
 \date{Submission date: \today}
 \author{COMP0029\_ZZJN7\thanks{
 {\bf Disclaimer:}
@@ -955,14 +979,1120 @@ Given that neural networks can predict other grasping properties, such as force 
 
 \chapter{System Manual}\label{apdx:2}
 \section{Prerequisites}\label{apdx:2.1}
+We recommend downloading the zip file containing all relevant code for this project separately either from the submission or \hyperref[]{this link}. The repository is anonymous.\\
+
 Before compiling and testing the listed code in \hyperref[apdx:3]{Appendix 3}, please ensure that your system has been properly configured with the following requirements:
 \begin{enumerate}
     \item Linux Operating System (preferably Ubuntu 20.04). The code for this project was only developed and tested on Ubuntu 20.04. It is not guaranteed to compile and run fully functionally on other operating system and devices.
 \end{enumerate}
 
 \section{Code Deployment}\label{apdx:2.2}
+Please follow these steps to deploy the project code:
+\begin{enumerate}
+    \item Clone the repository or download a zip file containing the repository code.
+    \item Create a Python virtual environment with Python 3.8.16. Ensure that the virtual environment is created in the root directory of the project:
+    \item Activate the virtual environment:
+    % \begin{lstlisting}
+    % source fyp_env/activate
+    % \end{lstlisting}
+    
+    % \item Install all required Python packages:
+    % \begin{lstlisting}
+    % pip install requirements.txt
+    % \end{lstlisting}
+    
+    % \item Run the Pybullet simulation:
+    % \begin{lstlisting}
+    % python src/main.py
+    % \end{lstlisting}
+\end{enumerate}
+
+\section{Using the Simulation}\label{apdx:2.3}
+There are several core functionalities provided by our Pybullet simulation. These functionalities are listed as either sliders or buttons on the right panel of the simulation GUI.
+\begin{itemize}
+    \item \textbf{Manual manipulation of the robot}: Adjust the six available sliders for the end effector pose (x,y,z,roll,pitch,yaw) and the slider for the gripper length (0 = gripper is completely closed, maximum = gripper is completely open).
+    \item \textbf{Reset simulation}: Resets all sliders and the robot (end effector position).
+    \item \textbf{Get joint coordinates}: Retrieves all movable joints of the robot arm and gripper.
+    \item \textbf{Get object features}: Retrieves the object features of the created object mesh in the simulation. Currently this function returns the 3 principal curvatures of the object, one for each dimension (width, height, depth).
+    \item \textbf{Collect data (baseline)}: Data collection pipeline to collect data for the baseline approach. To run this function, please ensure the \verb|object_name| property is set to \verb|block| in the \verb|parameters.yaml| file. This function will not work for any other object name since manually-selected end effector poses were only collected for block.
+    \item \textbf{Collect data (proposed)}: Data collection pipeline to collect data for the proposed approach (MLP). To run this function, please ensure the \verb|object_name| property is set to one of the following in the \verb|parameters.yaml| file:
+    % \begin{lstlisting}
+    %     object_name: block1/block2/block3/bottle1/bottle2/bottle3/
+    %     cylinder1/cylinder2/cylinder3
+    % \end{lstlisting}
+\end{itemize}
 
 
 \chapter{Code Listing}\label{apdx:3}
+This section documents the simulation code for the project only. The complete repository, training datasets and guaranteed working code can be found via \hyperref[]{this link}.
+\section{simulation.py}
+\begin{lstlisting}{python}
+import time
+import os
+
+import numpy as np
+import pybullet as p
+import pybullet_data
+import tacto
+
+from utilities import Models, Camera
+from tqdm import tqdm
+from thing import Thing
+from scipy.spatial import cKDTree
+
+
+
+class ClutteredPushGrasp:
+    # Global constants
+    SIMULATION_STEP_DELAY = 1 / 25000.
+
+
+    def __init__(self, robot, models: Models, camera=None, vis=False) -> None:
+        self.robot = robot
+        self.vis = vis
+
+        if self.vis:
+            self.p_bar = tqdm(ncols=0, disable=False)
+        self.camera = camera
+
+        # Define Pybullet simulation environment
+        # p.GUI for a simulation w/ GUI, p.DIRECT for a headless simulation
+        self.physicsClient = p.connect(p.GUI if self.vis else p.DIRECT)
+        p.setAdditionalSearchPath(pybullet_data.getDataPath())
+        p.setGravity(0, 0, -9.8)
+        self.planeID = p.loadURDF("plane.urdf")
+
+        # Import the robot
+        self.robot.load()
+        self.robot.step_simulation = self.step_simulation
+
+        # Prepare parameters
+        self.resetUserDebugParameters()
+        self.robot.load_digit_parm()        # Read the parameters.yaml file to load robot parameters
+
+        # Mount DIGIT tactile sensors and cameras
+        self.digits = tacto.Sensor(**self.robot.tacto_info, background = self.robot.bg)
+        p.resetDebugVisualizerCamera(**self.robot.camera_info)
+        self.digits.add_camera(self.robot.id, self.robot.link_ID)
+
+        # Load the target object defined in the parameters.yaml file (or other objects later into the envrionment)
+        self.object_name        = self.robot.object_info["object_name"]
+        self.object_position    = self.robot.object_info["object_position"]
+        self.global_scaling     = self.robot.object_info["global_scaling"]
+        self.container = Thing(self.object_name, self.object_position, self.global_scaling)
+
+        # Load the specified object to the DIGIT tactile sensors
+        self.digits.add_object(self.container.urdf_path, self.container.ID, self.container.objectScale)
+
+        # Load robot parameters
+        self.Z_PADDING          = self.robot.robot_info["z_padding"]
+        self.VELOCITY_SCALE     = self.robot.robot_info["velocity_scale"]
+
+        # Load data collection parameters
+        self.RANDOM_POSES_COUNT = self.robot.data_info["poses_count"]
+
+    # Hooks to pybullet.stepSimulation()
+    def step_simulation(self):
+        p.stepSimulation()
+        if self.vis:
+            time.sleep(self.SIMULATION_STEP_DELAY)
+            self.p_bar.update(1)
+
+    # Auxiliary function for step_simulation with predetermined step size
+    def fixed_step_sim(self, step_size):
+        for _ in range(step_size):
+            self.step_simulation()
+
+    # Read the values of the sliders in the simulation GUI
+    def read_debug_parameter(self):   
+        # read the value of task parameter        
+        x = p.readUserDebugParameter(self.xin)        
+        y = p.readUserDebugParameter(self.yin)        
+        z = p.readUserDebugParameter(self.zin)       
+        roll = p.readUserDebugParameter(self.rollId)        
+        pitch = p.readUserDebugParameter(self.pitchId)        
+        yaw = p.readUserDebugParameter(self.yawId)        
+        gripper_opening_length = p.readUserDebugParameter(self.gripper_opening_length_control)
+        return x, y, z, roll, pitch, yaw, gripper_opening_length
+
+    # Initialize simulation GUI button values
+    def initButtonVals(self):
+        self.jointObsButtonVal = 2.0
+        self.baselineDataColButtonVal = 2.0
+        self.mlpDataColButtonVal = 2.0
+        self.getObjectFeaturesButtonVal = 2.0
+        self.resetSimulationButtonVal = 2.0
+        self.fetch6dButtonVal = 2.0
+    
+    def readGetObjectFeaturesButton(self):
+        if p.readUserDebugParameter(self.getObjectFeaturesButton) >= self.getObjectFeaturesButtonVal:
+            object_geometric_features = self.getObjectGeometry(self.container.ID)
+        self.getObjectFeaturesButtonVal = p.readUserDebugParameter(self.getObjectFeaturesButton)+ 1.0
+
+    def readJointObsButton(self, angles):
+        if p.readUserDebugParameter(self.jointObsButton) >= self.jointObsButtonVal:
+            print(f"Joint angles (length={len(angles)}): {angles}")
+        self.jointObsButtonVal = p.readUserDebugParameter(self.jointObsButton) + 1.0
+    
+    def readResetSimulationButton(self):
+        if p.readUserDebugParameter(self.resetSimulationButton) >= self.resetSimulationButtonVal:
+            self.reset_simulation()
+        self.resetSimulationButtonVal = p.readUserDebugParameter(self.resetSimulationButton) + 1.0
+    
+    def readBaselineDataCollectionButton(self):
+        if p.readUserDebugParameter(self.baselineDataColButton) >= self.baselineDataColButtonVal:
+            self.collect_data()
+        self.baselineDataColButtonVal = p.readUserDebugParameter(self.baselineDataColButton) + 1.0
+
+    def readMLPDataCollectionButton(self):
+        if p.readUserDebugParameter(self.mlpDataColButton) >= self.mlpDataColButtonVal:
+            self.collect_data_mlp()
+        self.mlpDataColButtonVal = p.readUserDebugParameter(self.mlpDataColButton) + 1.0
+    
+    def readFetch6dButton(self, action):        
+        if p.readUserDebugParameter(self.fetch6dButton) >= self.fetch6dButtonVal:           
+            print(f"End effector 6D pose: {action}")        
+        self.fetch6dButtonVal = p.readUserDebugParameter(self.fetch6dButton) + 1.0
+
+
+    # HELPER FUNCTIONS FOR SIMULATION
+    def gripperCollisionDetection(self):
+        """
+        Determines if the gripper is in contact with an object.
+        """
+
+        # linkIndex=13, 19 for DIGIT sensor on left and right finger respectively
+        contact_points_left_sensor = p.getContactPoints(self.robot.id, self.container.ID, linkIndexA=13, linkIndexB=-1)
+        contact_points_right_sensor = p.getContactPoints(self.robot.id, self.container.ID, linkIndexA=19, linkIndexB=-1)
+        return len(contact_points_left_sensor+contact_points_right_sensor) > 0
+    
+    def isTactileReadingsValid(self, depth, color):
+        """
+        Determines if the given depth and color tactile data provide any meaningful results, i.e. the mean is above a 
+        certain threshold as a sanity check.
+
+        We use a threshold of 1e-3 to determine the minimal acceptable mean for the tactile data
+        """
+        av_d0, av_d1 = np.mean(depth[0]), np.mean(depth[1])         # Mean of depth data for each finger
+        av_c0, av_c1 = np.mean(color[0]), np.mean(color[1])         # Mean of color data for each finger
+        
+        # Additionally, we scale av_d0 and av_d1 to the range (0, 255) to match the range
+        # of color data
+        av_d0, av_d1 = av_d0 * 255, av_d1 * 255
+        return all(i >= 1e-3 for i in [av_d0, av_d1, av_c0, av_c1])
+    
+    # HELPER FUNCTIONS FOR DATA COLLECTION PIPELINE
+    # Generate random poses by applying Gaussian noise to a base pose(s)
+    def generateGaussianNoisePose(self, pose, object_name):
+        """
+        Generates a random end effector pose following a Gaussian distribution.
+        
+        @returns random_poses: filled array of generated end effector poses
+        """
+        
+        # Apply 6d gaussian noise to base hand pose
+        sixd_noise = {
+            # Baseline noise
+            "block": np.insert(np.random.normal(0, 1, 5), 1, 0),
+
+            # MLP noise
+            "block1": np.random.normal(0, 1, 6),
+            "block2": np.random.normal(0, 1, 6),
+            "block3": np.random.normal(0, 1, 6),
+            "cylinder1": np.random.normal(0, 1, 6),
+            "cylinder2": np.random.normal(0, 1, 6),
+            "cylinder3": np.random.normal(0, 1, 6),
+            "mustard_bottle1": np.random.normal(0, 1, 6),
+            "mustard_bottle2": np.random.normal(0, 1, 6),
+            "mustard_bottle3": np.random.normal(0, 1, 6),
+            "bottle1": np.random.normal(0, 1, 6),
+            "bottle2": np.random.normal(0, 1, 6),
+            "bottle3": np.random.normal(0, 1, 6),
+        }
+        
+        # Rescale generated poses to fit scale of simulation
+        noisy_poses = pose + sixd_noise[object_name] * 0.01
+        noisy_poses[2] += self.Z_PADDING
+        return noisy_poses
+    
+    def execute_pose(self, grasp_pose):
+        """
+        Executes a grasp given a specific hand pose
+
+        @params grasp_pose: 6d numpy array of an end effector pose (cartesian coordinates (x, y, z) &
+          euler angles (r, p, y))
+        """
+
+        # 1. Move arm to pose and prepare gripper
+        self.robot.manipulate_ee(grasp_pose, 'end', self.VELOCITY_SCALE)
+
+        # 1b. [Temporary fix - Reset object in case the gripper collides with the object unexpectedly]
+        self.fixed_step_sim(500)
+        self.container.resetObject()
+        self.fixed_step_sim(1000)
+
+        self.robot.open_gripper()
+        self.fixed_step_sim(500)
+
+        # 2. Lower the arm by z=2
+        lower_sixd_pose = grasp_pose.copy()
+        lower_sixd_pose[2] -= self.Z_PADDING
+        self.robot.manipulate_ee(lower_sixd_pose, 'end', self.VELOCITY_SCALE)
+        self.fixed_step_sim(500)
+
+        # 3. Close gripper to perform grasp
+        self.robot.close_gripper()
+        self.fixed_step_sim(200)
+
+        # 4. Determine if gripper is in stable contact with object (measure over 500 steps)
+        isGripperInContactTimeframe1 = self.gripperCollisionDetection()
+        self.fixed_step_sim(500)
+        isGripperInContactTimeframe2 = self.gripperCollisionDetection()
+
+        # 5. Gripper contact is stable - record grasp and tactile data
+        if isGripperInContactTimeframe1 is True and isGripperInContactTimeframe2 is True:
+            # 6. Record depth and color tactile data
+            self.digit_step()
+            self.fixed_step_sim(200)
+            color = np.asarray(self.color)      # (2, 160, 120, 3)
+            depth = np.asarray(self.depth)      # (2, 160, 120)
+
+            # 7. Tactile data sanity check
+            if self.isTactileReadingsValid(depth, color) is True:
+                # 7. Lift object for 5s to determine successful vs unsuccessful grasp
+                initial_object_z_pos = self.container.getPos()[2]
+                self.robot.manipulate_ee(grasp_pose, 'end', self.VELOCITY_SCALE)
+                self.fixed_step_sim(200)
+
+                # 8. Record success/failure by determining if object moved after 1500 steps
+                self.fixed_step_sim(750)
+                final_object_z_pos = self.container.getPos()[2]
+
+                # 9. Determine grasp success
+                grasp_outcome = True if final_object_z_pos - initial_object_z_pos > 0 else False
+                return (depth, color, grasp_outcome)
+        
+        # After grasp execution, release object and move robot to specific pose to prevent collision
+        # self.robot.open_gripper()
+        # self.robot.manipulate_ee(grasp_pose, 'end', self.VELOCITY_SCALE)
+        return None
+
+    def save_dataset(self, dataset_filename, folder_name, dataset):
+        CURR_DIR = os.getcwd()
+        TARGET_DIR = "./src/" + folder_name
+
+        dataset_path = os.path.join(CURR_DIR, TARGET_DIR, dataset_filename)
+        np.save(dataset_path, dataset)
+        print(f"Dataset saved to {dataset_path}")
+
+    def collect_data(self):
+        """
+        This function executes a data collection loop by generating N gaussian-distributed end effector poses,
+        then collecting the corresponding DIGIT tactile sensor readings on each finger of the gripper (as the 
+        tactile data) as well as the end effector poses (as the visual data).
+
+        The collected data is then used for stability classification in which the project aims to find the
+        best representation of this data. This serves as the basis for further work on learning a generative
+        model.
+        """      
+
+        # Arrays to populate when collecting data
+        end_effector_poses = np.empty((0, 6))                # End effector is a 6D structure
+        tactile_depth_data = np.empty((0, 2, 160, 120))      # Depth data (160x120) per finger (x2)
+        tactile_color_data = np.empty((0, 2, 160, 120, 3))   # Color data (160x120x3) per finger (x2)
+        grasp_outcomes     = np.empty(0)
+
+        # Counters for logging
+        success_count = 0
+        failure_count = 0
+
+        # Base hand poses for different objects will vary as a result of manual trials on these objects.
+        base_hand_poses = {
+            "block": [(0.0, -0.014147371053695679, 0.19894737422466278, -3.140000104904175, 1.570796251296997, 1.5707963705062866),
+                (0.0, -0.0047158002853393555, 0.19894737422466278, -3.140000104904175, 1.570796251296997, 1.5707963705062866),
+                (0.0, 0.021221041679382324, 0.19894737422466278, -3.140000104904175, 1.570796251296997, 1.5707963705062866),]
+        }
+
+        try:
+            object_hand_poses = base_hand_poses[self.object_name]
+            for seed_pose in object_hand_poses:
+                print(f"Starting seed pose simulation: {seed_pose}")
+
+                while success_count < self.RANDOM_POSES_COUNT or failure_count < self.RANDOM_POSES_COUNT:
+                    # Reset robot and arm only
+                    self.reset_simulation()
+                    self.fixed_step_sim(1000)
+                    noisy_pose = self.generateGaussianNoisePose(seed_pose, self.object_name)
+                    grasp_data = self.execute_pose(noisy_pose)
+
+                    if grasp_data is not None:
+                        depth, color, grasp_is_good = grasp_data
+
+                        # Only record the grasp data if the tactile data is valid
+                        if depth is None or color is None:
+                            print(f"Not saving grasp data to dataset :(")
+                        else:
+                            if grasp_is_good is True and success_count < self.RANDOM_POSES_COUNT:
+                                # Save recorded data to corresponding datasets
+                                end_effector_poses = np.append(end_effector_poses, np.array([noisy_pose]), axis=0)
+                                tactile_depth_data = np.append(tactile_depth_data, np.array([depth]), axis=0)
+                                tactile_color_data = np.append(tactile_color_data, np.array([color]), axis=0)
+                                grasp_outcomes = np.append(grasp_outcomes, np.ones(shape=(1,)), axis=0)
+                                success_count += 1
+                                print(f"Data analysed and saved - Successes: {success_count} | Failures: {failure_count}")
+                            elif grasp_is_good is False and failure_count < self.RANDOM_POSES_COUNT:
+                                # Save recorded data to corresponding datasets
+                                end_effector_poses = np.append(end_effector_poses, np.array([noisy_pose]), axis=0)
+                                tactile_depth_data = np.append(tactile_depth_data, np.array([depth]), axis=0)
+                                tactile_color_data = np.append(tactile_color_data, np.array([color]), axis=0)
+                                grasp_outcomes = np.append(grasp_outcomes, np.zeros(shape=(1,)), axis=0)
+                                failure_count += 1
+                                print(f"Data analysed and saved - Successes: {success_count} | Failures: {failure_count}")
+                            print(end_effector_poses.shape)
+
+                # Reset counters
+                success_count = 0
+                failure_count = 0
+
+            folder_name = "baseline_model"
+            # Save collected data into .npy files for future loading
+            self.save_dataset("depth_ds.npy", folder_name, tactile_depth_data)
+            self.save_dataset("color_ds.npy", folder_name, tactile_color_data)
+            self.save_dataset("poses_ds.npy", folder_name, end_effector_poses)
+            self.save_dataset("grasp_outcomes.npy", folder_name, grasp_outcomes)
+
+        except KeyError:
+            print("Baseline model only permits object_name = block. Update the parameters.yaml file and change the 'object_name' parameter to block.")
+
+        
+    def collect_data_mlp(self):
+        print("MLP data collection started...", flush=True)
+        poses = self.load_mlp_poses()
+
+        # Counters for logging
+        success_count = 0
+        failure_count = 0
+        total_poses = 0
+
+        SEED_POSE_COUNT = 20
+
+        end_effector_poses = np.empty((0, 6))                             # End effector is a 6D structure
+        tactile_depth_data = np.empty((0, 2, 160, 120))                   # Depth data (160x120) per finger (x2)
+        tactile_color_data = np.empty((0, 2, 160, 120, 3))                # Color data (160x120x3) per finger (x2)
+        grasp_outcomes     = np.empty(0)
+
+        for seed_pose in poses[self.object_name]:
+            print(f"Starting seed pose simulation: {seed_pose}")
+
+            # We need 10 good and 10 bad grasps per seed pose
+            while success_count < SEED_POSE_COUNT or failure_count < SEED_POSE_COUNT:
+                # 11. Reset robot and arm only
+                self.reset_simulation()
+                self.fixed_step_sim(1000)
+                noisy_pose = self.generateGaussianNoisePose(seed_pose, self.object_name)
+                grasp_data = self.execute_pose(noisy_pose)
+
+                if grasp_data is not None:
+                    depth, color, grasp_is_good = grasp_data
+
+                    # Record data if tactile data is valid
+                    if depth is None or color is None:
+                        print(f"Not saving grasp data to dataset :(")
+                    else:
+                        if grasp_is_good is True and success_count < SEED_POSE_COUNT:
+                            # Save recorded data to corresponding datasets
+                            end_effector_poses = np.append(end_effector_poses, np.array([noisy_pose]), axis=0)
+                            tactile_depth_data = np.append(tactile_depth_data, np.array([depth]), axis=0)
+                            tactile_color_data = np.append(tactile_color_data, np.array([color]), axis=0)
+                            grasp_outcomes = np.append(grasp_outcomes, np.ones(shape=(1,)), axis=0)
+                            success_count += 1
+                            total_poses += 1
+                            print(f"Data saved - Successes: {success_count} | Failures: {failure_count} | Total: {total_poses}")
+                        elif grasp_is_good is False and failure_count < SEED_POSE_COUNT:
+                            # Save recorded data to corresponding datasets
+                            end_effector_poses = np.append(end_effector_poses, np.array([noisy_pose]), axis=0)
+                            tactile_depth_data = np.append(tactile_depth_data, np.array([depth]), axis=0)
+                            tactile_color_data = np.append(tactile_color_data, np.array([color]), axis=0)
+                            grasp_outcomes = np.append(grasp_outcomes, np.zeros(shape=(1,)), axis=0)
+                            failure_count += 1
+                            total_poses += 1
+                            print(f"Data saved - Successes: {success_count} | Failures: {failure_count} | Total: {total_poses}")
+                        print(end_effector_poses.shape)
+
+            print("Collected enough data for seed pose. Moving to next pose")
+
+            # Reset counters
+            success_count = 0
+            failure_count = 0
+
+        # Save collected data into .npy files for future loading
+        # folder_name = "datasets"
+        folder_name = "new_datasets"
+        file_path = f"{self.object_name}_ds/"
+        self.save_dataset(file_path + "depth_ds.npy", folder_name, tactile_depth_data)
+        self.save_dataset(file_path + "color_ds.npy", folder_name, tactile_color_data)
+        self.save_dataset(file_path + "poses_ds.npy", folder_name, end_effector_poses)
+        self.save_dataset(file_path + "grasp_outcomes.npy", folder_name, grasp_outcomes)
+            
+
+    def load_mlp_poses(self):
+        # Manually-selected end effector poses
+        poses = {
+            "block1": [
+                (0.0, -0.014147371053695679, 0.17894737422466278, -3.140000104904175, 1.570796251296997, 1.5707963705062866),
+                (0.0, -0.0047158002853393555, 0.17894737422466278, -3.140000104904175, 1.570796251296997, 1.5707963705062866),
+                (0.0, 0.021221041679382324, 0.17894737422466278, -3.140000104904175, 1.570796251296997, 1.5707963705062866),
+                (0.0, 0.0, 0.1894736886024475, -1.5865263938903809, 1.570796251296997, 1.5707963705062866)
+            ],
+            "block2": [
+                (0.0, -0.016505271196365356, 0.17894737422466278, 0.0, 1.570796251296997, 1.5707963705062866),
+                (0.0, 0.014147371053695679, 0.17894737422466278, 0.0, 1.570796251296997, 1.5707963705062866),
+                (0.0, -0.12261052429676056, 0.10526315867900848, 0.0, 0.4957895278930664, 1.5707963705062866),
+                (0.0825263261795044, 0.011789485812187195, 0.13684210181236267, 0.0, 2.3136842250823975, 0.11574292182922363)
+            ],
+            "block3": [
+                (-0.007073685526847839, 0.0, 0.16842105984687805, 0.0, 1.570796251296997, 0.0),
+                (0.06837895512580872, 0.0, 0.15263158082962036, 0.09915781021118164, 2.0823161602020264, 0.0),
+                (-0.1414736807346344, 0.0070736706256866455, 0.06842105090618134, -0.09915804862976074, 0.4627368450164795, -0.049604058265686035),
+                (0.0, -0.10138948261737823, 0.08947368711233139, 3.140000104904175, 0.7602105140686035, 1.5707963705062866),
+            ],
+            "cylinder1": [
+                (0.0, 0.0, 0.17894737422466278, 0.0, 1.570796251296997, 1.5707963705062866),
+                (0.0, -0.10138948261737823, 0.1473684161901474, 0.0, 0.8263156414031982, 1.5707963705062866),
+                (-0.1178947389125824, 0.0, 0.11578947305679321, 0.0, 0.5618946552276611, -0.049604058265686035),
+                (-0.1296842098236084, 0.0, 0.08421052992343903, -3.140000104904175, 0.33052611351013184, -0.033069491386413574)
+            ],
+            "cylinder2": [
+                (0.0, -0.0589473694562912, 0.15789473056793213, 0.0, 1.1898949146270752, 1.5707963705062866),
+                (0.0, -0.09903157502412796, 0.12105263024568558, 0.0, 0.7932631969451904, 1.5707963705062866),
+                (-0.1061052605509758, -0.016505271196365356, 0.11052631586790085, 0.0, 0.6280002593994141, 0.14881229400634766),
+                (0.08016842603683472, 0.009431585669517517, 0.15263158082962036, 0.0, 2.148421049118042, 0.13227760791778564)
+            ],
+            "cylinder3": [
+                (0.0, 0.0, 0.17368420958518982, 0.0, 1.570796251296997, 1.5707963705062866),
+                (0.0, -0.10374736785888672, 0.13684210181236267, 0.0, 0.7271578311920166, 1.5707963705062866),
+                (-0.10846316814422607, -0.04008421301841736, 0.10526315867900848, 0.0, 0.594947099685669, 0.34722864627838135),
+                (-0.10846316814422607, 0.0, 0.11578947305679321, 0.0, 0.7271578311920166, 0.03306937217712402)
+            ],
+            "bottle1": [
+                (0.0, 0.0, 0.24736842513084412, 2.6442105770111084, 1.570796251296997, 1.5707963705062866),
+                (0.009431585669517517, -0.13204210996627808, 0.1473684161901474, 0.0, 0.4627368450164795, 1.5707963705062866),
+                (0.009431585669517517, -0.12261052429676056, 0.22631579637527466, 0.0, 0.7602105140686035, 1.5707963705062866),
+                (0.009431585669517517, -0.12261052429676056, 0.16842105984687805, 0.0, 0.7602105140686035, 1.5707963705062866),
+            ],
+            "bottle2": [
+                (0.009431585669517517, -0.009431570768356323, 0.21578946709632874, 2.3797895908355713, 1.570796251296997, 1.5707963705062866),
+                (-0.08016842603683472, 0.04951578378677368, 0.17368420958518982, 0.0, 0.7932631969451904, -0.5952491760253906),
+                (-0.09667368233203888, 0.05658945441246033, 0.1473684161901474, 0.0, 0.594947099685669, -0.5291104316711426),
+                (-0.08488421142101288, 0.05423158407211304, 0.1473684161901474, -0.033052682876586914, 0.7271578311920166, -0.5787144899368286)
+            ],
+            "bottle3": [
+                (0.0, 0.0, 0.24736842513084412, 2.2806313037872314, 1.570796251296997, 1.5707963705062866),
+                (-0.06366315484046936, 0.08724209666252136, 0.16842105984687805, 0.0, 0.5288419723510742, -0.7771308422088623),
+                (-0.056589484214782715, 0.09903159737586975, 0.15789473056793213, 0.0, 0.4957895278930664, -0.8928737640380859),
+                (0.08016842603683472, -0.07781052589416504, 0.1894736886024475, 0.0, 2.478947401046753, -0.6779226064682007)
+            ],
+        }
+        return poses
+
+
+    # HELPER FUNCTIONS FOR MLP MODEL
+    # Calculate the curvature of a rigid body using the principal curvature estimation algorithm
+    # This function only works for meshes that include a .obj file.
+    def getRigidBodyCurvature(self, body_id, k):
+        mesh_data = p.getMeshData(body_id)
+        # Convert the mesh data to a numpy array
+        indices, vertices = np.array(mesh_data[0]), np.array(mesh_data[1])
+
+        if indices > 0:
+            # Compute the principal curvatures at each vertex
+            curvatures = np.zeros((len(vertices), 2))
+            tree = cKDTree(vertices)
+            for i, vertex in enumerate(vertices):
+                # Find the 10 nearest neighbors to the current vertex
+                _, indices = tree.query(vertex, k=10)
+                neighbors = vertices[indices, :]
+
+                # Compute the covariance matrix of the neighbors
+                centroid = np.mean(neighbors, axis=0)
+                centered = neighbors - centroid
+                cov = np.dot(centered.T, centered)
+
+                # Compute the eigenvalues and eigenvectors of the covariance matrix
+                eigenvalues, eigenvectors = np.linalg.eigh(cov)
+
+                # Sort the eigenvalues in descending order
+                indices = eigenvalues.argsort()[::-1]
+                eigenvalues = eigenvalues[indices]
+                eigenvectors = eigenvectors[:, indices]
+
+                # Compute the principal curvatures as the reciprocals of the eigenvalues
+                curvatures[i] = np.abs(1.0 / eigenvalues[:2])
+            
+            # Get the top k eigenvalues
+            return curvatures[:k]
+        else:
+            return np.zeros((k, 2))
+    
+
+    # Get geometric features of an object
+    def getObjectGeometry(self, body_id):
+        curvature_data = self.getRigidBodyCurvature(body_id, k=3).flatten()
+        return curvature_data
+
+
+    # CORE FUNCTIONS FOR RUNNING THE SIMULATION
+    def step(self, action, control_method='joint'):
+        """
+        action: (x, y, z, roll, pitch, yaw, gripper_opening_length) for End Effector Position Control
+                (a1, a2, a3, a4, a5, a6, a7, gripper_opening_length) for Joint Position Control
+        control_method:  'end' for end effector position control
+                         'joint' for joint position control
+        """
+
+        self.robot.manipulate_ee(action[:-1], control_method)
+        self.robot.move_gripper(action[-1])
+
+        # in the step simulation, get the joint orientation
+        sixd = self.robot.get_joint_obs()
+
+        self.readResetSimulationButton()
+        self.readJointObsButton(sixd)
+        self.readBaselineDataCollectionButton()
+        self.readMLPDataCollectionButton()
+        self.readGetObjectFeaturesButton()
+        self.readFetch6dButton(action[:-1])
+        
+        self.digit_step()
+        self.fixed_step_sim(1000)
+        
+        return self.get_observation()
+
+    def digit_step(self):
+        self.color, self.depth = self.digits.render()
+        self.digits.updateGUI(self.color, self.depth)
+
+
+    def get_observation(self):
+        obs = dict()
+        if isinstance(self.camera, Camera):
+            rgb, depth, seg = self.camera.shot()
+            obs.update(dict(rgb=rgb, depth=depth, seg=seg))
+        else:
+            assert self.camera is None
+        obs.update(self.robot.get_joint_obs())
+
+        return obs
+
+    def reset(self):
+        self.robot.reset()
+        return self.get_observation()
+    
+    # Reset user-defined parameters (GUI slider values)
+    def resetUserDebugParameters(self):
+        # Re-initialize sliders        
+        self.xin = p.addUserDebugParameter("x", -0.224, 0.224, 0)
+        self.yin = p.addUserDebugParameter("y", -0.224, 0.224, 0)
+        self.zin = p.addUserDebugParameter("z", 0, 1., 0.5)
+        self.rollId = p.addUserDebugParameter("roll", -3.14, 3.14, 0)
+        self.pitchId = p.addUserDebugParameter("pitch", -3.14, 3.14, np.pi/2)
+        self.yawId = p.addUserDebugParameter("yaw", -np.pi/2, np.pi/2, np.pi/2)
+        self.gripper_opening_length_control = p.addUserDebugParameter("Gripper opening length", 0, self.robot.gripper_range[1], self.robot.gripper_range[1])
+        
+        # Re-initialize simulation buttons
+        self.initButtonVals()
+        self.resetSimulationButton  = p.addUserDebugParameter("Reset simulation", 1, 0, 1)
+        self.jointObsButton = p.addUserDebugParameter("Get joint coordinates", 1, 0, 1)
+        self.getObjectFeaturesButton = p.addUserDebugParameter("Get object features", 1, 0, 1)
+        self.fetch6dButton = p.addUserDebugParameter("Get end effector pose", 1, 0, 1)
+        self.baselineDataColButton = p.addUserDebugParameter("Collect data (baseline)", 1, 0, 1)
+        self.mlpDataColButton = p.addUserDebugParameter("Collect data (proposed)", 1, 0, 1)
+
+    # Reset the whole simulation
+    def reset_simulation(self):
+        # Remove sliders and buttons
+        p.removeAllUserParameters()
+
+        # Re-initialize sliders and buttons
+        self.resetUserDebugParameters()
+
+        self.robot.reset()
+        self.container.resetObject()
+
+    def close(self):
+        p.disconnect(self.physicsClient)
+\end{lstlisting}
+
+\section{main.py}
+\begin{lstlisting}
+    import os
+    import numpy as np
+    import pybullet as p
+    from env import ClutteredPushGrasp
+    from robot import UR5Robotiq85
+    from utilities import YCBModels, Camera
+    
+    
+    def run_simulation():
+        ycb_models = YCBModels(os.path.join('./data/ycb', '**', 'textured-decmp.obj'))  # Load YCB models
+        camera = Camera((1, 1, 1), (0, 0, 0), (0, 0, 1), 0.1, 5, (320, 320), 40)        # Initialize camera
+        robot = UR5Robotiq85((0, 0.5, 0), (0, 0, 0))                                    # Initialize robot
+    
+        # Initialize simulation environment
+        env = ClutteredPushGrasp(robot, ycb_models, camera, vis=True)
+        env.reset()
+        env.container.resetObject()
+    
+        while True:
+            env.step(env.read_debug_parameter(), 'end')
+            env.digit_step()
+    
+    
+    if __name__ == '__main__':
+        run_simulation()
+\end{lstlisting}
+
+\section{robot.py}
+\begin{lstlisting}
+import pybullet as p
+import math
+from collections import namedtuple
+import yaml
+import cv2
+
+class RobotBase(object):
+    """
+    The base class for robots
+    """
+
+    def __init__(self, pos, ori):
+        """
+        Arguments:
+            pos: [x y z]
+            ori: [r p y]
+
+        Attributes:
+            id: Int, the ID of the robot
+            eef_id: Int, the ID of the End-Effector
+            arm_num_dofs: Int, the number of DoFs of the arm
+                i.e., the IK for the EE will consider the first `arm_num_dofs` controllable (non-Fixed) joints
+            joints: List, a list of joint info
+            controllable_joints: List of Ints, IDs for all controllable joints
+            arm_controllable_joints: List of Ints, IDs for all controllable joints on the arm (that is, the first `arm_num_dofs` of controllable joints)
+
+            ---
+            For null-space IK
+            ---
+            arm_lower_limits: List, the lower limits for all controllable joints on the arm
+            arm_upper_limits: List
+            arm_joint_ranges: List
+            arm_rest_poses: List, the rest position for all controllable joints on the arm
+
+            gripper_range: List[Min, Max]
+        """
+        self.base_pos = pos
+        self.base_ori = p.getQuaternionFromEuler(ori)
+
+        # Load the background of the digit sensor
+        self.bg = cv2.imread("./src/bg_digit_240_320.jpg")
+        self.digit_RGB_img = []
+        self.digit_depth_img = []
+        self.sensor_pos = []        # compute the camera matrix...
+        self.gripper_range = [0, 0.085]
+
+    def load(self):
+        self.__init_robot__()
+        self.__parse_joint_info__()
+        self.__post_load__()
+        # print(self.joints)
+
+    # Read and load parameters from the parameters.yaml file 
+    def load_digit_parm(self):
+        with open("./src/parameters.yaml", 'r') as f:
+            file_data = yaml.load(f, Loader=yaml.FullLoader)
+
+        self.tacto_info     = file_data['tacto']
+        self.camera_info    = file_data['pybullet_camera']
+        self.panel_info     = file_data["object_control_panel"]
+        self.link_ID        = file_data["digit_link_id"]
+        self.object_info    = file_data["target_object"]
+        self.robot_info     = file_data["robot"]
+        self.data_info      = file_data["data_collection"]
+
+
+    def step_simulation(self):
+        raise RuntimeError('`step_simulation` method of RobotBase Class should be hooked by the environment.')
+
+    def __parse_joint_info__(self):
+        numJoints = p.getNumJoints(self.id)
+        jointInfo = namedtuple('jointInfo', 
+            ['id','name','type','damping','friction','lowerLimit','upperLimit','maxForce','maxVelocity','controllable'])
+        self.joints = []
+        self.controllable_joints = []
+        for i in range(numJoints):
+            info = p.getJointInfo(self.id, i)
+            jointID = info[0]
+            jointName = info[1].decode("utf-8")
+            jointType = info[2]  # JOINT_REVOLUTE, JOINT_PRISMATIC, JOINT_SPHERICAL, JOINT_PLANAR, JOINT_FIXED
+            jointDamping = info[6]
+            jointFriction = info[7]
+            jointLowerLimit = info[8]
+            jointUpperLimit = info[9]
+            jointMaxForce = info[10]
+            jointMaxVelocity = info[11]
+            controllable = (jointType != p.JOINT_FIXED)
+            if controllable:
+                self.controllable_joints.append(jointID)
+                p.setJointMotorControl2(self.id, jointID, p.VELOCITY_CONTROL, targetVelocity=0, force=0)
+            info = jointInfo(jointID,jointName,jointType,jointDamping,jointFriction,jointLowerLimit,
+                            jointUpperLimit,jointMaxForce,jointMaxVelocity,controllable)
+            self.joints.append(info)
+
+        ### Digit joint has id, 13 and 19
+
+        assert len(self.controllable_joints) >= self.arm_num_dofs
+        self.arm_controllable_joints = self.controllable_joints[:self.arm_num_dofs]
+
+        self.arm_lower_limits = [info.lowerLimit for info in self.joints if info.controllable][:self.arm_num_dofs]
+        self.arm_upper_limits = [info.upperLimit for info in self.joints if info.controllable][:self.arm_num_dofs]
+        self.arm_joint_ranges = [info.upperLimit - info.lowerLimit for info in self.joints if info.controllable][:self.arm_num_dofs]
+
+    def __init_robot__(self):
+        raise NotImplementedError
+    
+    def __post_load__(self):
+        pass
+
+    def reset(self):
+        self.reset_arm()
+        self.reset_gripper()
+
+    def reset_arm(self):
+        """
+        reset to rest poses
+        """
+        
+        for rest_pose, joint_id in zip(self.arm_rest_poses, self.arm_controllable_joints):
+            p.resetJointState(self.id, joint_id, rest_pose)
+
+        # Wait for a few steps
+        for _ in range(10):
+            self.step_simulation()
+
+    def reset_gripper(self):
+        self.open_gripper()
+
+    def open_gripper(self):
+        self.move_gripper(self.gripper_range[1])
+
+    def close_gripper(self):
+        self.move_gripper(self.gripper_range[0])
+
+    def manipulate_ee(self, action, control_method, velocity_scale=1):
+        assert control_method in ('joint', 'end')
+        if control_method == 'end':
+            x, y, z, roll, pitch, yaw = action
+            pos = (x, y, z)
+            orn = p.getQuaternionFromEuler((roll, pitch, yaw))
+            joint_poses = p.calculateInverseKinematics(self.id, self.eef_id, pos, orn,
+                                                       self.arm_lower_limits, self.arm_upper_limits, self.arm_joint_ranges,
+                                                       maxNumIterations=100)
+        elif control_method == 'joint':
+            assert len(action) == self.arm_num_dofs
+            joint_poses = action
+        # arm
+        for i, joint_id in enumerate(self.arm_controllable_joints):
+            p.setJointMotorControl2(self.id, joint_id, p.POSITION_CONTROL, joint_poses[i],
+                                    force=self.joints[joint_id].maxForce, maxVelocity=self.joints[joint_id].maxVelocity * velocity_scale)
+
+    def move_gripper(self, open_length):
+        raise NotImplementedError
+
+    def get_joint_obs(self):
+        positions = []
+        velocities = []
+        for joint_id in self.controllable_joints:
+            joint_states = p.getJointState(self.id, joint_id)
+            pos, vel = joint_states[0], joint_states[1]
+            positions.append(pos)
+            velocities.append(vel)
+        ee_pos = p.getLinkState(self.id, self.eef_id)[0]
+        return dict(positions=positions, velocities=velocities, ee_pos=ee_pos)
+
+
+class UR5Robotiq85(RobotBase):
+    def __init_robot__(self):
+        self.eef_id = 7
+        self.arm_num_dofs = 6
+        self.arm_rest_poses = [-1.5690622952052096, -1.5446774605904932, 1.343946009733127, -1.3708613585093699,
+                               -1.5707970583733368, 0.0009377758247187636]
+        self.id = p.loadURDF('./src/urdf/robots/ur5_robotiq_85_digit.urdf', self.base_pos, self.base_ori, useFixedBase=True, flags=p.URDF_ENABLE_CACHED_GRAPHICS_SHAPES)
+        self.gripper_range = [0, 0.085]
+    
+    def __post_load__(self):
+        # To control the gripper
+        mimic_parent_name = 'finger_joint'
+        mimic_children_names = {'right_outer_knuckle_joint': 1,
+                                'left_inner_knuckle_joint': 1,
+                                'right_inner_knuckle_joint': 1,
+                                'left_inner_finger_joint': -1,
+                                'right_inner_finger_joint': -1}
+        self.__setup_mimic_joints__(mimic_parent_name, mimic_children_names)
+
+    def __setup_mimic_joints__(self, mimic_parent_name, mimic_children_names):
+        self.mimic_parent_id = [joint.id for joint in self.joints if joint.name == mimic_parent_name][0]
+        self.mimic_child_multiplier = {joint.id: mimic_children_names[joint.name] for joint in self.joints if joint.name in mimic_children_names}
+
+        for joint_id, multiplier in self.mimic_child_multiplier.items():
+            c = p.createConstraint(self.id, self.mimic_parent_id,
+                                   self.id, joint_id,
+                                   jointType=p.JOINT_GEAR,
+                                   jointAxis=[0, 1, 0],
+                                   parentFramePosition=[0, 0, 0],
+                                   childFramePosition=[0, 0, 0])
+            p.changeConstraint(c, gearRatio=-multiplier, maxForce=100, erp=1)  # Note: the mysterious `erp` is of EXTREME importance
+
+    def move_gripper(self, open_length):
+        # open_length = np.clip(open_length, *self.gripper_range)
+        open_angle = 0.715 - math.asin((open_length - 0.010) / 0.1143)  # angle calculation
+        # Control the mimic gripper joint(s)
+        p.setJointMotorControl2(self.id, self.mimic_parent_id, p.POSITION_CONTROL, targetPosition=open_angle,
+                                force=self.joints[self.mimic_parent_id].maxForce, maxVelocity=self.joints[self.mimic_parent_id].maxVelocity)
+\end{lstlisting}
+\section{thing.py}
+\begin{lstlisting}
+"""
+Class for defining & initializing object meshes in Pybullet simulations.
+"""
+
+import pybullet as p
+
+
+class Thing:
+    def __init__(self, name, position, globalScaling):
+        self.name = name
+        self.initPos = position
+        self.objectScale = globalScaling    # also defined in the arg85.yaml file, for shrinking the size of the mug
+        self.initOrientation = p.getQuaternionFromEuler([0,0,0])
+        self.urdf_path = "./src/urdf/objects/"
+
+        if name == "block" or name == "block1":
+            self.urdf_path += "blocks/block1/block1.urdf"
+        elif name == "block2":
+            self.urdf_path += "blocks/block2/block2.urdf"
+        elif name == "block3":
+            self.urdf_path += "blocks/block3/block3.urdf"
+        elif name == "cylinder1":
+            self.urdf_path += "cylinders/cylinder1/cylinder1.urdf"
+        elif name == "cylinder2":
+            self.urdf_path += "cylinders/cylinder2/cylinder2.urdf"
+        elif name == "cylinder3":
+            self.urdf_path += "cylinders/cylinder3/cylinder3.urdf"
+        elif name == "bottle1":
+            self.urdf_path += "bottles/bottle1/bottle1.urdf"
+        elif name == "bottle2":
+            self.urdf_path += "bottles/bottle2/bottle2.urdf"
+        elif name == "bottle3":
+            self.urdf_path += "bottles/bottle3/bottle3.urdf"
+
+        id = p.loadURDF(self.urdf_path, self.initPos, self.initOrientation, useFixedBase=False, globalScaling=self.objectScale)
+        self.setID(id)
+        self.resetVelocity()
+
+    def setInitPos(self,pos):
+        self.initPos=pos
+
+    def getInitPos(self):
+        return self.initPos
+
+    def setID(self,ID):
+        self.ID=ID
+
+    def getPos(self):
+        bpao=p.getBasePositionAndOrientation(self.ID)
+        return bpao[0]
+
+    def setHeight(self,height):
+        self.height=height
+
+    def getHeight(self):
+        return self.height
+
+    def setWidth(self,width):
+        self.width=width
+
+    def getWidth(self):
+        return self.width
+
+    def setInitOrientation(self, quat):
+        self.initOrientation=quat
+    
+    def resetVelocity(self):
+        p.resetBaseVelocity(self.ID, [0, 0, 0], [0, 0, 0])
+    
+    def resetObject(self):
+        pos = (0, 0, 0)
+        orn = p.getQuaternionFromEuler([0,0,0])
+        p.resetBasePositionAndOrientation(self.ID, pos, orn)
+        self.resetVelocity()
+
+    def getInitOrientation(self):
+        return self.initOrientation 
+\end{lstlisting}
+\section{utilities.py}
+\begin{lstlisting}
+import pybullet as p
+import glob
+import numpy as np
+
+
+class Models:
+    def load_objects(self):
+        raise NotImplementedError
+
+    def __len__(self):
+        raise NotImplementedError
+
+    def __getitem__(self, item):
+        return NotImplementedError
+
+
+class YCBModels(Models):
+    def __init__(self, root, selected_names: tuple = ()):
+        self.obj_files = glob.glob(root)
+        self.selected_names = selected_names
+
+        self.visual_shapes = []
+        self.collision_shapes = []
+
+    def load_objects(self):
+        shift = [0, 0, 0]
+        mesh_scale = [1, 1, 1]
+
+        for filename in self.obj_files:
+            # Check selected_names
+            if self.selected_names:
+                in_selected = False
+                for name in self.selected_names:
+                    if name in filename:
+                        in_selected = True
+                if not in_selected:
+                    continue
+            print('Loading %s' % filename)
+            self.collision_shapes.append(
+                p.createCollisionShape(shapeType=p.GEOM_MESH,
+                                       fileName=filename,
+                                       collisionFramePosition=shift,
+                                       meshScale=mesh_scale))
+            self.visual_shapes.append(
+                p.createVisualShape(shapeType=p.GEOM_MESH,
+                                    fileName=filename,
+                                    visualFramePosition=shift,
+                                    meshScale=mesh_scale))
+
+    def __len__(self):
+        return len(self.collision_shapes)
+
+    def __getitem__(self, idx):
+        return self.visual_shapes[idx], self.collision_shapes[idx]
+
+
+class Camera:
+    def __init__(self, cam_pos, cam_tar, cam_up_vector, near, far, size, fov):
+        self.width, self.height = size
+        self.near, self.far = near, far
+        self.fov = fov
+
+        aspect = self.width / self.height
+        self.view_matrix = p.computeViewMatrix(cam_pos, cam_tar, cam_up_vector)
+        self.projection_matrix = p.computeProjectionMatrixFOV(self.fov, aspect, self.near, self.far)
+
+        _view_matrix = np.array(self.view_matrix).reshape((4, 4), order='F')
+        _projection_matrix = np.array(self.projection_matrix).reshape((4, 4), order='F')
+        self.tran_pix_world = np.linalg.inv(_projection_matrix @ _view_matrix)
+
+    def rgbd_2_world(self, w, h, d):
+        x = (2 * w - self.width) / self.width
+        y = -(2 * h - self.height) / self.height
+        z = 2 * d - 1
+        pix_pos = np.array((x, y, z, 1))
+        position = self.tran_pix_world @ pix_pos
+        position /= position[3]
+
+        return position[:3]
+
+    def shot(self):
+        # Get depth values using the OpenGL renderer
+        _w, _h, rgb, depth, seg = p.getCameraImage(self.width, self.height,
+                                                   self.view_matrix, self.projection_matrix,
+                                                   )
+        return rgb, depth, seg
+
+    def rgbd_2_world_batch(self, depth):
+        # reference: https://stackoverflow.com/a/62247245
+        x = (2 * np.arange(0, self.width) - self.width) / self.width
+        x = np.repeat(x[None, :], self.height, axis=0)
+        y = -(2 * np.arange(0, self.height) - self.height) / self.height
+        y = np.repeat(y[:, None], self.width, axis=1)
+        z = 2 * depth - 1
+
+        pix_pos = np.array([x.flatten(), y.flatten(), z.flatten(), np.ones_like(z.flatten())]).T
+        position = self.tran_pix_world @ pix_pos.T
+        position = position.T
+        position[:, :] /= position[:, 3:4]
+        return position[:, :3].reshape(*x.shape, -1)
+
+\end{lstlisting}
+\section{parameters.yaml}
+\begin{lstlisting}
+# id of the links that are digits
+digit_link_id: [13, 19]
+
+pybullet_camera:
+  cameraDistance: 0.4
+  cameraYaw: 45.
+  cameraPitch: -45.
+  cameraTargetPosition: [0, 0, 0]
+
+tacto:
+  width: 120
+  height: 160
+  visualize_gui: True
+
+object_control_panel:
+  slider_params:
+    position_low: [-0.3, -0.3, 0]
+    position_high: [0.3, 0.3, 0.3]
+
+# Neccesary parameters of the target object;
+# The global scaling is used to shrink the size of the object
+target_object:
+  # object_name options:
+  # Baseline: "block" only
+  # MLP old dataset: ["block1", "block2", "block3", "cylinder1", "cylinder2", "cylinder_3", "bottle1", "bottle2", "bottle3"]
+  object_name: block
+  object_position: [0, 0, 0.25]
+  global_scaling : 1.0
+
+simulation:
+  camera_pos : [0.5, 1, 0.7]
+  camera_pos_2 : [1.5, -1, 0.7]
+
+  pitch : -20.0
+  yaw : 0
+  roll : 0
+  fov : 30
+
+# Parameters for data collection
+data_collection:
+  poses_count: 10
+
+# Parameters to adjust for robot
+robot:
+  z_padding: 0.2        # Prevents the robot from colliding with the object when moving to it
+  velocity_scale: 0.15    # Scales the robot's speed in simulation
+\end{lstlisting}
+
+
 
 \end{document}
