@@ -154,7 +154,7 @@ However, little work has been done on increasing robustness in grasping systems 
 One of the primary challenges in robotic grasping is the wide variety of shapes and sizes that objects can come in. This can make it difficult for a robotic grasping system to determine the best approach for grasping, as well as to adjust its grasp strategy based on the object's properties. A robust system should be able to handle these variations and adjust its grasp strategy accordingly to ensure that the object is firmly held during manipulation. Another challenge is posed by uncertainties in the object's pose. Objects can be placed in various orientations and positions, making it challenging for a robot to determine the optimal grasping location. A robust system should be able to estimate the object's pose accurately and choose an appropriate grasp location to ensure that the object is grasped correctly. Furthermore, the environment in which a robot operates can change unpredictably, with variations in lighting conditions, surface textures, and other factors affecting the ability of a robotic grasping system to perform well. A robust system should be able to adapt to these changes and adjust its grasping strategy accordingly.\\
 
 
-We aim to take the best of both analytic (24) and data-driven methods \cite{berscheid2020selfsupervised, pinto2015supersizing} to develop robust and scalable grasping methods. Robustness in a robotic grasping system refers to its versatility of accurately recognising and grasping objects with varying geometric features (width, depth, curvature, etc) and its ability to successfully grasp the objects. Robustness is increasingly becoming a vital factor in the study of grasp stability and quality, however, incorporating robustness makes it practically difficult to design a single gripper that can effectively grasp all objects. As a result, researchers and engineers have developed dedicated grippers tailored to specific grasping tasks or types of objects.\\
+We aim to take the best of both analytic \cite{haschke2005} and data-driven methods \cite{berscheid2020selfsupervised, pinto2015supersizing} to develop robust and scalable grasping methods. Robustness in a robotic grasping system refers to its versatility of accurately recognising and grasping objects with varying geometric features (width, depth, curvature, etc) and its ability to successfully grasp the objects. Robustness is increasingly becoming a vital factor in the study of grasp stability and quality, however, incorporating robustness makes it practically difficult to design a single gripper that can effectively grasp all objects. As a result, researchers and engineers have developed dedicated grippers tailored to specific grasping tasks or types of objects.\\
 
 Developing a robust and efficient grasping system presents several challenges. One major hurdle is the incorporation of touch sensing into robotic grasping, which is hindered by hardware limitations such as sensor sensitivity and cost, as well as difficulties in integrating tactile inputs into standard control schemes \cite{Calandra_2018}. Consequently, most robotic grasping research has focused on vision and depth as the primary input modalities \cite{Calandra_2018, de_Farias_2021}.\\
 
@@ -399,12 +399,12 @@ A system architecture diagram for our Pybullet simulation can be found in the \h
 In the scope of this project, the Pybullet simulation plays a fundamental role in the acquisition of both visual and tactile data. By simulating the robot's dynamics and its interactions with the environment, Pybullet generates data that can be exploited for the purpose of training machine learning algorithms or assessing control strategies. Furthermore, the collected data may also be utilised for analytical purposes, such as the evaluation of the efficacy of distinct robotic designs or the appraisal of the performance of a specific algorithm. Figure 3.1 is a screenshot of our Pybullet simulation with core user-defined parameters on the right panel. Some important parameters include:
 \begin{enumerate}
     \item Manually manipulate of the end effector position of the robot gripper (via the sliders)
-    \item Data collection pipelines for the baseline and proposed approaches (via the \verb|Collect Data| buttons)
+    \item Data collection pipelines for the baseline and proposed approaches (via the "Collect Data" buttons)
 \end{enumerate}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{docs/Project Report/Media/3_1_1_pybullet_sim.png}
+    \includegraphics[width=0.9\textwidth]{docs/Project Report/Media/3_1_1_pybullet_sim.png}
     \caption{A screenshot of the Pybullet simulation for this project. The left panel displays real-time visualisations of colour (RGB) and depth data. The right panel includes parameters that can be manually controlled to manipulate the robot setup to perform specific tasks.}
     \label{fig:3.2}
 \end{figure}
@@ -415,7 +415,7 @@ This project allows users to configure the simulation via pre-defined parameters
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.5\textwidth]{docs/Project Report/Media/3_1_2_yaml.png}
-    \caption{Snippet of the {\verb|parameters.yaml|} configuration file for the Pybullet simulation}
+    \caption{Snippet of the {parameters.yaml} configuration file for the Pybullet simulation}
     \label{fig:3.3}
 \end{figure}
 
@@ -659,7 +659,7 @@ PCA is a widely used linear technique that projects the high-dimensional input d
 
 PCA is particularly useful for concatenated tactile and visual data, as it can extract relevant features from both modalities and combine them to form a lower-dimensional representation of the data. For example, PCA can be used to extract principal components that represent the most significant tactile and visual features, which can then be combined to form a lower-dimensional representation of the data. The resulting representation can be used as input to machine learning algorithms for classification or regression tasks.\\
 
-It is worth noting that the effectiveness of PCA for dimensionality reduction depends on several factors, such as the number of input dimensions, the amount of variance in the data, and the distribution of the data. Additionally, the choice of the number of principal components to retain can also impact the performance of the method. Hence, a careful evaluation of the effectiveness of PCA for the given task is necessary, including the selection of an appropriate number of principal components to retain, and any trade-offs between computation time and performance.
+The effectiveness of PCA for dimensionality reduction depends on several factors, such as the number of input dimensions, the amount of variance and the distribution in the data. Additionally, the choice of the number of principal components to retain can also impact the performance of the method. Hence, a careful evaluation of the effectiveness of PCA for the given task is necessary, including the selection of an appropriate number of principal components to retain, and any trade-offs between computation time and performance.
 
 
 \subsubsection{Convolution Neural Network (CNN) Feature Extraction}\label{sec:4.4.2.2}
