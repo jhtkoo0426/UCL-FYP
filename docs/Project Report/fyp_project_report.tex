@@ -309,7 +309,7 @@ where $x,y,z$ are Cartesian coordinates describing the position of the end effec
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.35\textwidth]{docs/Project Report/Media/2_1_2_ee_pose_eg.png}
-    \caption{Jiménez et al. \cite{jimenez2014}: Robust Pose Control of Robot Manipulators Using Conformal Geometric Algebra: An example of a 6-dimensional end effector pose}
+    \caption{Jiménez et al. \cite{jimenez2014}: Robust Pose Control of Robot Manipulators Using Conformal Geometric Algebra: A visualisation of a 6-dimensional end effector pose}
     \label{fig:2.5}
 \end{figure}
 
@@ -381,11 +381,11 @@ In this chapter, we present the practical aspects of the project. We first provi
 \section{Pybullet Simulation Overview and Functionalities}\label{sec:3.1}
 Pybullet is a Python module designed for robotics simulation and machine learning purposes, specifically emphasising sim-to-real transfer, as indicated by Coumans and Bai \cite{coumans2021}. In this project, Pybullet's functionalities play a crucial role, such as:
 \begin{enumerate}[\itemsep=0em]
-    \item Allows the loading of articulated bodies from a variety of file formats, such as Universal Robot Description Files (URDFs), enabling the development of complex robotic systems;
+    \item Allows the loading of articulated bodies from various file formats, such as Unified Robotics Description Format (URDF) files, enabling the development of complex robotic systems;
     \begin{figure}[H]
         \centering
         \includegraphics[width=0.6\textwidth]{docs/Project Report/Media/3_1_urdf_eg.png}
-        \caption{Example of a URDF file that describes a bottle}
+        \caption{Example of a URDF files that describes a bottle. The file can be loaded into Pybullet to generate an object mesh of the bottle}
         \label{fig:3.1}
     \end{figure}
     \vspace{-0.2cm}
@@ -397,14 +397,14 @@ A system architecture diagram for our Pybullet simulation can be found in the \h
 
 \subsection{Role of the Pybullet Simulation}\label{sec:3.1.1}
 In the scope of this project, the Pybullet simulation plays a fundamental role in the acquisition of both visual and tactile data. By simulating the robot's dynamics and its interactions with the environment, Pybullet generates data that can be exploited for the purpose of training machine learning algorithms or assessing control strategies. Furthermore, the collected data may also be utilised for analytical purposes, such as the evaluation of the efficacy of distinct robotic designs or the appraisal of the performance of a specific algorithm. Figure 3.1 is a screenshot of our Pybullet simulation with core user-defined parameters on the right panel. Some important parameters include:
-\begin{enumerate}
+\begin{enumerate}[\itemsep=0em]
     \item Manually manipulate of the end effector position of the robot gripper (via the sliders)
     \item Data collection pipelines for the baseline and proposed approaches (via the "Collect Data" buttons)
 \end{enumerate}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.9\textwidth]{docs/Project Report/Media/3_1_1_pybullet_sim.png}
+    \includegraphics[width=0.85\textwidth]{docs/Project Report/Media/3_1_1_pybullet_sim.png}
     \caption{A screenshot of the Pybullet simulation for this project. The left panel displays real-time visualisations of colour (RGB) and depth data. The right panel includes parameters that can be manually controlled to manipulate the robot setup to perform specific tasks.}
     \label{fig:3.2}
 \end{figure}
@@ -431,7 +431,7 @@ This work employs the terms "tactile" and "visual" data with frequent recurrence
 
 \newpage
 \subsection{Tactile data}\label{sec:3.2.1}
-In robotic grasping, tactile data refers to rich information collected from contact with a robotic hand or gripper during the manipulation of objects. It reflects the amount of force and pressure applied by the gripper on an object in the grasping process. Tactile data can be extracted from tactile sensors (cameras) mounted into robotic end effectors or grippers, which can be used to provide feedback to the control system about the grasp quality, such as whether the object is slipping or not, and to adjust the gripper's position and force to improve the grasp. In our simulation, we mount DIGIT tactile sensors \cite{Lambeta2020DIGIT} to each finger of a 2-finger gripper, thus generating a pair of tactile (depth and colour) readings per finger.
+In robotic grasping, tactile data refers to rich information collected from contact with a robotic hand or gripper during the manipulation of objects. It reflects the amount of force and pressure applied by the gripper on an object in the grasping process. Tactile data can be extracted from tactile sensors (cameras) mounted into robotic end effectors or grippers, which can be used to provide feedback to the control system about the grasp quality, such as whether the object is slipping or not, and to adjust the gripper's position and force to improve the grasp. In our simulation, we mount DIGIT tactile sensors \cite{Lambeta2020DIGIT} to each finger of a 2-finger gripper, thus generating a pair of tactile (depth and colour) readings per grasp.
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{docs/Project Report/Media/4_2_tactile_data_visualisation.png}
@@ -506,7 +506,7 @@ To generate random grasps on the box, we first manipulate the robot's end effect
 \end{equation}
 A fixed number $n$ of random poses are generated from each seed pose. This is accomplished by adding a small amount of Gaussian noise $K_n$, with a mean of zero and a unit variance, to each dimension of $S_i$. Taking into consideration the range of variation in Cartesian coordinates, object and robot dimensions of the Pybullet simulation, the applied noise is scaled down by a factor of 0.01. The resulting grasp poses are denoted as $X_v$ as follows:
 \begin{equation}
-    X_{v,i}=\Big\{S_i+K_i:K_i\sim\mathcal{N}(0,1),\;i=1,2,3,...,n\Big\}
+    X_{v,i}=\Big\{S_i+0.01K_i:K_i\sim\mathcal{N}(0,1),\;i=1,2,3,...,n\Big\}
 \end{equation}
 The variance of the Gaussian noise can be adjusted for a more/less dispersed distribution of the random grasp poses. It is essential to balance the trade-off between generating diverse grasp poses (and their corresponding data) and ensuring that the poses are likely to succeed. Notably, the impact of the variance of the Gaussian noise will be contingent on the characteristics of the object being grasped, which may necessitate modifying the variance according to the object's properties. This will be discussed in Section 5 where we introduce geometric features of objects into our classifier approach.
  
@@ -708,6 +708,7 @@ After preparing the datasets, the logistic regression (logit) classifier was tra
 As previously discussed, the logistic regression model was trained using three distinct dataset segmentations, with the application of three pre-processing methods. It is noteworthy that the employment of CNN and PCA techniques was omitted for the 6-dimensional visual-only data, as its dimensionality suffices for training purposes.
 
 
+\newpage
 \subsection{Analysis of Training Results and Balancing the Trade-off Between Accuracy and Dimensionality}\label{sec:4.5.2}
 The outcomes as presented in \hyperref[tbl:4.2]{Table 4.2} reveal that the incorporation of PCA techniques did not yield a considerable impact on the accuracy of the logit model. This observation can potentially be attributed to two underlying factors: firstly, the application of PCA to the dataset may result in the elimination of pertinent features or the introduction of noise through the utilisation of said techniques; secondly, it is plausible that non-linear relationships exist among the variables. However, it is worth noting that PCA assumes linearity in the relationships among variables, thereby implying that its accuracy may be influenced by the inability to capture relevant patterns, thereby resulting in a decline in accuracy.\\
 
@@ -771,7 +772,7 @@ To enhance the robustness of our model, we have trained it on three primitive ob
             Depth  & 0.025 & 0.03  & 0.05  & 0.04 & 0.045  & 0.05  & 0.06 & 0.04 & 0.04 \\
             Width  & 0.05  & 0.025 & 0.025 & 0.04 & 0.045  & 0.05  & 0.04 & 0.06 & 0.06 \\
             Height & 0.05  & 0.045 & 0.04  & 0.05 & 0.035  & 0.045 & 0.04 & 0.06 & 0.04 \\
-            Radius & --    & --    & --    & 0.02 & 0.0225 & 0.025 & --   & --   & --   \\
+            Radius & N/A   & N/A   & N/A   & 0.02 & 0.0225 & 0.025 & N/A  & N/A  & N/A  \\
             \bottomrule
         \end{tabular}
     }
@@ -796,12 +797,7 @@ The principal curvatures of an object mesh are pair of maximum and minimum value
     \label{fig:5.2}
 \end{figure}
 
-\hyperref[fig:5.2]{Figure 5.2} visualises the top $k=3$ principal curvatures for all the object variations in our dataset. We found that the principal curvatures were able to:
-\begin{enumerate}[\itemsep=0em]
-    \item capture a high amount of variance of the curvatures for all objects (97.34\%)
-    \item successfully cluster the object variations for each category
-\end{enumerate}
-
+\hyperref[fig:5.2]{Figure 5.2} visualises the top $k=3$ principal curvatures for all the object variations in our dataset. We found that the principal curvatures were able to capture a high amount of variance of the curvatures for all objects (97.34\%) and successfully cluster the object variations for each category.
 
 \subsubsection{Other Features}\label{sec:5.2.3.2}
 In addition to principal curvatures, we attempted to extract convexity and fundamental dimensions of objects, aimed at capturing their size and shape characteristics. Despite the analytical efforts, the results obtained from these features were not deemed promising and therefore were not incorporated into the model. Consequently, it can be inferred that the principal curvatures hold significant potential as a valid representation of geometric features for the object dataset under consideration.
